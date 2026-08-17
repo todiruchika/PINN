@@ -1,0 +1,48 @@
+{
+  "name": "model_b_default",
+  "notes": "Model B: physics-only PINN, hard Dirichlet BC by construction, trainable Gaussian source blobs. One solve per (chip, sensor count, seed).",
+  "device": "cpu",
+  "model": {
+    "bc_mode": "hard",
+    "field": {
+      "width": 64,
+      "depth": 4,
+      "activation": "tanh",
+      "out_scale": 1.0,
+      "fourier": null
+    },
+    "source": {
+      "kind": "gaussian",
+      "n_blobs": 6,
+      "init_amp": 10.0,
+      "init_width": 0.12,
+      "min_width": 0.02,
+      "max_width": 0.5
+    }
+  },
+  "training": {
+    "adam_steps": 5000,
+    "lr": 0.001,
+    "lr_min": 1e-05,
+    "lbfgs_steps": 2000,
+    "lbfgs_lr": 1.0,
+    "lbfgs_history": 50,
+    "n_collocation": 2048,
+    "n_collocation_lbfgs": 4096,
+    "n_boundary": 256,
+    "weight_scheme": "fixed",
+    "w_residual": 1.0,
+    "w_data": 100.0,
+    "w_boundary": 1.0,
+    "residual_scale": 1.0,
+    "anneal_every": 100,
+    "anneal_ema": 0.9,
+    "grad_clip": null,
+    "restore_best": true,
+    "log_every": 500,
+    "log_every_lbfgs": 200
+  },
+  "eval": {
+    "grid": 128
+  }
+}

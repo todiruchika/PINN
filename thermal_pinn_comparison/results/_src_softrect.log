@@ -1,0 +1,18 @@
+Model B: 1 solves (1 chips x 1 sensor counts x 1 seeds), split=test
+[1/1] thermal_00601 N=5 seed=0 (k=115.1, T_b=23.22, hotspots=4)
+Traceback (most recent call last):
+  File "C:\Users\ruchi\OneDrive\Desktop\pinn\thermal_pinn_comparison\src\train_pinn.py", line 356, in <module>
+    main()
+  File "C:\Users\ruchi\OneDrive\Desktop\pinn\thermal_pinn_comparison\src\train_pinn.py", line 309, in main
+    result = train_one_chip(chip, n_sensors, seed, config, verbose=not args.quiet)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ruchi\OneDrive\Desktop\pinn\thermal_pinn_comparison\src\train_pinn.py", line 81, in train_one_chip
+    model = build_pinn(model_cfg).to(device)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ruchi\OneDrive\Desktop\pinn\thermal_pinn_comparison\src\models\pinn.py", line 289, in build_pinn
+    return PhysicsOnlyPINN(field=field, source=build_source(kind, **source_cfg))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\ruchi\OneDrive\Desktop\pinn\thermal_pinn_comparison\src\models\pinn.py", line 254, in build_source
+    return SOURCES[kind](**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: SoftRectSource.__init__() got an unexpected keyword argument 'init_width'
