@@ -23,6 +23,7 @@ parametrisations are provided:
 """
 from __future__ import annotations
 
+import inspect
 import math
 
 import torch
@@ -248,10 +249,29 @@ class FixedRectSource(nn.Module):
 SOURCES = {"gaussian": GaussianSource, "softrect": SoftRectSource, "mlp": MLPSource}
 
 
+def _init_params(cls) -> set[str]:
+    return set(inspect.signature(cls.__init__).parameters) - {"self"}
+
+
 def build_source(kind: str, **kwargs) -> nn.Module:
+    """Instantiate a source parametrisation, tolerating sibling-specific keys.
+
+    Configs are merged rather than replaced (``--override`` on top of a default
+    config), so switching ``kind`` leaves behind keys that belong to another
+    parametrisation -- e.g. ``init_width`` from ``gaussian`` when asking for
+    ``softrect``. Those are dropped; keys belonging to no parametrisation at all
+    are still an error, so typos do not pass silently.
+    """
     if kind not in SOURCES:
         raise ValueError(f"unknown source {kind!r}; choose from {sorted(SOURCES)}")
-    return SOURCES[kind](**kwargs)
+    cls = SOURCES[kind]
+    accepted = _init_params(cls)
+    known_elsewhere = set().union(*(_init_params(c) for c in SOURCES.values())) - accepted
+    unknown = set(kwargs) - accepted - known_elsewhere
+    if unknown:
+        raise ValueError(f"unknown option(s) {sorted(unknown)} for source {kind!r}; "
+                         f"accepted: {sorted(accepted)}")
+    return cls(**{k: v for k, v in kwargs.items() if k in accepted})
 
 
 # --------------------------------------------------------------------------- #

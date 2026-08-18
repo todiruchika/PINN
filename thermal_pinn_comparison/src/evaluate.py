@@ -143,6 +143,25 @@ def append_metrics_row(row: dict, path: str | Path = "results/metrics.csv") -> P
 # --------------------------------------------------------------------------- #
 # aggregation
 # --------------------------------------------------------------------------- #
+def merge_parts(parts_dir: str | Path = "results/parts", out: str | Path = "results/metrics.csv") -> Path:
+    """Concatenate per-process metric files into one ``metrics.csv``.
+
+    Parallel runs write one CSV each: concurrent appends to a shared file are
+    not atomic, so they are merged after the fact instead.
+    """
+    parts = sorted(resolve_path(parts_dir).glob("*.csv"))
+    if not parts:
+        raise FileNotFoundError(f"no CSV parts in {resolve_path(parts_dir)}")
+    df = pd.concat([pd.read_csv(p) for p in parts], ignore_index=True)
+    df = df.drop_duplicates(subset=["model", "bc_mode", "source_kind", "split",
+                                    "sample_id", "n_sensors", "seed"], keep="last")
+    out_path = resolve_path(out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_path, index=False)
+    print(f"merged {len(parts)} part file(s) -> {out_path} ({len(df)} rows)")
+    return out_path
+
+
 def comparison_table(path: str | Path = "results/metrics.csv", metric: str = "rel_l2") -> pd.DataFrame:
     """Rows = model, columns = sensor count, cells = ``mean +/- std`` across seeds.
 
@@ -203,7 +222,11 @@ def main() -> None:
     ap.add_argument("--metrics", default="results/metrics.csv")
     ap.add_argument("--metric", default="rel_l2")
     ap.add_argument("--plot", action="store_true", help="also write the error-vs-N figure")
+    ap.add_argument("--merge", default=None, help="merge per-process CSVs from this dir first")
     args = ap.parse_args()
+
+    if args.merge:
+        merge_parts(args.merge, args.metrics)
 
     print(f"\n=== comparison table ({args.metric}, mean +/- std over seeds) ===")
     print(comparison_table(args.metrics, args.metric).to_string())

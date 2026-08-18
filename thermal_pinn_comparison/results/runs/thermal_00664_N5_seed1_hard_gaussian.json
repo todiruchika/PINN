@@ -1,0 +1,288 @@
+{
+  "row": {
+    "model": "B",
+    "bc_mode": "hard",
+    "source_kind": "gaussian",
+    "split": "test",
+    "sample_id": "thermal_00664",
+    "n_sensors": 5,
+    "seed": 1,
+    "rel_l2": 0.06896486430442061,
+    "rmse": 10.449129656097659,
+    "mae": 4.479070152854547,
+    "max_abs_err": 56.999237060546875,
+    "peak_loc_err": 0.04979964819162804,
+    "pred_peak_temp": 443.450439453125,
+    "true_peak_temp": 469.6102600097656,
+    "boundary_mae": 7.564444146623828e-07,
+    "sensor_rmse": 0.3193251798640115,
+    "source_rel_l2": 0.6845921457902907,
+    "source_centre_err": 0.037507858384976146,
+    "train_seconds": 867.1039882000186,
+    "inference_seconds": 0.051496800035238266,
+    "final_loss": 0.0024208305403590202,
+    "final_residual": 0.002128290245309472,
+    "final_data_loss": 2.9254019864310976e-06
+  },
+  "config": {
+    "name": "model_b_default",
+    "notes": "Model B: physics-only PINN, hard Dirichlet BC by construction, trainable Gaussian source blobs. One solve per (chip, sensor count, seed).",
+    "device": "cpu",
+    "model": {
+      "bc_mode": "hard",
+      "field": {
+        "width": 64,
+        "depth": 4,
+        "activation": "tanh",
+        "out_scale": 1.0,
+        "fourier": null
+      },
+      "source": {
+        "kind": "gaussian",
+        "n_blobs": 6,
+        "init_amp": 10.0,
+        "init_width": 0.12,
+        "min_width": 0.02,
+        "max_width": 0.5
+      }
+    },
+    "training": {
+      "adam_steps": 5000,
+      "lr": 0.001,
+      "lr_min": 1e-05,
+      "lbfgs_steps": 2000,
+      "lbfgs_lr": 1.0,
+      "lbfgs_history": 50,
+      "n_collocation": 2048,
+      "n_collocation_lbfgs": 4096,
+      "n_boundary": 256,
+      "weight_scheme": "fixed",
+      "w_residual": 1.0,
+      "w_data": 100.0,
+      "w_boundary": 1.0,
+      "residual_scale": 1.0,
+      "anneal_every": 100,
+      "anneal_ema": 0.9,
+      "grad_clip": null,
+      "restore_best": true,
+      "log_every": 500,
+      "log_every_lbfgs": 200
+    },
+    "eval": {
+      "grid": 128
+    }
+  },
+  "history": [
+    {
+      "step": 0,
+      "phase": "adam",
+      "loss": 95.07833862304688,
+      "residual": 51.01921463012695,
+      "data": 0.4405911862850189,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 500,
+      "phase": "adam",
+      "loss": 4.268313884735107,
+      "residual": 0.5242756009101868,
+      "data": 0.037440381944179535,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 1000,
+      "phase": "adam",
+      "loss": 3.369353771209717,
+      "residual": 0.1682988852262497,
+      "data": 0.03201054781675339,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 1500,
+      "phase": "adam",
+      "loss": 2.2089273929595947,
+      "residual": 0.12628909945487976,
+      "data": 0.02082638256251812,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 2000,
+      "phase": "adam",
+      "loss": 1.5101808309555054,
+      "residual": 0.14426948130130768,
+      "data": 0.013659114018082619,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 2500,
+      "phase": "adam",
+      "loss": 1.1071070432662964,
+      "residual": 0.18465201556682587,
+      "data": 0.009224549867212772,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 3000,
+      "phase": "adam",
+      "loss": 0.8477389812469482,
+      "residual": 0.18770048022270203,
+      "data": 0.006600385066121817,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 3500,
+      "phase": "adam",
+      "loss": 0.6800171136856079,
+      "residual": 0.1638486087322235,
+      "data": 0.005161684937775135,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 4000,
+      "phase": "adam",
+      "loss": 0.5876632928848267,
+      "residual": 0.14272534847259521,
+      "data": 0.004449379630386829,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 4500,
+      "phase": "adam",
+      "loss": 0.6182349920272827,
+      "residual": 0.20266607403755188,
+      "data": 0.0041556889191269875,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 4999,
+      "phase": "adam",
+      "loss": 0.5199727416038513,
+      "residual": 0.11465121060609818,
+      "data": 0.004053215496242046,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5001,
+      "phase": "lbfgs",
+      "loss": 0.5576762557029724,
+      "residual": 0.1523444652557373,
+      "data": 0.004053317941725254,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5201,
+      "phase": "lbfgs",
+      "loss": 0.1510259509086609,
+      "residual": 0.11155197024345398,
+      "data": 0.00039473973447456956,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5401,
+      "phase": "lbfgs",
+      "loss": 0.06363396346569061,
+      "residual": 0.04344811663031578,
+      "data": 0.00020185846369713545,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5601,
+      "phase": "lbfgs",
+      "loss": 0.03492310643196106,
+      "residual": 0.02529778890311718,
+      "data": 9.625315578887239e-05,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5801,
+      "phase": "lbfgs",
+      "loss": 0.018665460869669914,
+      "residual": 0.014607090502977371,
+      "data": 4.0583709051134065e-05,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6001,
+      "phase": "lbfgs",
+      "loss": 0.011674219742417336,
+      "residual": 0.009408865123987198,
+      "data": 2.265354669361841e-05,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6201,
+      "phase": "lbfgs",
+      "loss": 0.00769789470359683,
+      "residual": 0.00665199663490057,
+      "data": 1.0458979886607267e-05,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6401,
+      "phase": "lbfgs",
+      "loss": 0.005636800546199083,
+      "residual": 0.004910481162369251,
+      "data": 7.2631942202860955e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6601,
+      "phase": "lbfgs",
+      "loss": 0.004240910988301039,
+      "residual": 0.0036495495587587357,
+      "data": 5.913615495956037e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6801,
+      "phase": "lbfgs",
+      "loss": 0.003319784067571163,
+      "residual": 0.0028758100233972073,
+      "data": 4.439740223460831e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 7001,
+      "phase": "lbfgs",
+      "loss": 0.002690698020160198,
+      "residual": 0.002363832201808691,
+      "data": 3.2686580198060255e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 7102,
+      "phase": "lbfgs",
+      "loss": 0.0024208305403590202,
+      "residual": 0.002128290245309472,
+      "data": 2.9254019864310976e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    }
+  ],
+  "scaler": {
+    "offset": 28.441544335545977,
+    "scale": 186.708055664454
+  }
+}

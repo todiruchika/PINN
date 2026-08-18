@@ -84,7 +84,55 @@ In `soft`/`free` the scaler offset is 0, so the network must represent the
 boundary level itself rather than being handed it through the normalisation.
 `boundary_mae` in `metrics.csv` reports the answer for every arm.
 
-## 4. Layout
+## 4. Calibration evidence for the defaults
+
+All on `thermal_00601` (test split, N=5, seed 0, 3000 Adam + 1000 L-BFGS steps).
+These are single-chip single-seed numbers used to *pick defaults*, not results.
+
+**Loss balancing** — `w_data=100` is the default: it saturates the sensor fit
+without an extreme weight, and gradient annealing bought nothing here, so fixed
+weights stay the simpler choice.
+
+| balancing | rel L2 | max abs err | sensor fit (`L_data`) |
+|---|---|---|---|
+| `w_data=1` | 0.317 | 1292 °C | 2.0e-03 |
+| gradient annealing | 0.325 | 1326 °C | 3.7e-06 |
+| **`w_data=100`** | **0.295** | 1245 °C | 1.7e-06 |
+| `w_data=1e4` | 0.290 | 1217 °C | 3.4e-07 |
+
+**Source parametrisation** — `gaussian` with 6 blobs is the default.
+
+| source | rel L2 | max abs err | source rel L2 | hotspot centre err |
+|---|---|---|---|---|
+| **gaussian, 6 blobs** | **0.275** | 1191 °C | 0.851 | 0.086 |
+| gaussian, oracle count (4) | 0.283 | 1212 °C | 0.854 | 0.077 |
+| gaussian, 10 blobs | 0.302 | 1267 °C | 0.865 | 0.134 |
+| gaussian 6 + wider field (128x5) | 0.290 | 1239 °C | 0.863 | 0.088 |
+| free-form `mlp` source | 0.384 | 1486 °C | 0.911 | — |
+| `softrect` | 0.414 | 1553 °C | 0.922 | 0.231 |
+
+Three points worth carrying into the writeup:
+
+1. **The correctly specified source loses.** `softrect` matches how the dataset
+   was generated (uniform rectangles) yet does worst: its sharp sigmoid edges
+   make the inverse problem much harder to optimise, so the mis-specified but
+   smooth Gaussian wins. Model-form correctness and trainability pull in
+   opposite directions here.
+2. **The oracle hotspot count does not help.** Six free blobs match four correct
+   ones, so the main comparison needs no oracle-count variant.
+3. **Localisation is good while source *shape* recovery is poor**
+   (`source_rel_l2` ~0.85 against `source_centre_err` ~0.08). Model B finds
+   *where* the heat is, not *how it is distributed* — the right claim to make
+   given the engineering interest is hotspot location.
+
+**The oracle-source floor** (`tests/test_forward_solve.py`, same chip): with the
+*true* source handed to the network and no sensor data at all, rel L2 = **0.086**,
+max abs error 218 °C, peak location error 0.000. So Model B's ~0.28 is dominated
+by source under-determination from sparse sensors, not by the network's ability
+to represent the field. Quote this floor whenever Model B is compared with A or C:
+it separates the inverse-problem limit from the representation limit.
+
+## 5. Layout
 
 ```
 src/
@@ -93,13 +141,19 @@ src/
                    collocation sampling, gradient-norm annealing  (shared with Model C)
   models/pinn.py   hard-BC temperature field + the three source parametrisations
   train_pinn.py    Model B driver: one solve per (chip, sensor count, seed)
-  evaluate.py      metrics, results/metrics.csv, comparison table
-tests/test_physics.py
-experiments/configs/
-results/metrics.csv, results/runs/, results/figures/
+  evaluate.py      metrics, results/metrics.csv, comparison table, error-vs-N plot
+tests/
+  test_physics.py       8 checks: autodiff Laplacian, manufactured solution,
+                        exact hard BC, dataset/PDE consistency, indexing
+  test_forward_solve.py oracle-source forward solve -> representation floor
+experiments/
+  configs/         one JSON per configuration
+  run_model_b.sh   parallel matrix runner (per-process CSVs, merged afterwards)
+results/
+  metrics.csv  parts/  runs/  logs/  figures/
 ```
 
-## 5. Usage
+## 6. Usage
 
 ```bash
 # one-time: record the split ID lists
@@ -108,8 +162,19 @@ python -c "import sys;sys.path.insert(0,'src');import data_loader as d;print(d.w
 # sanity-check on a single chip (milestone 3)
 python src/train_pinn.py --split test --chips thermal_00601 --sensors 5 --seeds 0 --save-figs
 
-# Model B arm of the experiment matrix, test set subsampled for cost (§10)
-python src/train_pinn.py --split test --n-chips 20 --sensors 5,8,10 --seeds 0,1,2 --quiet
+# Model B arm of the experiment matrix, test set subsampled for cost (§10).
+# 4 concurrent solves, per-process CSVs under results/parts/
+experiments/run_model_b.sh 20 5,8,10 0,1,2 4
+python src/evaluate.py --merge results/parts --plot
+
+# boundary ablation arms
+OVERRIDE='{"model":{"bc_mode":"soft"}}' TAG=soft PARTS=results/parts_bc \
+  experiments/run_model_b.sh 3 5 0,1,2 3
+OVERRIDE='{"model":{"bc_mode":"free"}}' TAG=free PARTS=results/parts_bc \
+  experiments/run_model_b.sh 3 5 0,1,2 3
+
+# representation floor for a given chip
+python tests/test_forward_solve.py --chip thermal_00601
 
 # ablations
 python src/train_pinn.py --chips thermal_00601 --override '{"model":{"source":{"kind":"softrect"}}}'
