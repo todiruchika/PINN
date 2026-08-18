@@ -1,0 +1,18 @@
+=== Model A: N=5 sensors, seed=0 ===
+    best val rel_l2=0.4953 (epoch 210) -> test rel_l2 mean=0.4542 over 100 chips
+=== Model A: N=5 sensors, seed=1 ===
+    best val rel_l2=0.5516 (epoch 90) -> test rel_l2 mean=0.5259 over 100 chips
+=== Model A: N=5 sensors, seed=2 ===
+    best val rel_l2=0.5125 (epoch 70) -> test rel_l2 mean=0.4627 over 100 chips
+=== Model A: N=8 sensors, seed=0 ===
+    best val rel_l2=0.5027 (epoch 180) -> test rel_l2 mean=0.4598 over 100 chips
+=== Model A: N=8 sensors, seed=1 ===
+    best val rel_l2=0.5085 (epoch 350) -> test rel_l2 mean=0.4677 over 100 chips
+=== Model A: N=8 sensors, seed=2 ===
+    best val rel_l2=0.5203 (epoch 110) -> test rel_l2 mean=0.4514 over 100 chips
+=== Model A: N=10 sensors, seed=0 ===
+    best val rel_l2=0.4678 (epoch 90) -> test rel_l2 mean=0.4697 over 100 chips
+=== Model A: N=10 sensors, seed=1 ===
+    best val rel_l2=0.4771 (epoch 60) -> test rel_l2 mean=0.4654 over 100 chips
+=== Model A: N=10 sensors, seed=2 ===
+    best val rel_l2=0.4633 (epoch 100) -> test rel_l2 mean=0.4509 over 100 chips

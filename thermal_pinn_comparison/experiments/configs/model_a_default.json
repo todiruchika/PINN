@@ -1,0 +1,24 @@
+{
+  "name": "model_a_default",
+  "notes": "Model A: data-driven DeepONet, no physics term. Trained once on the full train split per (sensor count, seed), evaluated on every held-out test chip.",
+  "device": "cpu",
+  "model": {
+    "net": {
+      "p": 128,
+      "branch_width": 128,
+      "branch_depth": 3,
+      "trunk_width": 128,
+      "trunk_depth": 4,
+      "activation": "tanh"
+    }
+  },
+  "training": {
+    "epochs": 400,
+    "batch_size": 32,
+    "lr": 0.001,
+    "lr_min": 1e-05,
+    "n_query": 512,
+    "eval_every": 10,
+    "patience": 10
+  }
+}
