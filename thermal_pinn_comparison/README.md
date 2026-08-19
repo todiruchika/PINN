@@ -132,6 +132,12 @@ by source under-determination from sparse sensors, not by the network's ability
 to represent the field. Quote this floor whenever Model B is compared with A or C:
 it separates the inverse-problem limit from the representation limit.
 
+Note that `thermal_00601` is a *hard* chip: 4 overlapping hotspots in a 2651 °C
+peak field, and Model B scores ~0.28 on it against ~0.13 averaged over the chips
+in Sec. 7.
+The calibration numbers above are therefore comparable to each other but are not
+representative of Model B's typical accuracy.
+
 ## 5. Layout
 
 ```
@@ -202,3 +208,43 @@ arms are run without duplicating config files.
   the true source is actually recovered.
 * Ground-truth fields, `hotspot_positions` and `hotspot_power_values` are read
   **only** inside `evaluate.py` / `evaluate_source`, never in the training path.
+
+## 7. Results so far (Model B only)
+
+Real runs, `results/metrics.csv`: 3 test chips (`thermal_00652`, `00664`, `00684`)
+x N in {5, 8, 10} x 2 seeds = 18 solves, default config. `+/-` is **seed** std
+(per-chip runs averaged within a seed first); chip-to-chip spread is much larger
+at ~0.04-0.05.
+
+| N sensors | rel L2 | max abs err | peak loc err | boundary MAE | sensor RMSE | s/chip |
+|---|---|---|---|---|---|---|
+| 5 | 0.135 +/- 0.002 | 558 °C | 0.075 | **0.0** | 4.0 °C | 873 |
+| 8 | 0.124 +/- 0.004 | 430 °C | 0.064 | **0.0** | 2.8 °C | 865 |
+| 10 | 0.126 +/- 0.002 | 478 °C | 0.060 | **0.0** | 4.9 °C | 710 |
+
+Findings to carry into the writeup:
+
+* **Sensor count barely matters for Model B.** 5 -> 10 sensors moves rel L2 from
+  0.135 to 0.126, less than the chip-to-chip spread. The physics term, not the
+  data, is doing the work. Expect the opposite for Model A, which is the point
+  of the §5 ablation plot.
+* **`boundary_mae` is exactly 0.0 on every run**, with no boundary weight in the
+  loss. This is the Axis-A hard-enforcement claim demonstrated, not asserted.
+* **The peak is systematically under-predicted** while its *location* is nearly
+  exact (0.008 on `thermal_00602`, under one pixel). The smooth Gaussian source
+  flattens the true rectangular heater's plateau. So `max_abs_err` carries
+  information `rel_l2` hides -- keep both in the headline table.
+* **Cost asymmetry**: ~12-15 min *per chip*, re-solved from scratch every time,
+  against a single training run plus millisecond inference for Models A and C.
+  Wall-clock figures above were measured at 4-way concurrency on a 12-core
+  CPU-only box; state the concurrency setting whenever quoting them.
+
+Example figures in `results/figures/`:
+`error_vs_sensors.png` (headline plot) and
+`thermal_0060{1,2}_N5_seed0_hard_gaussian_figdemo.png` (true / predicted / error triptychs).
+
+### Not done yet
+
+* Models A and C (`losses.py` is written so Model C imports the physics unchanged).
+* Full-scale arm: 20 chips x 3 N x 3 seeds via `experiments/run_model_b.sh 20 5,8,10 0,1,2 4` (~3 h here).
+* The `soft` / `free` boundary ablation arms -- implemented and wired, not yet run.
