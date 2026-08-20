@@ -1,0 +1,5 @@
+Model B: 9 solves on split=test, 5 at a time
+chip list -> results/model_b_chips_test.txt
+
+done. merge and summarise with:
+  python src/evaluate.py --merge results/parts_figs --plot

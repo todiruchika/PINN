@@ -32,17 +32,25 @@ THREADS_PER_JOB="${THREADS_PER_JOB:-2}"
 #   OVERRIDE='{"model":{"bc_mode":"soft"}}' TAG=soft experiments/run_model_b.sh 3 5 0
 OVERRIDE="${OVERRIDE:-}"
 TAG="${TAG:-}"
+# CHIPS: explicit comma-separated sample ids, overriding the N_CHIPS subsample.
+#   CHIPS=thermal_00652,thermal_00664 experiments/run_model_b.sh 2 5,8,10 0
+CHIPS="${CHIPS:-}"
+# FIGS=1 (default) also writes the true/predicted/error triptych per solve, so the
+# figures in a report always correspond to rows in metrics.csv. FIGS=0 to skip.
+FIGS="${FIGS:-1}"
 PARTS="${PARTS:-results/parts}"
 LOGS="results/logs"
 mkdir -p "$PARTS" "$LOGS"
 
 # Resolve the chip list once, so every (N, seed) combination sees the same chips
 # and the exact list is recorded for the writeup.
-CHIPS=$(python -c "
+if [ -z "$CHIPS" ]; then
+  CHIPS=$(python -c "
 import sys; sys.path.insert(0, 'src')
 from train_pinn import select_chips
 print(','.join(select_chips('$SPLIT', None, $N_CHIPS, None)))
 ")
+fi
 echo "$CHIPS" | tr ',' '\n' > "results/model_b_chips_${SPLIT}.txt"
 
 n_chips=$(echo "$CHIPS" | tr ',' '\n' | wc -l | tr -d ' ')
@@ -61,6 +69,7 @@ for chip in $(echo "$CHIPS" | tr ',' ' '); do
       extra=""
       [ -n "$OVERRIDE" ] && extra="--override '$OVERRIDE'"
       [ -n "$TAG" ] && extra="$extra --tag $TAG"
+      [ "$FIGS" = "1" ] && extra="$extra --save-figs --save-fields"
       printf '%s\n' "python -u src/train_pinn.py --config $CONFIG --split $SPLIT --chips $chip \
 --sensors $n --seeds $s --quiet $extra --metrics $PARTS/${stem}.csv --runs-dir results/runs \
 > $LOGS/${stem}.log 2>&1"

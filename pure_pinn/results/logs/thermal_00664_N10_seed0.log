@@ -1,5 +1,5 @@
 Model B: 1 solves (1 chips x 1 sensor counts x 1 seeds), split=test
 [1/1] thermal_00664 N=10 seed=0 (k=145.2, T_b=28.44, hotspots=2)
-      rel_L2=0.1721 max_abs=129.6 degC peak_loc_err=0.032 bnd_mae=0.000 (843.0 s)
+      rel_L2=0.1721 max_abs=129.6 degC peak_loc_err=0.032 bnd_mae=0.000 (1906.2 s)
 
-wrote 1 rows to C:\Users\ruchi\OneDrive\Desktop\pinn\thermal_pinn_comparison\results\parts\thermal_00664_N10_seed0.csv
+wrote 1 rows to C:\Users\ruchi\OneDrive\Desktop\pinn\pure_pinn\results\parts_figs\thermal_00664_N10_seed0.csv

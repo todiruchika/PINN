@@ -18,8 +18,8 @@
     "sensor_rmse": 10.392077035756298,
     "source_rel_l2": 0.656036285502468,
     "source_centre_err": 0.14598776195580157,
-    "train_seconds": 857.5436036000028,
-    "inference_seconds": 0.09238569997251034,
+    "train_seconds": 1904.3564650999906,
+    "inference_seconds": 0.1792416999815032,
     "final_loss": 0.0029519356321543455,
     "final_residual": 0.0016296536196023226,
     "final_data_loss": 1.3222820598457474e-05

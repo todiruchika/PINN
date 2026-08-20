@@ -1,0 +1,16 @@
+thermal_00684: k=141.5, T_b=23.48 degC, 3 hotspots, peak=2957 degC
+  [adam     0] residual=1.8294e+02
+  [adam   500] residual=9.3264e+00
+  [adam  1000] residual=4.7192e+00
+  [adam  1500] residual=2.6281e+00
+  [adam  2000] residual=2.9966e+00
+  [adam  2500] residual=2.0826e+00
+  [lbfgs end] residual=2.0770e+00
+
+relative L2      0.0376   <- representation/optimisation floor for Model B
+max abs error    105.6 degC
+peak loc error   0.0000
+boundary MAE     9.11e-07 degC (hard BC, should be ~0)
+wall clock       753.1 s
+
+PASS: rel L2 < 0.15

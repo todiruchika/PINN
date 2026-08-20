@@ -132,6 +132,20 @@ by source under-determination from sparse sensors, not by the network's ability
 to represent the field. Quote this floor whenever Model B is compared with A or C:
 it separates the inverse-problem limit from the representation limit.
 
+The floor is **chip-dependent and not budget-limited**. On `thermal_00684` it is
+**0.038**; doubling Adam steps, tripling L-BFGS steps and quadrupling collocation
+points (2048 -> 8192) cut the final residual 3x (2.08 -> 0.68) but left the field
+error unchanged at **0.038**. So extra optimisation buys nothing: the remaining
+gap is the smooth network's inability to reproduce sharp-edged rectangular
+sources, not under-training. A third variant (width 128, depth 5) was killed
+before finishing and has not been measured.
+
+Consequence for the error budget, using `thermal_00684`: floor 0.038 against an
+actual Model B error of 0.118, so **roughly two thirds of Model B's error comes
+from source under-determination by sparse sensors**, not from representation.
+(An earlier read of this, based only on `thermal_00601`, had it the other way
+round -- that chip's 0.086 floor is unusually high.)
+
 Note that `thermal_00601` is a *hard* chip: 4 overlapping hotspots in a 2651 °C
 peak field, and Model B scores ~0.28 on it against ~0.13 averaged over the chips
 in Sec. 7.
@@ -239,9 +253,18 @@ Findings to carry into the writeup:
   Wall-clock figures above were measured at 4-way concurrency on a 12-core
   CPU-only box; state the concurrency setting whenever quoting them.
 
+**Reproducibility**: re-solving the nine (chip, N) combinations at seed 0 in a
+separate invocation reproduced `rel_l2` exactly (max abs difference 0.0 over 9
+pairs), so figures and table rows always correspond. `run_model_b.sh` now passes
+`--save-figs --save-fields` by default (`FIGS=0` to disable) and accepts an
+explicit `CHIPS=` list, so this cannot drift again.
+
 Example figures in `results/figures/`:
 `error_vs_sensors.png` (headline plot) and
-`thermal_0060{1,2}_N5_seed0_hard_gaussian_figdemo.png` (true / predicted / error triptychs).
+`thermal_006{52,64,84}_N{5,8,10}_seed0_hard_gaussian.png` (true / predicted / error
+triptychs for the three tabulated chips at every sensor count), and
+`design_flow.png` (the design-flow diagram, regenerate via `python src/make_flowchart.py`).
+The two `*_figdemo.png` files are the *calibration* chips, not results.
 
 ### Not done yet
 
