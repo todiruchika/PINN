@@ -25,6 +25,7 @@ Anti-inverse-crime (Wirgin arXiv math-ph/0401050):
 import os
 import sys
 import argparse
+import re
 import numpy as np
 import pandas as pd
 import json
@@ -178,7 +179,8 @@ class MasterDatasetGenerator:
         return meta
 
     def execute_split_generation(self, split: str, count: int,
-                                  start_idx: int, fp_id_offset: int) -> pd.DataFrame:
+                                  start_idx: int, fp_id_offset: int,
+                                  save_metadata: bool = True) -> pd.DataFrame:
         print(f"\n[Pipeline] Generating {count} samples for '{split}' "
               f"(IDs {start_idx}–{start_idx+count-1})...", flush=True)
 
@@ -204,26 +206,109 @@ class MasterDatasetGenerator:
 
         df = pd.DataFrame(rows).sort_values("sample_id").reset_index(drop=True)
         csv_file = os.path.join(self.output_dir, split, "metadata.csv")
-        df.to_csv(csv_file, index=False)
+        if save_metadata:
+            df.to_csv(csv_file, index=False)
         n_viol = int(df["thermal_violation"].sum()) if "thermal_violation" in df else 0
-        print(f"  Saved {len(df)} rows → {csv_file} (thermal violations: {n_viol})", flush=True)
+        print(
+            f"  Generated {len(df)} rows"
+            + (f" → {csv_file}" if save_metadata else "")
+            + f" (thermal violations: {n_viol})",
+            flush=True,
+        )
         return df
 
-    def run_pipeline(self, train_cnt: int, val_cnt: int, test_cnt: int):
+    def _load_existing_metadata(self) -> pd.DataFrame:
+        split_metadata = []
+        for split in ["train", "validation", "test"]:
+            csv_file = os.path.join(self.output_dir, split, "metadata.csv")
+            if os.path.isfile(csv_file):
+                split_metadata.append(pd.read_csv(csv_file))
+
+        if split_metadata:
+            existing = pd.concat(split_metadata, ignore_index=True)
+        else:
+            csv_file = os.path.join(self.output_dir, "metadata.csv")
+            if not os.path.isfile(csv_file):
+                return pd.DataFrame()
+            existing = pd.read_csv(csv_file)
+
+        required = {"sample_id", "split", "floorplan_id"}
+        missing = required.difference(existing.columns)
+        if missing:
+            raise ValueError(
+                f"Cannot append: existing metadata is missing columns {sorted(missing)}"
+            )
+        if existing["sample_id"].duplicated().any():
+            duplicates = existing.loc[
+                existing["sample_id"].duplicated(), "sample_id"
+            ].tolist()
+            raise ValueError(
+                f"Cannot append: duplicate sample IDs in existing metadata: {duplicates}"
+            )
+        return existing
+
+    def _next_sample_index(self, existing_metadata: pd.DataFrame) -> int:
+        max_index = 0
+        for sample_id in existing_metadata.get("sample_id", []):
+            match = re.fullmatch(r"thermal_(\d+)", str(sample_id))
+            if not match:
+                raise ValueError(
+                    f"Cannot append: invalid sample ID in metadata: {sample_id}"
+                )
+            max_index = max(max_index, int(match.group(1)))
+
+        for root, _, filenames in os.walk(self.output_dir):
+            for filename in filenames:
+                match = re.search(r"thermal_(\d+)", filename)
+                if match:
+                    max_index = max(max_index, int(match.group(1)))
+        return max_index + 1
+
+    def run_pipeline(self, train_cnt: int, val_cnt: int, test_cnt: int,
+                     append: bool = False):
+        existing_metadata = self._load_existing_metadata() if append else pd.DataFrame()
         self.prepare_directories()
 
-        # Floorplan IDs are globally unique across splits (no leakage)
-        df_train = self.execute_split_generation("train", train_cnt,
-                                                  start_idx=1,
-                                                  fp_id_offset=0)
-        df_val   = self.execute_split_generation("validation", val_cnt,
-                                                  start_idx=train_cnt + 1,
-                                                  fp_id_offset=train_cnt)
-        df_test  = self.execute_split_generation("test",  test_cnt,
-                                                  start_idx=train_cnt + val_cnt + 1,
-                                                  fp_id_offset=train_cnt + val_cnt)
+        if append:
+            sample_start = self._next_sample_index(existing_metadata)
+            floorplan_start = (
+                int(existing_metadata["floorplan_id"].max()) + 1
+                if not existing_metadata.empty else 0
+            )
+        else:
+            sample_start = 1
+            floorplan_start = 0
 
-        total_df = pd.concat([df_train, df_val, df_test], ignore_index=True)
+        # Floorplan IDs are globally unique across splits (no leakage).
+        df_train = self.execute_split_generation("train", train_cnt,
+                                                  start_idx=sample_start,
+                                                  fp_id_offset=floorplan_start,
+                                                  save_metadata=not append)
+        df_val   = self.execute_split_generation("validation", val_cnt,
+                                                  start_idx=sample_start + train_cnt,
+                                                  fp_id_offset=floorplan_start + train_cnt,
+                                                  save_metadata=not append)
+        df_test  = self.execute_split_generation("test",  test_cnt,
+                                                  start_idx=sample_start + train_cnt + val_cnt,
+                                                  fp_id_offset=floorplan_start + train_cnt + val_cnt,
+                                                  save_metadata=not append)
+
+        generated_by_split = {
+            "train": df_train,
+            "validation": df_val,
+            "test": df_test,
+        }
+        if append:
+            for split, generated in generated_by_split.items():
+                prior = existing_metadata[existing_metadata["split"] == split]
+                combined = pd.concat([prior, generated], ignore_index=True)
+                combined = combined.sort_values("sample_id").reset_index(drop=True)
+                combined.to_csv(
+                    os.path.join(self.output_dir, split, "metadata.csv"), index=False
+                )
+                generated_by_split[split] = combined
+
+        total_df = pd.concat(list(generated_by_split.values()), ignore_index=True)
         total_df = total_df.sort_values("sample_id").reset_index(drop=True)
         total_df.to_csv(os.path.join(self.output_dir, "metadata.csv"), index=False)
         total_df[["sample_id", "split"]].to_csv(
@@ -254,6 +339,8 @@ if __name__ == "__main__":
     parser.add_argument("--out-dir",    type=str, default="dataset")
     parser.add_argument("--seed",       type=int, default=42,
                         help="Global random seed for reproducibility")
+    parser.add_argument("--append", action="store_true",
+                        help="Append samples and continue IDs after existing output")
     parser.add_argument("--no-fine-mesh", action="store_true",
                         help="Use coarse 128x128 solver (disables anti-inverse-crime)")
     args = parser.parse_args()
@@ -273,4 +360,4 @@ if __name__ == "__main__":
         use_fine_mesh=not args.no_fine_mesh,
         global_seed=args.seed,
     )
-    gen.run_pipeline(train_count, val_count, test_count)
+    gen.run_pipeline(train_count, val_count, test_count, append=args.append)
