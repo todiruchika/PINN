@@ -1,5 +1,9 @@
 data/raw/
 data/generated/
+data/raw_extended/
+data/raw_check/
+*.zip
+.pytest_cache/
 __pycache__/
 .venv/
 venv/
