@@ -11,7 +11,7 @@ import json
 import numpy as np
 from pathlib import Path
 
-from src.data.dataset import RAW_DIR, GRID
+from src.data.dataset import RAW_DIR, GRID, load_metadata
 
 LAYOUT_DIR = Path("sensors/layouts")
 FIGURES_DIR = Path("figures")
@@ -20,10 +20,10 @@ DEFAULT_MARGIN = 3
 DEFAULT_ENERGY = 0.95
 
 
-def _T_b(T: np.ndarray) -> float:
-    """Mean of four edge temperatures (default T_b rule; PENDING until BC known)."""
-    edge = np.concatenate([T[0, :], T[-1, :], T[1:-1, 0], T[1:-1, -1]])
-    return float(edge.mean())
+def _normalise_snapshot(T: np.ndarray, T_amb: float) -> np.ndarray:
+    delta = float(T.max()) - T_amb
+    denom = delta if delta > 1e-10 else 1.0
+    return (T - T_amb) / denom
 
 
 def _qr_pivot(A: np.ndarray):
@@ -44,14 +44,14 @@ def fit_podqr_layout(
     """Fit POD-QR layout from training samples only. Returns layout dict."""
     split = "train"
     N = GRID
+    metadata = load_metadata(raw_dir)
+    ambient_by_id = metadata.set_index("sample_id")["T_amb_C"]
 
     snapshots = []
     for sid in sorted(train_ids):
         T = np.load(str(raw_dir / split / "matrices" / f"{sid}.npy")).astype(np.float64)
-        Tb = _T_b(T)
-        Tmax = T.max()
-        denom = Tmax - Tb if (Tmax - Tb) > 1e-10 else 1.0
-        theta = (T - Tb) / denom
+        Tb = float(ambient_by_id.loc[sid])
+        theta = _normalise_snapshot(T, Tb)
         snapshots.append(theta.ravel())
 
     X = np.stack(snapshots, axis=1)  # (16384, n_train)
@@ -86,7 +86,7 @@ def fit_podqr_layout(
         "r": r,
         "energy_threshold": energy_threshold,
         "cumulative_energy_at_r": float(cumulative[r - 1]),
-        "T_b_rule": "mean_edge",
+        "T_b_rule": "per_sample_T_amb_C",
         "boundary_margin_cells": margin,
         "train_ids_sha256": sha,
     }

@@ -47,6 +47,13 @@ def peak_temp_error(pred: np.ndarray, true: np.ndarray, mask: np.ndarray = None)
 def hotspot_localization_error(pred: np.ndarray, true: np.ndarray, mask: np.ndarray = None) -> float:
     """Euclidean distance (in grid cells) between predicted and true hotspot."""
     _check_shapes(pred, true)
+    if mask is not None:
+        if mask.shape != pred.shape:
+            raise ValueError(f"Mask shape mismatch: mask {mask.shape} vs data {pred.shape}")
+        if not np.any(mask):
+            raise ValueError("Mask must include at least one node")
+        pred = np.where(mask, pred, -np.inf)
+        true = np.where(mask, true, -np.inf)
     pred_idx = np.unravel_index(np.argmax(pred), pred.shape)
     true_idx = np.unravel_index(np.argmax(true), true.shape)
     return float(np.sqrt((pred_idx[0] - true_idx[0]) ** 2 + (pred_idx[1] - true_idx[1]) ** 2))
@@ -59,5 +66,5 @@ def all_metrics(pred: np.ndarray, true: np.ndarray, mask: np.ndarray = None) -> 
         "rmse_C": rmse(pred, true, mask),
         "mse_C2": mse(pred, true, mask),
         "peak_temp_error_C": peak_temp_error(pred, true, mask),
-        "hotspot_localization_cells": hotspot_localization_error(pred, true),
+        "hotspot_localization_cells": hotspot_localization_error(pred, true, mask),
     }

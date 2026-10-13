@@ -29,3 +29,10 @@ def test_gappy_pod_rmse():
     err = float(np.sqrt(np.mean((pred - true) ** 2)))
     print(f"\nGappy POD RMSE on {sample_id} (N=10): {err:.4f} degC")
     assert err < 100.0, f"RMSE {err:.2f} degC > 100 — reconstruction likely wrong"
+
+
+def test_gappy_pod_requires_generated_podqr_sensors(tmp_path):
+    ensure_basis()
+    sample_id = load_splits()["train"][0]
+    with pytest.raises(FileNotFoundError, match="POD-QR sensors are missing"):
+        gappy_pod_predict(sample_id, 5, generated_dir=tmp_path)

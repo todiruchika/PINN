@@ -23,9 +23,9 @@
 | Grids | PASS | All grids (128,128), finite, Q>=0 |
 | Temperature | PASS | peak_T: min=31.2 median=89.1 max=164.2 degC; 11 samples > 125 degC |
 | Boundary.ZeroFlux | WARN | Lateral-edge |dT/dn|: mean=204.4 K/m, max=4118.8 K/m. Non-zero values are expected (stride-downsampling artifact; BC is adiabatic Neumann). |
-| Energy | PASS | max |ratio-1| = 0.0156, median = 0.0156 |
+| Energy | PASS | max |ratio-1| = 0.0000, median = 0.0000 |
 | Energy.err_pct | PASS | energy_bal_err_pct max = 2.23% |
 | Sensors | PASS | All N in {5,8,10} present, positions in [0,0.012] |
-| Sensors.placement | WARN | Legacy sensors use block_centre_with_jitter (not podqr) |
+| Sensors.placement | WARN | Stored reference sensors use block_centre_with_jitter (not podqr) |
 | Metadata.conductivity | WARN | k not in metadata — expected. Compute at runtime: k(T[K]) = 22714/(T[K]-99)+2 (source: pde_solver.py). See PROTOCOL.md. |
 | Metadata.BC | WARN | boundary_condition not in metadata — expected. BC is adiabatic Neumann on all lateral edges + h_eff distributed sink. Source: pde_solver.py. |

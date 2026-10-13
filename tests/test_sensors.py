@@ -2,7 +2,8 @@ import json
 import numpy as np
 import pytest
 from pathlib import Path
-from src.sensors.podqr import fit_podqr_layout
+from src.sensors.layouts import random_uniform_layout
+from src.sensors.podqr import _normalise_snapshot, fit_podqr_layout
 from src.data.splits import load_splits
 
 GRID = 128
@@ -22,6 +23,20 @@ def test_pivots_unique():
     layout = get_layout()
     pivots = [(p["row"], p["col"]) for p in layout["pivots"]]
     assert len(set(pivots)) == len(pivots), "Pivot indices not unique"
+
+
+def test_podqr_normalization_uses_ambient_reference():
+    T = np.array([[30.0, 40.0], [50.0, 60.0]])
+    theta = _normalise_snapshot(T, 25.0)
+    assert theta[0, 0] == pytest.approx(1 / 7)
+    assert theta.max() == pytest.approx(1.0)
+
+
+def test_random_uniform_layout_is_unique_and_deterministic():
+    first = random_uniform_layout(10, seed=17)
+    second = random_uniform_layout(10, seed=17)
+    assert first == second
+    assert len(set(first)) == 10
 
 
 def test_pivots_within_grid():

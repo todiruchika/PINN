@@ -1,36 +1,34 @@
 """Steady 2D heat conduction stubs.
 
-BC and PDE form are unknown (see PROTOCOL.md blockers).
-Do NOT implement until the boundary condition and governing equation are resolved.
+The governing equation and boundary conditions are documented in PROTOCOL.md.
+Residual and boundary-condition implementations remain intentionally pending.
 """
 
 
 def pde_residual(T, Q, k, dx):
     """Compute PDE residual on interior nodes.
 
-    For linear conduction: -k*nabla^2(T) - Q = 0.
-    For leakage model: -k*nabla^2(T) - Q_dynamic - beta*(T-T_amb)*Q_leakage0 = 0.
+    The confirmed model is -div(t_die*k(T)*grad(T)) + h_eff*(T-T_amb) = q(x,y,T).
 
     Raises:
-        NotImplementedError: BC and PDE form must be confirmed first.
+        NotImplementedError: residual discretisation is not implemented.
     """
-    raise NotImplementedError("PDE residual: BC and governing equation unknown (BLOCKER)")
+    raise NotImplementedError("PDE residual implementation is pending")
 
 
 def apply_boundary_condition(T, T_amb):
     """Apply boundary condition to temperature field.
 
     Raises:
-        NotImplementedError: Boundary condition is unknown (BLOCKER).
-        Edge temperatures differ by up to 92 degC from T_amb.
+        NotImplementedError: boundary-condition implementation is pending.
     """
-    raise NotImplementedError("Boundary condition unknown (BLOCKER)")
+    raise NotImplementedError("Boundary-condition implementation is pending")
 
 
 def hard_bc_ansatz(coords, T_amb):
     """Hard-constraint BC ansatz for PINN.
 
     Raises:
-        NotImplementedError: Requires known BC (BLOCKER).
+        NotImplementedError: hard-constraint ansatz is not implemented.
     """
-    raise NotImplementedError("Hard BC ansatz: BC unknown (BLOCKER)")
+    raise NotImplementedError("Hard boundary-condition ansatz is pending")

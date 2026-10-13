@@ -9,4 +9,3 @@ __pycache__/
 venv/
 *.pyc
 *.pt
-dataset/py_pipeline/venv/

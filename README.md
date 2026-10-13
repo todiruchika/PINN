@@ -24,7 +24,7 @@ cp -r /path/to/shared/data/raw/ data/raw/
 **Option B — run the generator** (see `generator/README.md` for the exact command):
 
 ```bash
-python generator/package_for_claude/dataset_generator.py \
+python generator/dataset_generator.py \
     --train-size 80 --val-size 10 --test-size 10 \
     --out-dir data/raw/dataset --seed 42
 ```
@@ -33,6 +33,12 @@ python generator/package_for_claude/dataset_generator.py \
 
 ```bash
 sha256sum -c data/SHA256SUMS
+```
+
+**Generate POD-QR sensor readings** (required before loading with `strategy="podqr"`):
+
+```bash
+python -m src.sensors.generate_sensors
 ```
 
 ## Run Tests

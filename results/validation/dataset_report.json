@@ -107,7 +107,7 @@
   {
     "check": "Energy",
     "status": "PASS",
-    "message": "max |ratio-1| = 0.0156, median = 0.0156"
+    "message": "max |ratio-1| = 0.0000, median = 0.0000"
   },
   {
     "check": "Energy.err_pct",
@@ -122,7 +122,7 @@
   {
     "check": "Sensors.placement",
     "status": "WARN",
-    "message": "Legacy sensors use block_centre_with_jitter (not podqr)"
+    "message": "Stored reference sensors use block_centre_with_jitter (not podqr)"
   },
   {
     "check": "Metadata.conductivity",

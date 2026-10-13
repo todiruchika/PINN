@@ -30,12 +30,41 @@ def _calib_offsets(n: int, global_seed: int) -> list:
     return [float(offsets[i]) for i in range(n)]
 
 
+def sensor_record_for_layout(
+    T: np.ndarray,
+    layout: list,
+    n_sensors: int,
+    placement_strategy: str,
+    sample_num: int,
+    global_seed: int = GLOBAL_SEED,
+) -> dict:
+    positions_m = [[idx_to_metre(col), idx_to_metre(row)] for row, col in layout]
+    temperatures_true = [float(T[row, col]) for row, col in layout]
+    calibration_offsets = _calib_offsets(n_sensors, global_seed)
+    rng = np.random.default_rng(global_seed * 10000 + sample_num * 100 + n_sensors)
+    temperatures_noisy = [
+        float(round((temperature + calibration_offsets[i] + rng.normal(0, NOISE_SIGMA)) / QUANT_STEP) * QUANT_STEP)
+        for i, temperature in enumerate(temperatures_true)
+    ]
+    return {
+        "sensor_count": n_sensors,
+        "positions": positions_m,
+        "temperatures_true": temperatures_true,
+        "temperatures_noisy": temperatures_noisy,
+        "noise_sigma_C": NOISE_SIGMA,
+        "quant_step_C": QUANT_STEP,
+        "calibration_offsets_C": calibration_offsets,
+        "placement_strategy": placement_strategy,
+        "boundary_margin_cells": MARGIN,
+    }
+
+
 def generate_sensors(
     raw_dir: Path = RAW_DIR,
     out_base: Path = Path("data/generated"),
     global_seed: int = GLOBAL_SEED,
 ) -> None:
-    splits = load_splits()
+    splits = load_splits(raw_dir / "splits.csv")
 
     for split, ids in splits.items():
         out_dir = out_base / split
@@ -47,29 +76,9 @@ def generate_sensors(
 
             for n in SENSOR_COUNTS:
                 layout = podqr_layout(n)
-                positions_m = [[idx_to_metre(col), idx_to_metre(row)] for row, col in layout]
-                T_true = [float(T[row, col]) for row, col in layout]
-                cal_offsets = _calib_offsets(n, global_seed)
-
-                rng = np.random.default_rng(global_seed * 10000 + sample_num * 100 + n)
-                T_noisy = []
-                for i, t in enumerate(T_true):
-                    noise = rng.normal(0, NOISE_SIGMA)
-                    val = t + cal_offsets[i] + noise
-                    quantised = round(val / QUANT_STEP) * QUANT_STEP
-                    T_noisy.append(float(quantised))
-
-                record = {
-                    "sensor_count": n,
-                    "positions": positions_m,
-                    "temperatures_true": T_true,
-                    "temperatures_noisy": T_noisy,
-                    "noise_sigma_C": NOISE_SIGMA,
-                    "quant_step_C": QUANT_STEP,
-                    "calibration_offsets_C": cal_offsets,
-                    "placement_strategy": "podqr",
-                    "boundary_margin_cells": MARGIN,
-                }
+                record = sensor_record_for_layout(
+                    T, layout, n, "podqr", sample_num, global_seed
+                )
                 out_path = out_dir / f"{sid}_sensors_{n}.json"
                 with open(out_path, "w") as f:
                     json.dump(record, f, indent=2)

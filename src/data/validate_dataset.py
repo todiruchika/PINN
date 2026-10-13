@@ -143,7 +143,7 @@ def run_validation(data_dir: Path):
            f"Non-zero values are expected (stride-downsampling artifact; BC is adiabatic Neumann).")
 
     # 6. Energy
-    dA = (DIE_L / GRID) ** 2
+    dA = (DIE_L / (GRID - 1)) ** 2
     energy_errors = []
     for split in splits:
         for sid in meta.loc[meta["split"] == split, "sample_id"]:
@@ -154,8 +154,8 @@ def run_validation(data_dir: Path):
 
     max_err = float(np.max(energy_errors))
     median_err = float(np.median(energy_errors))
-    if max_err > 0.03:
-        record("Energy", "FAIL", f"max |ratio-1| = {max_err:.4f} > 0.03")
+    if max_err > 0.025:
+        record("Energy", "FAIL", f"max |ratio-1| = {max_err:.4f} > 0.025")
     else:
         record("Energy", "PASS", f"max |ratio-1| = {max_err:.4f}, median = {median_err:.4f}")
 
@@ -194,8 +194,8 @@ def run_validation(data_dir: Path):
         record("Sensors", "PASS", f"All N in {{5,8,10}} present, positions in [0,{DIE_L}]")
     if sensor_quant_warnings:
         record("Sensors.quantization", "WARN",
-               f"{len(sensor_quant_warnings)} sensor files have non-integer noisy values (expected for legacy sensors with continuous true values)")
-    record("Sensors.placement", "WARN", "Legacy sensors use block_centre_with_jitter (not podqr)")
+               f"{len(sensor_quant_warnings)} sensor files have non-integer noisy values (expected for reference sensors with continuous true values)")
+    record("Sensors.placement", "WARN", "Stored reference sensors use block_centre_with_jitter (not podqr)")
 
     # 8. Metadata
     if "k_thermal" not in meta.columns and "conductivity" not in meta.columns:

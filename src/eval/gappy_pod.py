@@ -44,6 +44,7 @@ def gappy_pod_predict(
     raw_dir: Path = Path("data/raw/dataset"),
     basis_path: Path = BASIS_PATH,
     use_generated: bool = True,
+    generated_dir: Path = Path("data/generated"),
 ) -> tuple:
     """Load basis, sensor readings, reconstruct, return (pred, true)."""
     import json
@@ -58,12 +59,27 @@ def gappy_pod_predict(
 
     T_true = np.load(str(raw_dir / split / "matrices" / f"{sample_id}.npy"))
 
-    gen_path = Path("data/generated") / split / f"{sample_id}_sensors_{n_sensors}.json"
+    gen_path = generated_dir / split / f"{sample_id}_sensors_{n_sensors}.json"
     raw_path = raw_dir / split / "sensors" / f"{sample_id}_sensors_{n_sensors}.json"
-    sensor_path = gen_path if (use_generated and gen_path.exists()) else raw_path
+    if use_generated:
+        if not gen_path.exists():
+            raise FileNotFoundError(
+                f"POD-QR sensors are missing: {gen_path}. "
+                "Generate them with `python -m src.sensors.generate_sensors`."
+            )
+        sensor_path = gen_path
+    else:
+        sensor_path = raw_path
 
     with open(sensor_path) as f:
         sensors = json.load(f)
+    if use_generated:
+        from src.sensors.layouts import is_current_podqr_record
+        if not is_current_podqr_record(sensors, n_sensors):
+            raise ValueError(
+                f"POD-QR sensor data is stale or does not match the current layout: {sensor_path}. "
+                "Regenerate it with `python -m src.sensors.generate_sensors`."
+            )
 
     flat_indices = np.array([
         metre_to_idx(pos[1]) * 128 + metre_to_idx(pos[0])

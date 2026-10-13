@@ -6,13 +6,7 @@ Generated: 2026-10-13.
 
 ## Phase 5a — Regression Check
 
-**Command:**
-```
-python legacy/py_pipeline/dataset_generator.py \
-  --train-size 2 --val-size 1 --test-size 1 \
-  --out-dir data/raw_check --seed 42
-```
-*(Executed sequentially via direct API call; multiprocessing pool failed — see note below.)*
+**Historical command:** a retired generator snapshot was run sequentially via direct API call; multiprocessing pool failed — see note below. The original source is not retained in this report.
 
 **Result: PASSED — byte-identical.**
 
@@ -21,7 +15,7 @@ python legacy/py_pipeline/dataset_generator.py \
 | thermal_00001 | 0.000000 | 0.0000 | ✓ (42.6273 °C) | ✓ (32.4908 °C) |
 | thermal_00002 | 0.000000 | 0.0000 | ✓ (94.4238 °C) | ✓ (44.0143 °C) |
 
-The delivered dataset and the `legacy/py_pipeline/` generator are bit-for-bit reproducible at seed 42.
+The delivered dataset and the generator snapshot used for this historical check were bit-for-bit reproducible for the two tested samples at seed 42.
 
 **Note on multiprocessing:** The generator's `mp.Pool` fails on this Windows 11 machine with
 `numpy._core._exceptions._ArrayMemoryError: Unable to allocate 2.00 MiB for array (512,512)`
@@ -33,14 +27,7 @@ or on a Linux/Mac system.
 
 ## Phase 5b — Extended Dataset Generation
 
-**Command:**
-```
-python generate_extended.py  # sequential wrapper; see scratchpad
-# equivalent to:
-python legacy/py_pipeline/dataset_generator.py \
-  --train-size 400 --val-size 50 --test-size 50 \
-  --out-dir data/raw_extended --seed 42
-```
+**Historical command:** an untracked sequential wrapper targeted `data/raw_extended` with 400/50/50 samples and seed 42.
 
 **Status: Running in background.** The multiprocessing pool was unavailable (see above).
 Sequential rate: ~60 s/sample × 500 samples = **~8 hours estimated**. This exceeds the 2-hour
@@ -71,8 +58,7 @@ IDs `thermal_00003` – `thermal_00100` are expected identical (same seed, seque
 
 ### Delivered 100 samples vs generator package metadata
 
-The `generator/package_for_claude/metadata.csv` and `generator/metadata.csv` files are
-**identical** to the delivered dataset (same 100 sample IDs, same values).
+The `generator/metadata.csv` file is **identical** to the delivered dataset (same 100 sample IDs, same values).
 
 **No 500-sample file with peaks 27–105 °C was found in this repository.**
 All three metadata files in the repository describe the same 100 samples with peaks 31–164 °C.

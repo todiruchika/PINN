@@ -6,7 +6,7 @@ Each item is marked **DECIDED** or **PENDING**.
 
 ## Physics
 
-Source: `generator/package_for_claude/pde_solver.py` (verified 2026-10-13).
+Source: `generator/pde_solver.py` (verified 2026-10-13).
 
 | Item | Status | Detail |
 |------|--------|--------|
@@ -83,7 +83,7 @@ Reference: Manohar, Brunton, Kutz & Brunton, IEEE Control Systems Magazine 2018;
 |-----|--------|--------|
 | `podqr` | DECIDED | Primary strategy. Deterministic. |
 | `random_uniform` | DECIDED | Seeded uniform random within margin. |
-| `block_centre_legacy` | DECIDED | Legacy positions from raw dataset (block_centre_with_jitter). |
+| `block_centre_reference` | DECIDED | Stored block-centre positions (block_centre_with_jitter) from the delivered dataset. |
 | `kmeans_floorplan` | DECIDED (layout only) | K-means seeded from floorplan centroids. Layout only — never a model input. **Stub** pending floorplan metadata parsing convention. |
 
 ---
@@ -108,7 +108,7 @@ Reference: Manohar, Brunton, Kutz & Brunton, IEEE Control Systems Magazine 2018;
 
 ### Sampling strategy
 
-Describes what the generator code does. Sources: `generator/package_for_claude/dataset_generator.py`, `floorplan_generator.py`, `pde_solver.py`; labels from `generator/PARAMETERS.md`. Items the code does not establish are marked UNKNOWN.
+Describes what the generator code does. Sources: `generator/dataset_generator.py`, `generator/floorplan_generator.py`, and `generator/pde_solver.py`; labels from `generator/PARAMETERS.md`. Items the code does not establish are marked UNKNOWN.
 
 | Item | Code behaviour | Source |
 |------|----------------|--------|
@@ -127,11 +127,11 @@ Describes what the generator code does. Sources: `generator/package_for_claude/d
 
 **UNKNOWN**
 
-- Whether the delivered 100 samples were produced by `generator/package_for_claude/dataset_generator.py`. The package copy differs byte-wise from `legacy/py_pipeline/dataset_generator.py`; the regression check (`results/dataset_extension_report.md`) covers only samples 00001–00002 from the legacy copy.
-- Provenance of `splits.csv`. `legacy/py_pipeline/dataset_generator.py` contains `assign_splits` (stratified by the >125 °C flag, seed 42, 80/10/10), but the package generator does not assign splits, and no record shows that this function produced the delivered file. Splits are not regenerated here.
+- Whether the delivered 100 samples were produced by the current generator. `results/dataset_extension_report.md` records a historical regression check for samples 00001–00002, but there is no complete generation record for the delivered set.
+- Provenance of the delivered `splits.csv` is unknown. The current generator writes a manifest for newly generated data; it does not regenerate the delivered split assignment.
 - Block-count range: the `generate_single_sample` docstring says 1–10 blocks; the code samples 2–8. The code is used as the behavioural reference here.
 - Power-density ranges, leakage fractions, T_amb bounds, and the 125 °C threshold are all labelled ASSUMPTION — NOT SOURCED in `generator/PARAMETERS.md`.
-- Split naming: `splits.csv` uses `validation`; the directory layout uses `val`.
+- Split naming: generated datasets use `train`, `validation`, and `test`, matching `splits.csv` and the data loader.
 
 ---
 
@@ -192,7 +192,7 @@ Describes what the generator code does. Sources: `generator/package_for_claude/d
 3. **k resolved (2026-10-13)** — k(T) = 22714/(T[K]−99) + 2, clipped to [20, 160] W/(m·K). Source: `pde_solver.py`. Note: k is NOT in the metadata CSV; it must be computed at runtime from each sample's T field.
 4. **Three assumptions need external confirmation** — t_die = 500 µm, h_eff = 6256.3 W/(m²·K), β = 0.012 /K. All flagged as ASSUMPTION — NOT SOURCED in `generator/PARAMETERS.md`. Must confirm against HotSpot `default.config` and published data before submission.
 5. **100 samples** — Far below ≥ 2,000 target cited for the paper. Acquiring more data is a hard dependency for publication.
-6. **Energy balance tolerance** — Validator threshold (3%) needs updating to match the generator convention (dA = (L/(N−1))²) and the observed maximum (2.23%). See `results/validation/energy_investigation.md`.
+6. **Energy balance tolerance** — The validator now uses the generator convention (dA = (L/(N−1))²) and a 2.5% threshold. See `results/validation/energy_investigation.md` for the measured coarse-grid residual.
 
 ---
 

@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from src.eval.metrics import relative_l2, mae, rmse, mse, peak_temp_error, hotspot_localization_error
+from src.eval.metrics import all_metrics, relative_l2, mae, rmse, mse, peak_temp_error, hotspot_localization_error
 
 
 def test_relative_l2_zero():
@@ -38,6 +38,20 @@ def test_hotspot_localization():
     true = np.zeros((4, 4))
     true[0, 2] = 10.0
     assert hotspot_localization_error(pred, true) == pytest.approx(2.0)
+
+
+def test_hotspot_localization_ignores_masked_nodes():
+    pred = np.zeros((2, 3))
+    true = np.zeros((2, 3))
+    pred[0, 0] = 100.0
+    pred[1, 1] = 10.0
+    true[0, 2] = 100.0
+    true[1, 1] = 10.0
+    mask = np.ones((2, 3), dtype=bool)
+    mask[0, 0] = False
+    mask[0, 2] = False
+    assert hotspot_localization_error(pred, true, mask) == pytest.approx(0.0)
+    assert all_metrics(pred, true, mask)["hotspot_localization_cells"] == pytest.approx(0.0)
 
 
 def test_masked_mae():

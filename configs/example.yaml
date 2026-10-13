@@ -6,13 +6,13 @@ die:
   grid_size: 128    # 128x128 ground truth
 
 physics:
-  governing_equation: null   # BLOCKED: linear vs leakage (beta=0.012 unconfirmed)
-  boundary_condition: null   # BLOCKED: not T_amb; unknown BC
-  conductivity_k: null       # BLOCKED: not in metadata
+  governing_equation: "-div(t_die*k(T)*grad(T)) + h_eff*(T-T_amb) = q(x,y,T)"
+  boundary_condition: "adiabatic_neumann_with_distributed_sink"
+  conductivity_k: "22714/(T_K-99)+2; clamp to [20,160] W/(m*K)"
 
 nondim:
-  T_ref: null       # BLOCKED: depends on BC
-  deltaT_ref: null  # BLOCKED
+  T_ref: "T_amb_C"
+  deltaT_ref: "peak_temp_C - T_amb_C"
 
 sensors:
   counts: [5, 8, 10]
@@ -24,7 +24,7 @@ sensors:
 
 podqr:
   energy_threshold: 0.95
-  T_b_rule: "mean_edge"   # PENDING: mean of four edges until BC known
+  T_b_rule: "per_sample_T_amb_C"
 
 splits:
   file: data/raw/dataset/splits.csv
