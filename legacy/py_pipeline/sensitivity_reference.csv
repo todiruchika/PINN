@@ -1,0 +1,15 @@
+parameter,description,nominal_value,unit,direction,varied_value,peak_temp_C,delta_peak_C,baseline_peak_C
+die_thickness,Die thickness t_die [m],0.0005,(see PARAMETERS.md),-25%,0.000375,74.145728,5.426301,68.719427
+die_thickness,Die thickness t_die [m],0.0005,(see PARAMETERS.md),+25%,0.000625,65.102462,-3.616965,68.719427
+h_eff,Effective vertical heat-sink conductance h_eff [W/(m²K)],6256.256256256255,(see PARAMETERS.md),-25%,4692.192192192191,74.74989,6.030463,68.719427
+h_eff,Effective vertical heat-sink conductance h_eff [W/(m²K)],6256.256256256255,(see PARAMETERS.md),+25%,7820.320320320319,64.774273,-3.945155,68.719427
+leakage_beta,Leakage exponential coefficient beta [1/K],0.012,(see PARAMETERS.md),-25%,0.009000000000000001,68.424479,-0.294948,68.719427
+leakage_beta,Leakage exponential coefficient beta [1/K],0.012,(see PARAMETERS.md),+25%,0.015,69.058342,0.338915,68.719427
+p_leak0,Leakage power density at T0 [W/cm²],3.0,(see PARAMETERS.md),-25%,2.25,68.052836,-0.666592,68.719427
+p_leak0,Leakage power density at T0 [W/cm²],3.0,(see PARAMETERS.md),+25%,3.75,69.396406,0.676978,68.719427
+sigma_sensor_C,Sensor noise sigma [°C],1.0,(see PARAMETERS.md),-25%,0.75,68.719427,0.0,68.719427
+sigma_sensor_C,Sensor noise sigma [°C],1.0,(see PARAMETERS.md),+25%,1.25,68.719427,0.0,68.719427
+quant_step_C,ADC quantization step [°C],1.0,(see PARAMETERS.md),-25%,0.75,68.719427,0.0,68.719427
+quant_step_C,ADC quantization step [°C],1.0,(see PARAMETERS.md),+25%,1.25,68.719427,0.0,68.719427
+calib_offset_range,Calibration offset range ±[°C],2.0,(see PARAMETERS.md),-25%,1.5,68.719427,0.0,68.719427
+calib_offset_range,Calibration offset range ±[°C],2.0,(see PARAMETERS.md),+25%,2.5,68.719427,0.0,68.719427

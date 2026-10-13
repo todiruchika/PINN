@@ -1,0 +1,363 @@
+#!/usr/bin/env python3
+"""
+Orchestrated Dataset Generator (v2 – peer-review revision)
+Part of the PINN Thermal Dataset Generation Pipeline.
+
+Key changes from v1:
+  - All units SI (metres, W/cm², °C).
+  - Ground truth generated with FineMeshReferenceSolver (512x512) to avoid
+    the inverse crime (Wirgin, arXiv math-ph/0401050).
+  - Coarse solver (128x128) tag recorded in metadata separately.
+  - No overlapping blocks, no summed power densities.
+  - Sensor positions fixed at design time (block centres).
+  - Noisy sensor readings with explicit noise model.
+  - metadata.csv includes solver_tag, energy_bal_err_pct, thermo_iters.
+  - Thermal violation samples flagged but NOT dropped.
+  - Ambient temperature sampled from 25-45 °C.
+
+Anti-inverse-crime (Wirgin arXiv math-ph/0401050):
+  Ground-truth .npy files are generated with FineMeshReferenceSolver
+  (solver_tag = 'FineMesh512_to_128', fine mesh = 512×512, then
+  downsampled to 128×128 by stride [::4, ::4]). Reconstruction models
+  should use the coarse solver (128×128) for forward modeling.
+"""
+
+import os
+import sys
+import argparse
+import numpy as np
+import pandas as pd
+import json
+import time
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from typing import List, Dict, Any, Tuple
+
+from floorplan_generator import FloorplanGenerator, DIE_LX, DIE_LY
+from pde_solver import FineMeshReferenceSolver, ThermalPDESolver, T_AMB_MIN_C, T_AMB_MAX_C
+from sensor_generator import SensorGenerator
+
+# Maximum operating junction temperature
+# [ASSUMPTION — NOT SOURCED: 125 °C is a widely-quoted JEDEC maximum junction
+#  temperature, but the specific JEDEC document was not uploaded. No uploaded
+#  reference paper cites this value explicitly.]
+T_JUNCTION_MAX_C = 125.0   # °C
+T_VIOLATION_C    = 125.0   # °C  alias used in violation reporting
+T_SILICON_MELT_C = 1412.0  # °C  (silicon melting point, well-known physical constant)
+
+
+# Fixed dataset split ratio: 80% train, 10% validation, 10% test
+SPLIT_RATIO = {"train": 0.80, "validation": 0.10, "test": 0.10}
+SPLIT_SEED  = 42
+
+
+def assign_splits(metadata_input: Any, seed: int = SPLIT_SEED,
+                  split_ratio: Dict[str, float] = SPLIT_RATIO) -> pd.DataFrame:
+    """
+    Assigns splits so that each split has the same fraction of samples above 125 C as the full set,
+    to within one sample. Uses SPLIT_SEED = 42 and the 80/10/10 ratio.
+    Stratifies by the violates_125C flag, then assigns by seeded random permutation within each stratum.
+    Returns DataFrame with columns ['sample_id', 'split'].
+    """
+    if isinstance(metadata_input, pd.DataFrame):
+        df_meta = metadata_input
+    elif isinstance(metadata_input, str) and os.path.exists(metadata_input):
+        df_meta = pd.read_csv(metadata_input)
+    elif os.path.exists("metadata.csv"):
+        df_meta = pd.read_csv("metadata.csv")
+    else:
+        # Fallback if no metadata file available yet
+        sample_ids = list(metadata_input)
+        df_meta = pd.DataFrame({"sample_id": sample_ids, "violates_125C": False})
+
+    rng = np.random.default_rng(seed)
+    n_total = len(df_meta)
+    n_train_target = int(round(n_total * split_ratio["train"]))
+    n_val_target   = int(round(n_total * split_ratio["validation"]))
+    n_test_target  = n_total - n_train_target - n_val_target
+
+    if "violates_125C" in df_meta.columns:
+        viol_mask = df_meta["violates_125C"].astype(bool)
+    elif "peak_temp_C" in df_meta.columns:
+        viol_mask = df_meta["peak_temp_C"] > T_VIOLATION_C
+    else:
+        viol_mask = pd.Series(False, index=df_meta.index)
+
+    viol_ids = sorted(df_meta[viol_mask]["sample_id"].tolist())
+    non_viol_ids = sorted(df_meta[~viol_mask]["sample_id"].tolist())
+
+    n_viol = len(viol_ids)
+    n_non  = len(non_viol_ids)
+
+    # Violating stratum split allocation (80/10/10)
+    n_train_viol = int(round(n_viol * split_ratio["train"]))
+    n_val_viol   = int(round(n_viol * split_ratio["validation"]))
+    n_test_viol  = n_viol - n_train_viol - n_val_viol
+    if n_test_viol <= 0 and n_viol >= 3:
+        n_test_viol = 1
+        n_train_viol -= 1
+
+    # Non-violating stratum allocation
+    n_train_non = n_train_target - n_train_viol
+    n_val_non   = n_val_target - n_val_viol
+    n_test_non  = n_test_target - n_test_viol
+
+    perm_viol = rng.permutation(viol_ids) if n_viol > 0 else []
+    perm_non  = rng.permutation(non_viol_ids) if n_non > 0 else []
+
+    train_set = set(perm_viol[:n_train_viol]) | set(perm_non[:n_train_non])
+    val_set   = set(perm_viol[n_train_viol:n_train_viol + n_val_viol]) | set(perm_non[n_train_non:n_train_non + n_val_non])
+    test_set  = set(perm_viol[n_train_viol + n_val_viol:]) | set(perm_non[n_train_non + n_val_non:])
+
+    records = []
+    for sid in sorted(df_meta["sample_id"].tolist()):
+        if sid in train_set:
+            sp = "train"
+        elif sid in val_set:
+            sp = "validation"
+        else:
+            sp = "test"
+        records.append({"sample_id": sid, "split": sp})
+
+    df_splits = pd.DataFrame(records)
+
+    # Confirm test split has at least one sample above 125 C
+    test_viol_count = len(test_set & set(viol_ids))
+    if n_viol > 0 and test_viol_count < 1:
+        print(f"[WARN] Test split contains 0 violating samples (violating count: {n_viol})", file=sys.stderr)
+
+    return df_splits
+
+
+def _worker_generate_sample(args):
+    generator_inst, sample_idx, split, T_amb, floorplan_id = args
+    return generator_inst.generate_single_sample(sample_idx, split, T_amb, floorplan_id)
+
+
+class MasterDatasetGenerator:
+    def __init__(self, output_dir: str = "dataset",
+                 grid_size: int = 128,
+                 use_fine_mesh: bool = True,
+                 global_seed: int = 42):
+        self.output_dir = output_dir
+        self.grid_size = grid_size
+        self.use_fine_mesh = use_fine_mesh
+        self.global_seed = global_seed
+        np.random.seed(global_seed)
+
+        # One floorplan generator with reproducible seed
+        self.floorplan_gen = FloorplanGenerator(L_x=DIE_LX, L_y=DIE_LY,
+                                                rng_seed=global_seed)
+        # Sensor generator
+        self.sensor_gen = SensorGenerator(grid_size=grid_size,
+                                          L_x=DIE_LX, L_y=DIE_LY,
+                                          rng_seed=global_seed + 1)
+
+    def prepare_directories(self, splits: List[str] = ["train", "val", "test"]):
+        for split in splits:
+            sp = os.path.join(self.output_dir, split)
+            os.makedirs(os.path.join(sp, "images"),   exist_ok=True)
+            os.makedirs(os.path.join(sp, "matrices"), exist_ok=True)
+            os.makedirs(os.path.join(sp, "sensors"),  exist_ok=True)
+        print(f"[Pipeline] Directories prepared in '{self.output_dir}/'", flush=True)
+
+    def generate_single_sample(self, sample_idx: int, split: str,
+                                T_amb: float,
+                                floorplan_id: int) -> Dict[str, Any]:
+        """
+        Generates one sample. Ground truth uses FineMeshReferenceSolver (512x512 downsampled to 128x128).
+        """
+        # ----- Floorplan -------------------------------------------------
+        # Each floorplan_id maps to a unique floorplan (train/val/test split
+        # by floorplan_id to avoid data leakage across splits).
+        fp_rng = np.random.default_rng(self.global_seed + floorplan_id * 100)
+        fp_gen = FloorplanGenerator(L_x=DIE_LX, L_y=DIE_LY,
+                                    rng_seed=self.global_seed + floorplan_id * 100)
+        blocks = fp_gen.generate_single_sample(grid_size=self.grid_size)
+
+        if len(blocks) == 0:
+            # Degenerate case – shouldn't happen but guard anyway
+            blocks = fp_gen.generate_single_sample(2, grid_size=self.grid_size)
+
+        # ----- Solve (fine mesh → 128×128 output) ------------------------
+        if self.use_fine_mesh:
+            solver = FineMeshReferenceSolver(base_grid_size=self.grid_size, verbose=False)
+        else:
+            solver = ThermalPDESolver(grid_size=self.grid_size, verbose=False)
+
+        result = (solver.solve_and_downsample(T_amb, blocks)
+                  if self.use_fine_mesh
+                  else solver.solve(T_amb, blocks))
+
+        T_matrix = result["T"]          # (128, 128) float32 °C
+        Q_matrix = result.get("Q_total", None)
+
+        # ----- Sensor placement ------------------------------------------
+        s_rng = np.random.default_rng(self.global_seed + sample_idx * 7)
+        s_gen = SensorGenerator(grid_size=self.grid_size, L_x=DIE_LX, L_y=DIE_LY,
+                                 rng_seed=self.global_seed + sample_idx * 7)
+        sensor_data = s_gen.process_sample(T_matrix, blocks)
+
+        # ----- File IDs --------------------------------------------------
+        sample_id = f"thermal_{sample_idx:05d}"
+        split_path = os.path.join(self.output_dir, split)
+
+        # ----- Save .npy -------------------------------------------------
+        mat_file = os.path.join(split_path, "matrices", f"{sample_id}.npy")
+        np.save(mat_file, T_matrix)
+
+        # Save Q map alongside for energy-balance validation
+        if Q_matrix is not None:
+            q_file = os.path.join(split_path, "matrices", f"{sample_id}_Q.npy")
+            np.save(q_file, Q_matrix.astype(np.float32))
+
+        # ----- Save PNG heatmap ------------------------------------------
+        img_file = os.path.join(split_path, "images", f"{sample_id}.png")
+        fig, ax = plt.subplots(figsize=(4, 4), dpi=128)
+        fig.subplots_adjust(left=0, right=1, bottom=0, top=1)
+        ax.axis("off")
+        ax.imshow(T_matrix, cmap="inferno", origin="lower", aspect="equal")
+        fig.savefig(img_file, bbox_inches="tight", pad_inches=0)
+        plt.close(fig)
+
+        # ----- Save sensors (three counts, no default duplicate) ----------
+        for density in [5, 8, 10]:
+            df_file = os.path.join(split_path, "sensors",
+                                   f"{sample_id}_sensors_{density}.json")
+            with open(df_file, "w") as f:
+                json.dump(sensor_data[f"sensors_{density}"], f, indent=2)
+
+        # ----- Thermal violation flag ------------------------------------
+        peak_T = float(T_matrix.max())
+        is_violation = bool(peak_T > T_JUNCTION_MAX_C)
+
+        # ----- Metadata row ----------------------------------------------
+        blocks_json = FloorplanGenerator.blocks_to_json_safe(blocks)
+        solver_tag_val = "FineMesh512_to_128" if self.use_fine_mesh else result.get("solver_tag", "unknown")
+        meta = {
+            "sample_id":          sample_id,
+            "split":              split,
+            "floorplan_id":       floorplan_id,
+            "solver_tag":         solver_tag_val,
+            "T_amb_C":            float(T_amb),
+            "peak_temp_C":        float(np.round(peak_T, 4)),
+            "peak_C":             float(np.round(peak_T, 4)),
+            "min_temp_C":         float(np.round(T_matrix.min(), 4)),
+            "thermal_violation":  is_violation,
+            "violates_125C":      bool(peak_T > T_VIOLATION_C),
+            "energy_bal_P_in":    float(np.round(result["energy_bal"]["P_in_W"], 4)),
+            "energy_bal_P_out":   float(np.round(result["energy_bal"]["P_out_W"], 4)),
+            "energy_bal_err_pct": float(np.round(result["energy_bal"]["error_pct"], 3)),
+            # Note: newton_iters records only the final outer-loop inner Picard iteration count
+            "newton_iters":       result.get("newton_iters", -1),
+            "thermo_iters":       result.get("thermo_iters", -1),
+            "block_count":        len(blocks),
+            # Serialise blocks as JSON strings (SI units)
+            "blocks_json":        json.dumps(blocks_json),
+            # Physical parameter metadata
+            "die_L_x_m":          DIE_LX,
+            "die_L_y_m":          DIE_LY,
+            "units":              "coords_m_power_W_per_cm2_temp_C",
+        }
+        return meta
+
+    def execute_split_generation(self, split: str, count: int,
+                                  start_idx: int, fp_id_offset: int) -> pd.DataFrame:
+        print(f"\n[Pipeline] Generating {count} samples for '{split}' "
+              f"(IDs {start_idx}–{start_idx+count-1})...", flush=True)
+
+        T_amb_values = np.random.uniform(T_AMB_MIN_C, T_AMB_MAX_C, count)
+        args_list = [
+            (self, start_idx + i, split, float(T_amb_values[i]), fp_id_offset + i)
+            for i in range(count)
+        ]
+
+        import multiprocessing as mp
+        cpu_count = max(1, mp.cpu_count() - 1)
+        print(f"  [Pipeline] Running with ProcessPool on {cpu_count} CPU cores...", flush=True)
+
+        t0 = time.time()
+        rows = []
+        with mp.Pool(processes=cpu_count) as pool:
+            for i, row in enumerate(pool.imap_unordered(_worker_generate_sample, args_list)):
+                rows.append(row)
+                if (i + 1) % max(1, count // 10) == 0 or (i + 1) == count:
+                    elapsed = time.time() - t0
+                    pct = (i + 1) / count * 100
+                    print(f"  [{split.upper()}] {i+1}/{count} ({pct:.0f}%)  elapsed {elapsed:.1f}s", flush=True)
+
+        df = pd.DataFrame(rows).sort_values("sample_id").reset_index(drop=True)
+        csv_file = os.path.join(self.output_dir, split, "metadata.csv")
+        df.to_csv(csv_file, index=False)
+        n_viol = int(df["thermal_violation"].sum()) if "thermal_violation" in df else 0
+        print(f"  Saved {len(df)} rows → {csv_file} (thermal violations: {n_viol})", flush=True)
+        return df
+
+    def run_pipeline(self, train_cnt: int, val_cnt: int, test_cnt: int):
+        self.prepare_directories()
+
+        # Floorplan IDs are globally unique across splits (no leakage)
+        df_train = self.execute_split_generation("train", train_cnt,
+                                                  start_idx=1,
+                                                  fp_id_offset=0)
+        df_val   = self.execute_split_generation("val",   val_cnt,
+                                                  start_idx=train_cnt + 1,
+                                                  fp_id_offset=train_cnt)
+        df_test  = self.execute_split_generation("test",  test_cnt,
+                                                  start_idx=train_cnt + val_cnt + 1,
+                                                  fp_id_offset=train_cnt + val_cnt)
+
+        total_df = pd.concat([df_train, df_val, df_test], ignore_index=True).sort_values("sample_id").reset_index(drop=True)
+        top_meta = os.path.join(self.output_dir, "metadata.csv")
+        top_splits = os.path.join(self.output_dir, "splits.csv")
+        total_df.to_csv(top_meta, index=False)
+        splits_df = total_df[["sample_id", "split"]]
+        splits_df.to_csv(top_splits, index=False)
+        splits_df.to_csv("splits.csv", index=False)
+
+        total = len(total_df)
+        print(f"\n{'='*60}")
+        print(f"PINN THERMAL DATASET GENERATION COMPLETE")
+        print(f"Total samples: {total}  "
+              f"(train={len(df_train)}, val={len(df_val)}, test={len(df_test)})")
+        print(f"Saved: {top_meta} and {top_splits}")
+        print(f"Global seed: {self.global_seed}")
+        print(f"Solver: {'FineMesh512_to_128' if self.use_fine_mesh else 'Coarse-128'}")
+        print(f"Anti-inverse-crime: {'YES (Wirgin 2001)' if self.use_fine_mesh else 'NO'}")
+        print("="*60, flush=True)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="PINN Thermal Dataset Generator v2 (peer-review revision)")
+    parser.add_argument("--scale", choices=["prototype", "production"],
+                        default="prototype",
+                        help="prototype=500/100/100, production=50000/5000/5000")
+    parser.add_argument("--train-size", type=int, default=None)
+    parser.add_argument("--val-size",   type=int, default=None)
+    parser.add_argument("--test-size",  type=int, default=None)
+    parser.add_argument("--grid-size",  type=int, default=128)
+    parser.add_argument("--out-dir",    type=str, default="dataset")
+    parser.add_argument("--seed",       type=int, default=42,
+                        help="Global random seed for reproducibility")
+    parser.add_argument("--no-fine-mesh", action="store_true",
+                        help="Use coarse 128x128 solver (disables anti-inverse-crime)")
+    args = parser.parse_args()
+
+    if args.scale == "production":
+        train_count, val_count, test_count = 50000, 5000, 5000
+    else:
+        train_count, val_count, test_count = 500, 100, 100
+
+    if args.train_size is not None: train_count = args.train_size
+    if args.val_size   is not None: val_count   = args.val_size
+    if args.test_size  is not None: test_count  = args.test_size
+
+    gen = MasterDatasetGenerator(
+        output_dir=args.out_dir,
+        grid_size=args.grid_size,
+        use_fine_mesh=not args.no_fine_mesh,
+        global_seed=args.seed,
+    )
+    gen.run_pipeline(train_count, val_count, test_count)
