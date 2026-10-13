@@ -1,65 +1,60 @@
 # PINN Thermal Map
 
-Physics-informed neural network evaluation framework for chip thermal-map reconstruction from sparse sensors.
-
-## Repository layout
-
-```
-main branch — shared protocol, data handling, sensor layouts, evaluation harness
-  Ruchika, smriti, siya — per-person method branches (PINN / ML / hybrid)
-```
-
-## Dataset setup
-
-The dataset must be placed (or already exists) at:
-
-```
-data/raw/dataset/{train,validation,test}/{matrices,images,sensors}/
-data/raw/dataset/metadata.csv
-data/raw/dataset/splits.csv
-```
-
-If you have the zip file (`41c99137-dataset.zip`):
+## Setup
 
 ```bash
-unzip 41c99137-dataset.zip -d data/raw/
-```
-
-`data/raw/` is gitignored — do not commit raw data.
-
-## Quick start
-
-```bash
+git clone <repo-url>
+cd PINN
+git checkout -b <your-name>-<topic>   # branch from main
+python -m venv .venv
+# Windows: .venv\Scripts\activate   macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
+```
 
+## Data
+
+Data is **not** committed. Every clone needs it once; it survives branch switches because `data/` is gitignored.
+
+**Option A — copy from shared drive:**
+
+```bash
+cp -r /path/to/shared/data/raw/ data/raw/
+```
+
+**Option B — run the generator** (see `generator/README.md` for the exact command):
+
+```bash
+python generator/package_for_claude/dataset_generator.py \
+    --train-size 80 --val-size 10 --test-size 10 \
+    --out-dir data/raw/dataset --seed 42
+```
+
+**Verify checksums after either option:**
+
+```bash
+sha256sum -c data/SHA256SUMS
+```
+
+## Run Tests
+
+```bash
 # Validate dataset
 python -m src.data.validate_dataset --dir data/raw/dataset
 
-# Fit POD-QR sensor layout (train split only)
-python -c "from src.sensors.podqr import fit_podqr_layout; from src.data.splits import load_splits; fit_podqr_layout(load_splits()['train'])"
-
-# Generate sensor JSON files for all samples
-python -m src.sensors.generate_sensors
-
-# Run tests
+# Full test suite
 python -m pytest tests/ -v
 ```
 
-## Known blockers
+## Branch Workflow
 
-1. **Boundary condition unknown** — Edge temperatures deviate from `T_amb_C` by up to 92 °C. The BC is not Dirichlet at T_amb.
-2. **Governing equation uncertain** — May include temperature-dependent leakage (β = 0.012). Newton iterations = 1 for all samples (unconfirmed whether this matters).
-3. **Thermal conductivity k not in metadata** — Cannot form the PDE residual until k is known.
-4. **Only 100 samples** — Far below the ≥ 2,000 target cited in the paper.
+- Work on your own branch; never commit `data/` or `.zip` files.
+- Merge `main` into your branch regularly to stay current with the harness.
+- Open a PR back to `main` to integrate validated results.
 
-See `PROTOCOL.md` for full details and PENDING/DECIDED status on each item.
+## Branch Status
 
-## Branch workflow
-
-- `main` — protocol, data loaders, sensor placement, evaluation metrics, gappy POD baseline. No model training code.
-- `Ruchika`, `smriti`, `siya` (or confirmed name) — individual method implementations. Branch from `main` after this setup merges.
-- Open a PR back to `main` to merge validated results into the shared harness.
-
-## Optional: regenerate ground-truth FEM data
-
-Requires [FEniCSx / dolfinx](https://fenicsproject.org/) (not in `requirements.txt`). See `dataset/py_pipeline/README.md` for the solver pipeline.
+| Branch | Purpose |
+|--------|---------|
+| `main` | Shared physics constants, data loaders, sensor layouts, evaluation harness only. No model training code. |
+| `smriti` | Model work (smriti). |
+| `Ruchika` | Model work (Ruchika). |
