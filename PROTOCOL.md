@@ -6,13 +6,20 @@ Each item is marked **DECIDED** or **PENDING**.
 
 ## Physics
 
+Source: `generator/package_for_claude/pde_solver.py` (verified 2026-10-13).
+
 | Item | Status | Detail |
 |------|--------|--------|
 | Domain | DECIDED | Steady-state 2D heat conduction on a 12 mm × 12 mm die |
-| Source term | DECIDED | q in W/m², stored as `thermal_NNNNN_Q.npy` |
-| Governing equation | PENDING | Linear conduction (-k∇²T = Q) vs leakage model (-k∇²T = Q_dyn + β·(T−T_amb)·Q_leak0) with β = 0.012. Newton iterations = 1 for all 100 samples; whether this distinguishes the two forms is unconfirmed. |
-| Boundary condition | PENDING | **BLOCKER** — edge temperatures deviate by up to 92 °C from `T_amb_C`. The BC is not Dirichlet at T_amb. Unknown. |
-| Thermal conductivity k | PENDING | **BLOCKER** — not present in metadata. |
+| Governing equation | DECIDED | −∇·(t_die · k(T) ∇T) + h_eff (T − T_amb) = q(x,y,T) — HotSpot compact 2D model (Huang et al., IEEE TVLSI 2006). |
+| Lateral BCs | DECIDED | Neumann dT/dn = 0 on all four lateral edges (adiabatic). Source: `pde_solver.py` docstring; Therm-FM arXiv 2605.22663; HotSpot Huang et al. 2006. |
+| Top-surface BC | DECIDED | Distributed vertical sink: h_eff(T − T_amb) added to every interior node. This h_eff term makes the system uniquely solvable without any Dirichlet constraint. |
+| Thermal conductivity k(T) | DECIDED | k(T[K]) = 22 714 / (T[K] − 99) + 2, clipped to [20, 160] W/(m·K), valid for T ∈ [250, 1200] K. Source: Glassbrenner & Slack (1964). **ASSUMPTION**: coefficients (A=22714, offset=99, B=2) are a custom fit; quantitative validation against G&S 1964 data is pending. Source file: `pde_solver.py` constants `_K_A`, `_K_OFFSET`, `_K_B`. |
+| Source term q | DECIDED | q = Σ_blocks (p_dyn + p_leak0 · exp(β(T − 25))) W/cm² × 10⁴ → W/m². Leakage is temperature-dependent and updated in the outer Picard loop. Stored as `thermal_NNNNN_Q.npy`. |
+| Leakage coefficient β | DECIDED | β = 0.012 /K. **ASSUMPTION**: within literature range [0.010, 0.015] /K (He et al., DAC 2004; Liao et al., IEEE TCAD 2005) but not the exact value from either paper. Source file: `pde_solver.py` constant `LEAKAGE_BETA_DEFAULT`. |
+| Die thickness t_die | DECIDED | t_die = 500 µm. **ASSUMPTION — NOT SOURCED**: VarSim (arXiv 2307.12119, Table II) uses 150 µm. Confirm before publication. Source file: `pde_solver.py` constant `DIE_THICKNESS_DEFAULT`. |
+| Effective heat-sink conductance h_eff | DECIDED | h_eff = 6256.3 W/(m²·K) = 1 / ((R_die + R_spreader + R_heatsink) × A_chip). **ASSUMPTION**: R values are HotSpot defaults from `default.config`, not from the uploaded HotSpot 2006 paper text. Source file: `pde_solver.py` constant `H_EFF_DEFAULT`. |
+| Solver | DECIDED | Picard iteration (inner loop: k(T) nonlinearity; outer loop: leakage update). Fine mesh 512×512 → downsampled to 128×128 by stride `[::4,::4]` (anti-inverse-crime, Wirgin arXiv math-ph/0401050). Solver tag: `FineMesh512_to_128`. |
 
 ---
 
@@ -20,7 +27,7 @@ Each item is marked **DECIDED** or **PENDING**.
 
 | Item | Status | Detail |
 |------|--------|--------|
-| θ = (T − T_ref)/ΔT_ref | PENDING | Cannot define until BC is known. |
+| θ = (T − T_amb) / (max T − T_amb) | DECIDED (2026-10-13) | Per sample. T_amb is per-sample ambient from metadata. max T is the sample's peak temperature. Normalises to [0, 1]. Used for POD-QR fitting only; all reported metrics remain in °C. |
 | Error reporting | DECIDED | Report all errors in °C (absolute), plus relative L2. |
 
 ---
@@ -59,8 +66,8 @@ Reference: Manohar, Brunton, Kutz & Brunton, IEEE Control Systems Magazine 2018;
 | Item | Status | Detail |
 |------|--------|--------|
 | Split used for fitting | DECIDED | Training split only. Validation and test splits never opened during layout computation. |
-| Normalisation | DECIDED | θ_i = (T_i − T_b,i) / (max T_i − T_b,i) per sample. |
-| T_b rule | PENDING | **Default**: mean of four edge temperatures of each sample. Revisit when BC is known. |
+| Normalisation | DECIDED (2026-10-13) | θ_i = (T_i − T_amb,i) / (max T_i − T_amb,i) per sample. T_amb from metadata column `T_amb_C`. |
+| T_b rule | DECIDED (2026-10-13) | Use per-sample `T_amb_C` from metadata (consistent with the physics: T_amb is the known ambient temperature in the model). |
 | Matrix dimensions | DECIDED | 16384 × 80 (flattened 128×128, 80 train samples). |
 | SVD centring | DECIDED | Subtract training mean before SVD. |
 | Mode count r | DECIDED | Keep r modes where cumulative energy ≥ 95%. Sensitivity reported at 90% and 99%. |
@@ -153,10 +160,12 @@ Reference: Manohar, Brunton, Kutz & Brunton, IEEE Control Systems Magazine 2018;
 
 ## Blockers
 
-1. **BC unknown** — Edge temperatures deviate from T_amb by up to 92 °C. Must resolve before: PDE residual, hard-BC ansatz, nondimensionalisation.
-2. **Governing equation** — Linear vs leakage (β = 0.012). Must confirm before implementing physics loss.
-3. **k not in metadata** — Cannot compute PDE residual.
-4. **100 samples** — Far below ≥ 2,000 target cited for the paper. Acquiring more data is a hard dependency for publication.
+1. **BC resolved (2026-10-13)** — The BC is adiabatic Neumann (dT/dn = 0) on all lateral edges, plus a distributed h_eff sink to T_amb on every node. The apparent edge-temperature deviation from T_amb in the coarse field is a stride-downsampling artifact, not a Dirichlet BC violation.
+2. **Governing equation resolved (2026-10-13)** — PDE confirmed: −∇·(t_die · k(T)∇T) + h_eff(T − T_amb) = q(x,y,T) with temperature-dependent k(T) and leakage. Source: `pde_solver.py`.
+3. **k resolved (2026-10-13)** — k(T) = 22714/(T[K]−99) + 2, clipped to [20, 160] W/(m·K). Source: `pde_solver.py`. Note: k is NOT in the metadata CSV; it must be computed at runtime from each sample's T field.
+4. **Three assumptions need external confirmation** — t_die = 500 µm, h_eff = 6256.3 W/(m²·K), β = 0.012 /K. All flagged as ASSUMPTION — NOT SOURCED in `generator/PARAMETERS.md`. Must confirm against HotSpot `default.config` and published data before submission.
+5. **100 samples** — Far below ≥ 2,000 target cited for the paper. Acquiring more data is a hard dependency for publication.
+6. **Energy balance tolerance** — Validator threshold (3%) needs updating to match the generator convention (dA = (L/(N−1))²) and the observed maximum (2.23%). See `results/validation/energy_investigation.md`.
 
 ---
 
