@@ -106,6 +106,33 @@ Reference: Manohar, Brunton, Kutz & Brunton, IEEE Control Systems Magazine 2018;
 | Split sizes | DECIDED | train=80, validation=10, test=10. |
 | Pixel-level leakage | DECIDED | Not split by pixel. |
 
+### Sampling strategy
+
+Describes what the generator code does. Sources: `generator/package_for_claude/dataset_generator.py`, `floorplan_generator.py`, `pde_solver.py`; labels from `generator/PARAMETERS.md`. Items the code does not establish are marked UNKNOWN.
+
+| Item | Code behaviour | Source |
+|------|----------------|--------|
+| Die | 12 mm × 12 mm square (`DIE_LX = DIE_LY = 0.012` m). | floorplan_generator.py L36–37 |
+| Ambient T_amb | Uniform in [25, 45] °C. Drawn in the parent process from the global NumPy RNG (seeded with `global_seed`), in order: all train, then val, then test. Changing one split's count changes T_amb for every later split. | dataset_generator.py L185; pde_solver.py L78–79 |
+| Block count | Uniform integer in [2, 8]. Placement failures (200 tries per block) skip that block, so realised `block_count` can be lower. If zero blocks result, one retry with 2 blocks. Realised count is recorded per sample. | floorplan_generator.py L222, L229–231; dataset_generator.py L96–98 |
+| Block types | Uniform choice among CPU, GPU, Cache, MC. | floorplan_generator.py L224, L228 |
+| Block geometry | Sizes as fractions of die edge: CPU w,h ∈ [0.12, 0.25]; GPU w ∈ [0.20, 0.40], h ∈ [0.18, 0.35]; Cache w ∈ [0.18, 0.35], h ∈ [0.10, 0.28]; MC is a strip (one side ∈ [0.04, 0.09], other ∈ [0.25, 0.55]) on a randomly chosen die edge. Position uniform within the die. Blocks are rejection-sampled to be non-overlapping (5×10⁻⁵ m margin). | floorplan_generator.py L107–157 |
+| Power levels | Per block, dynamic density p_dyn ~ U(range) in W/cm²: CPU [40, 150], GPU [30, 120], Cache [5, 20], MC [8, 30]. Leakage at 25 °C is p_dyn × fraction (CPU 0.05, GPU 0.05, Cache 0.04, MC 0.03). Leakage at T is p_leak0 · exp(β(T − 25)), β = 0.012 /K, re-evaluated in the Picard outer loop. | floorplan_generator.py L45–71, L233–236; pde_solver.py L150–164 |
+| Power map | Each block contributes (p_dyn + p_leak) × 10⁴ W/m² over its footprint, weighted by cell-area overlap. | pde_solver.py L240–254 |
+| Intra-block non-uniformity | `floorplan_generator` builds per-block Gaussian hot-spot weights (1–3 bumps), but `intra_weight` is not read by `pde_solver.py` or `dataset_generator.py`. The power map is therefore uniform within each block. | floorplan_generator.py L162–204; no consumers found |
+| Floorplan seed | Per sample: `global_seed + floorplan_id × 100`. `floorplan_id` is a running index across splits (train 0…, then val, then test), so no floorplan is shared between splits. | dataset_generator.py L91–93, L187, L216–224 |
+| Global seed | 42 (CLI `--seed`). Seeds the T_amb draws and floorplan/sensor RNGs. | dataset_generator.py L248, L64 |
+| Thermal violation | Peak T > 125 °C is flagged in metadata; samples are not dropped. The 125 °C threshold is ASSUMPTION — NOT SOURCED (PARAMETERS.md §8). | dataset_generator.py L41–46, L148–150 |
+| Default sample counts | Script default is "prototype" 500/100/100; "production" 50 000/5 000/5 000. Actual counts are set by CLI flags. | dataset_generator.py L240–261 |
+
+**UNKNOWN**
+
+- Whether the delivered 100 samples were produced by `generator/package_for_claude/dataset_generator.py`. The package copy differs byte-wise from `legacy/py_pipeline/dataset_generator.py`; the regression check (`results/dataset_extension_report.md`) covers only samples 00001–00002 from the legacy copy.
+- Provenance of `splits.csv`. `legacy/py_pipeline/dataset_generator.py` contains `assign_splits` (stratified by the >125 °C flag, seed 42, 80/10/10), but the package generator does not assign splits, and no record shows that this function produced the delivered file. Splits are not regenerated here.
+- Block-count range: the `generate_single_sample` docstring says 1–10 blocks; the code samples 2–8. The code is used as the behavioural reference here.
+- Power-density ranges, leakage fractions, T_amb bounds, and the 125 °C threshold are all labelled ASSUMPTION — NOT SOURCED in `generator/PARAMETERS.md`.
+- Split naming: `splits.csv` uses `validation`; the directory layout uses `val`.
+
 ---
 
 ## Metrics (non-sensor nodes)
