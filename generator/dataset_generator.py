@@ -178,16 +178,17 @@ class MasterDatasetGenerator:
         }
         return meta
 
-    def execute_split_generation(self, split: str, count: int,
-                                  start_idx: int, fp_id_offset: int,
+    def execute_split_generation(self, split: str, sample_indices: List[int],
+                                  fp_id_offset: int,
                                   save_metadata: bool = True) -> pd.DataFrame:
+        count = len(sample_indices)
         print(f"\n[Pipeline] Generating {count} samples for '{split}' "
-              f"(IDs {start_idx}–{start_idx+count-1})...", flush=True)
+              f"(IDs {min(sample_indices)}–{max(sample_indices)})...", flush=True)
 
         T_amb_values = np.random.uniform(T_AMB_MIN_C, T_AMB_MAX_C, count)
         args_list = [
-            (self, start_idx + i, split, float(T_amb_values[i]), fp_id_offset + i)
-            for i in range(count)
+            (self, sample_idx, split, float(T_amb_values[i]), fp_id_offset + i)
+            for i, sample_idx in enumerate(sample_indices)
         ]
 
         import multiprocessing as mp
@@ -248,21 +249,30 @@ class MasterDatasetGenerator:
         return existing
 
     def _next_sample_index(self, existing_metadata: pd.DataFrame) -> int:
-        max_index = 0
+        existing_indices = set()
         for sample_id in existing_metadata.get("sample_id", []):
             match = re.fullmatch(r"thermal_(\d+)", str(sample_id))
             if not match:
                 raise ValueError(
                     f"Cannot append: invalid sample ID in metadata: {sample_id}"
                 )
-            max_index = max(max_index, int(match.group(1)))
+            existing_indices.add(int(match.group(1)))
 
+        disk_indices = set()
         for root, _, filenames in os.walk(self.output_dir):
             for filename in filenames:
                 match = re.search(r"thermal_(\d+)", filename)
                 if match:
-                    max_index = max(max_index, int(match.group(1)))
-        return max_index + 1
+                    disk_indices.add(int(match.group(1)))
+
+        orphan_indices = sorted(disk_indices - existing_indices)
+        if orphan_indices:
+            raise ValueError(
+                "Cannot append: sample files have no matching metadata rows "
+                f"(IDs {orphan_indices[:10]}). Restore their metadata or move "
+                "the incomplete files out of the output directory before retrying."
+            )
+        return max(existing_indices, default=0) + 1
 
     def run_pipeline(self, train_cnt: int, val_cnt: int, test_cnt: int,
                      append: bool = False):
@@ -279,25 +289,43 @@ class MasterDatasetGenerator:
             sample_start = 1
             floorplan_start = 0
 
-        # Floorplan IDs are globally unique across splits (no leakage).
-        df_train = self.execute_split_generation("train", train_cnt,
-                                                  start_idx=sample_start,
-                                                  fp_id_offset=floorplan_start,
-                                                  save_metadata=not append)
-        df_val   = self.execute_split_generation("validation", val_cnt,
-                                                  start_idx=sample_start + train_cnt,
-                                                  fp_id_offset=floorplan_start + train_cnt,
-                                                  save_metadata=not append)
-        df_test  = self.execute_split_generation("test",  test_cnt,
-                                                  start_idx=sample_start + train_cnt + val_cnt,
-                                                  fp_id_offset=floorplan_start + train_cnt + val_cnt,
-                                                  save_metadata=not append)
-
-        generated_by_split = {
-            "train": df_train,
-            "validation": df_val,
-            "test": df_test,
+        split_counts = {
+            "train": train_cnt,
+            "validation": val_cnt,
+            "test": test_cnt,
         }
+        sample_indices_by_split = {split: [] for split in split_counts}
+        if append:
+            # Keep the requested counts while distributing each split across
+            # the consecutive new sample IDs, as in a randomized dataset split.
+            assignments = [
+                split for split, count in split_counts.items()
+                for _ in range(count)
+            ]
+            np.random.default_rng(self.global_seed).shuffle(assignments)
+            for offset, split in enumerate(assignments):
+                sample_indices_by_split[split].append(sample_start + offset)
+        else:
+            next_idx = sample_start
+            for split, count in split_counts.items():
+                sample_indices_by_split[split] = list(range(next_idx, next_idx + count))
+                next_idx += count
+
+        # Floorplan IDs remain globally unique across splits (no leakage).
+        floorplan_offsets = {
+            "train": floorplan_start,
+            "validation": floorplan_start + train_cnt,
+            "test": floorplan_start + train_cnt + val_cnt,
+        }
+        generated_by_split = {}
+        for split in ("train", "validation", "test"):
+            generated_by_split[split] = self.execute_split_generation(
+                split,
+                sample_indices_by_split[split],
+                fp_id_offset=floorplan_offsets[split],
+                save_metadata=not append,
+            )
+
         if append:
             for split, generated in generated_by_split.items():
                 prior = existing_metadata[existing_metadata["split"] == split]
@@ -319,7 +347,7 @@ class MasterDatasetGenerator:
         print(f"\n{'='*60}")
         print(f"PINN THERMAL DATASET GENERATION COMPLETE")
         print(f"Total samples: {total}  "
-              f"(train={len(df_train)}, validation={len(df_val)}, test={len(df_test)})")
+              f"(train={train_cnt}, validation={val_cnt}, test={test_cnt} added)")
         print(f"Global seed: {self.global_seed}")
         print(f"Solver: {'FineMesh512_to_128' if self.use_fine_mesh else 'Coarse-128'}")
         print(f"Anti-inverse-crime: {'YES (Wirgin 2001)' if self.use_fine_mesh else 'NO'}")
