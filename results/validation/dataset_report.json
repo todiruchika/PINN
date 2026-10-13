@@ -1,0 +1,137 @@
+[
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data\\raw\\dataset\\train\\matrices exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data\\raw\\dataset\\train\\images exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data\\raw\\dataset\\train\\sensors exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data\\raw\\dataset\\validation\\matrices exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data\\raw\\dataset\\validation\\images exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data\\raw\\dataset\\validation\\sensors exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data\\raw\\dataset\\test\\matrices exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data\\raw\\dataset\\test\\images exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data\\raw\\dataset\\test\\sensors exists"
+  },
+  {
+    "check": "Layout.IDs",
+    "status": "PASS",
+    "message": "100 IDs consistent across metadata and splits.csv"
+  },
+  {
+    "check": "Layout.train.matrix_ids",
+    "status": "PASS",
+    "message": "80 IDs match"
+  },
+  {
+    "check": "Layout.validation.matrix_ids",
+    "status": "PASS",
+    "message": "10 IDs match"
+  },
+  {
+    "check": "Layout.test.matrix_ids",
+    "status": "PASS",
+    "message": "10 IDs match"
+  },
+  {
+    "check": "Splits.counts",
+    "status": "PASS",
+    "message": "train=80, validation=10, test=10"
+  },
+  {
+    "check": "Splits.overlap",
+    "status": "PASS",
+    "message": "No overlap across splits"
+  },
+  {
+    "check": "Splits.train.meta_agree",
+    "status": "PASS",
+    "message": "80 IDs agree"
+  },
+  {
+    "check": "Splits.validation.meta_agree",
+    "status": "PASS",
+    "message": "10 IDs agree"
+  },
+  {
+    "check": "Splits.test.meta_agree",
+    "status": "PASS",
+    "message": "10 IDs agree"
+  },
+  {
+    "check": "Grids",
+    "status": "PASS",
+    "message": "All grids (128,128), finite, Q>=0"
+  },
+  {
+    "check": "Temperature",
+    "status": "PASS",
+    "message": "peak_T: min=31.2 median=89.1 max=164.2 degC; 11 samples > 125 degC"
+  },
+  {
+    "check": "Boundary",
+    "status": "FAIL",
+    "message": "BLOCKER: max edge deviation from T_amb = 121.09 degC (mean 47.33 degC). BC is unknown."
+  },
+  {
+    "check": "Energy",
+    "status": "PASS",
+    "message": "max |ratio-1| = 0.0156, median = 0.0156"
+  },
+  {
+    "check": "Energy.err_pct",
+    "status": "PASS",
+    "message": "energy_bal_err_pct max = 2.23%"
+  },
+  {
+    "check": "Sensors",
+    "status": "PASS",
+    "message": "All N in {5,8,10} present, positions in [0,0.012]"
+  },
+  {
+    "check": "Sensors.placement",
+    "status": "WARN",
+    "message": "Legacy sensors use block_centre_with_jitter (not podqr)"
+  },
+  {
+    "check": "Metadata.conductivity",
+    "status": "WARN",
+    "message": "No conductivity column in metadata (BLOCKER)"
+  },
+  {
+    "check": "Metadata.BC",
+    "status": "WARN",
+    "message": "No boundary_condition column in metadata (BLOCKER)"
+  }
+]

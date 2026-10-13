@@ -1,6 +1,0 @@
-{
-  "name": "PINN Thermal Dataset Generator",
-  "description": "An interactive pipeline for generating semiconductor thermal maps by solving the steady-state heat equation for Physics-Informed Neural Network (PINN) training datasets.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

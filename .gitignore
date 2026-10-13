@@ -1,0 +1,8 @@
+data/raw/
+data/generated/
+__pycache__/
+.venv/
+venv/
+*.pyc
+*.pt
+dataset/py_pipeline/venv/
