@@ -43,6 +43,9 @@ python -m src.data.validate_dataset --dir data/raw/dataset
 
 # Full test suite
 python -m pytest tests/ -v
+
+# Coverage of delivered 100 vs data/raw_extended/ (writes results/validation/coverage_report.md)
+python -m src.eval.coverage
 ```
 
 ## Branch Workflow
@@ -53,8 +56,18 @@ python -m pytest tests/ -v
 
 ## Branch Status
 
+`main` contains:
+
+- `src/data/`: dataset loader, splits, dataset validator
+- `src/sensors/`: sensor layouts, POD-QR placement, readers
+- `src/eval/`: metrics, gappy POD baseline, report aggregator, coverage check
+- `src/physics/heat.py`: stubs that raise `NotImplementedError`
+- `tests/`: pytest suite
+- No model or training code (`src/train/` is an empty package)
+
+Remote branches that model work goes on:
+
 | Branch | Purpose |
 |--------|---------|
-| `main` | Shared physics constants, data loaders, sensor layouts, evaluation harness only. No model training code. |
 | `smriti` | Model work (smriti). |
 | `Ruchika` | Model work (Ruchika). |

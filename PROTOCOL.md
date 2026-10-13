@@ -199,6 +199,7 @@ Describes what the generator code does. Sources: `generator/package_for_claude/d
 ## Branch Plan
 
 1. `main` — this protocol + data/sensor/eval harness. Merges when tests pass.
-2. Method branches (`Ruchika`, `smriti`, siya's branch) start from `main` after this merges.
+   Status (2026-10-13): contains `src/data`, `src/sensors`, `src/eval` (incl. `coverage.py`), `src/physics/heat.py` (stubs raising `NotImplementedError`), and `tests/`. `src/models/` and `src/train/` contain only `__init__.py`. The extended dataset is incomplete (28 of 400 train matrices), so no coverage comparison has been run against it yet.
+2. Method branches (`Ruchika`, `smriti` exist on origin; siya's branch not yet pushed) start from `main` after this merges.
 3. Each branch implements its model in `src/models/` and training in `src/train/`. No model code on `main`.
 4. PRs back to `main` to integrate validated results.
