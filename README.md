@@ -13,32 +13,15 @@ pip install -r requirements.txt
 
 ## Data
 
-Data is **not** committed. Every clone needs it once; it survives branch switches because `data/` is gitignored.
+The canonical 100-sample dataset and its POD-QR sensor records are committed under
+`data/raw/dataset/` and `data/generated/`. Clone or pull the repository to get the
+same train/validation/test data on every approach branch. The incomplete extended
+and scratch datasets remain local and are not committed.
 
-**Option A — copy from shared drive:**
-
-```bash
-cp -r /path/to/shared/data/raw/ data/raw/
-```
-
-**Option B — run the generator** (see `generator/README.md` for the exact command):
-
-```bash
-python generator/dataset_generator.py \
-    --train-size 80 --val-size 10 --test-size 10 \
-    --out-dir data/raw/dataset --seed 42
-```
-
-**Verify checksums after either option:**
+**Verify the dataset checksums:**
 
 ```bash
 sha256sum -c data/SHA256SUMS
-```
-
-**Generate POD-QR sensor readings** (required before loading with `strategy="podqr"`):
-
-```bash
-python -m src.sensors.generate_sensors
 ```
 
 ## Run Tests

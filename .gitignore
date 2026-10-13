@@ -1,5 +1,14 @@
-data/raw/
-data/generated/
+data/raw/*
+!data/raw/dataset/
+data/raw/dataset/*
+!data/raw/dataset/**
+data/generated/*
+!data/generated/train/
+!data/generated/validation/
+!data/generated/test/
+!data/generated/train/**
+!data/generated/validation/**
+!data/generated/test/**
 data/raw_extended/
 data/raw_check/
 *.zip
