@@ -165,7 +165,32 @@ A GPU should be much faster. Inference is a single forward pass: milliseconds pe
 
 ---
 
-## 5. Notes on use
+## 5. A first check (short runs, not a result set)
+
+Two matched runs, **N = 10, seed 0, 3,000 steps (10% of the default budget)**, one with the
+physics term (`--w-phys 0.01`) and one without (`--w-phys 0`). Relative L2 on non-sensor nodes:
+
+| | physics | data-only |
+|---|---|---|
+| validation, 100 chips | **0.0663** | 0.0674 |
+| test, 100 chips | 0.0623 | 0.0645 |
+| validation, peak error (°C, mean) | 6.7 | 6.7 |
+| validation, hotspot location (cells, median) | 9.8 | 9.3 |
+| validation, source relative L2 | 0.72 | 0.72 |
+
+* The physics term helped **very little**: 61 of 100 validation chips were better, the mean gain was
+  0.0011 (about 1.9 standard errors, one seed), and it more than doubled the training time. With dense
+  supervised fields the data terms already pin the temperature field. A larger `--w-phys` has not been tried.
+* On the four test chips used earlier for the per-chip PINN (N = 10), mean relative L2 was 0.072
+  (physics) and 0.076 (data-only) against 0.077 for the per-chip PINN: about the same. Hotspot
+  location was better (about 12.5 cells against 22) but the peak temperature was worse (about 11 °C
+  against 6.8 °C). Four chips and one seed: not a comparison to quote.
+* The predicted **source** field is poor (relative L2 0.72 with or without physics). Do not read the source
+  head as a recovered heat map yet.
+* The validation error was still falling when the 3,000-step cosine schedule ended, so the default
+  30,000 steps should do better. Untested.
+
+## 6. Notes on use
 
 * **Comparable with the per-chip PINN** only on the same chips and metrics. Both report relative L2 on
   non-sensor nodes in °C; the per-chip PINN was only run on a handful of chips so far.
