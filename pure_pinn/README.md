@@ -100,8 +100,9 @@ python pure_pinn/src/train_pinn.py \
 
 That fits one PINN for chip `thermal_00001` with 5 sensors and seed 0, prints
 progress, and appends **one row** to `pure_pinn/results/metrics.csv`. At the
-default budget (5000 Adam + 2000 L-BFGS steps) it took about **3 minutes** on a
-4-core CPU.
+default budget (5000 Adam + 2000 L-BFGS steps) it took **~2m50s** on a 4-core CPU
+running alone, and 3-5.5 minutes per solve with two solves running side by side at
+2 threads each.
 
 Pick the chip, split, and sensor count yourself:
 
@@ -210,9 +211,10 @@ Environment knobs: `SPLIT` (default `test`), `CHIPS`, `OVERRIDE`, `TAG`, `PARTS`
 `THREADS_PER_JOB` (default 2), `FIGS=0` to skip figures. Keep `JOBS × THREADS_PER_JOB`
 near your core count. Wall-clock times are only comparable at the same `JOBS`.
 
-Cost to plan around: one solve is ~3 minutes, so all **500 train chips × 3 sensor counts
-× 1 seed** is 1,500 solves, roughly **75 hours** at one solve at a time, or ~19 hours
-with 4 at a time on a 4-core box if scaling were perfect (it is not; measure first).
+Cost to plan around: one solve is ~3-5 minutes, so all **500 train chips × 3 sensor counts
+× 1 seed** is 1,500 solves, i.e. roughly **75-120 hours** of compute on a 4-core box.
+Running jobs side by side does not speed a solve up, so measure before launching
+anything large.
 Use `--n-chips` to subsample. There is no shared model, so nothing is saved for
 re-use: the 500 train chips are simply a pool of chips to tune on or evaluate on.
 
@@ -221,7 +223,7 @@ re-use: the 500 train chips are simply a pool of chips to tune on or evaluate on
 ## 5. Tests and diagnostics
 
 ```bash
-python pure_pinn/tests/test_physics.py                      # 18 checks, ~10 s
+python pure_pinn/tests/test_physics.py                      # 18 checks, a few seconds
 python pure_pinn/tests/test_forward_solve.py --chip thermal_00001 --split train
 ```
 
@@ -237,16 +239,49 @@ python pure_pinn/tests/test_forward_solve.py --chip thermal_00001 --split train
 
 ---
 
-## 6. How to read the results
+## 6. Verification run on the new dataset
 
-The network represents the field essentially perfectly when the source is known
-(oracle floor above). With the source unknown and 5-10 sensors, the problem is
-**under-determined**: many source layouts fit the sensors and satisfy the PDE.
-Expect `sensor_rmse` to be tiny while `peak_temp_err` and `source_rel_l2` are not, and
-expect longer training to sometimes *worsen* the field error (it pins the sensors and
-the residual harder, which can lock in a spurious hotspot). Judge Model B by
-`rel_l2`, `peak_temp_err` and `hotspot_loc_cells` together, over many chips and
-seeds, never from one chip.
+Not a result set, just evidence that the ported model works end to end: 4 **test** chips
+(`thermal_00014, 00022, 00025, 00039`), N ∈ {5, 10}, seed 0, default config. Rows are in
+`results/verification/metrics_4_test_chips.csv`. Errors are on non-sensor nodes, in °C.
+
+| chip | N | rel L2 | MAE | max abs | peak err | hotspot loc (cells) | sensor RMSE |
+|---|---|---|---|---|---|---|---|
+| 00014 | 5 | 0.071 | 1.94 | 7.4 | 0.2 | 32.2 | 0.02 |
+| 00014 | 10 | 0.071 | 1.96 | 6.8 | 4.1 | 14.9 | 0.07 |
+| 00022 | 5 | 0.216 | 8.92 | 40.8 | 12.1 | 44.1 | 0.00 |
+| 00022 | 10 | 0.081 | 3.04 | 24.8 | 2.2 | 16.3 | 0.05 |
+| 00025 | 5 | 0.119 | 2.79 | 22.7 | 21.6 | 17.9 | 0.00 |
+| 00025 | 10 | 0.060 | 1.62 | 11.5 | 9.8 | 12.0 | 0.04 |
+| 00039 | 5 | 0.096 | 2.55 | 23.0 | 9.3 | 26.6 | 0.02 |
+| 00039 | 10 | 0.095 | 2.57 | 23.4 | 11.1 | 44.7 | 0.08 |
+| **mean ± std over chips** | 5 | 0.125 ± 0.064 | | | 10.8 ± 8.8 | 30.2 ± 11.0 | |
+| **mean ± std over chips** | 10 | 0.077 ± 0.015 | | | 6.8 ± 4.3 | 22.0 ± 15.2 | |
+
+For rough context, a gappy-POD reconstruction (the saved POD-QR basis, scaled from the
+same sensor readings; **my quick adaptation, not the repo's baseline entry point**) gave
+mean rel L2 ≈ 0.23 at N=5 and ≈ 0.09 at N=10 on the same four chips. So Model B looks
+better at 5 sensors and comparable at 10, but that is 4 chips and 1 seed with a large
+chip-to-chip spread: do not quote it as a result. A proper comparison needs the
+protocol's 5 seeds and many more chips.
+
+What the table says about the model:
+
+* The field error is **moderate and the hotspot is poorly placed**. Hotspot localisation
+  is 12-45 cells (1 cell = 0.094 mm, so 1-4 mm) and the peak temperature is off by
+  several °C. Sensor RMSE is near zero, so the model fits its own data; it just does not
+  know where the heat sources are.
+* That is the **under-determined inverse problem**: with 5-10 sensors many source layouts
+  fit the readings and satisfy the PDE. It is not an implementation fault: the oracle
+  test (section 5) reproduces the true field to rel L2 0.0012 once the source is given.
+* On `thermal_00001` (N=5) a 300-step run scored rel L2 0.043 while the full 7,000-step
+  run scored 0.080, with the peak over-predicted (63 °C against a true 42.6 °C). That is
+  one chip, but it suggests the later iterations lock in a spurious hotspot, so test a
+  shorter budget (or early stopping on held-out sensors) before assuming the default
+  budget is best.
+
+Judge Model B by `rel_l2`, `peak_temp_err` and `hotspot_loc_cells` together, over many
+chips and seeds, never from one chip.
 
 ---
 
@@ -262,6 +297,7 @@ src/
   make_flowchart.py  design-flow figure (unchanged)
 tests/             test_physics.py, test_forward_solve.py
 experiments/       configs/model_b_default.json, run_model_b.sh
-results_legacy_old_dataset/   results from the previous (incompatible) dataset
+results/verification/  the 8-solve check above
+results_legacy_old_dataset/   results and split lists from the previous (incompatible) dataset
 docs/              original implementation note (describes the previous dataset)
 ```
