@@ -1,273 +1,267 @@
-# Sparse-Sensor Thermal Reconstruction: Data-Driven vs. Physics-Informed vs. Hybrid
+# Per-chip physics-only PINN (Model B)
 
-Comparative study on the semiconductor steady-state thermal dataset
-(`../dataset/py_pipeline/dataset`). Reconstruct the full 128x128 temperature
-field of a multicore chip from N ∈ {5, 8, 10} sparse point sensors.
+Reconstruct a chip's full 128x128 temperature map from N ∈ {5, 8, 10} sparse
+noisy sensors, using **only the governing equation and that chip's own sensor
+readings**. One small network is fitted **from scratch for every chip**; nothing
+is learned across chips, and the ground-truth field is used only to score the
+result.
 
-| Model | Status | Survey cell ([`PINN_Survey_Updated.pdf`](../PINN_Survey_Updated.pdf), Table II) |
-|---|---|---|
-| A — data-driven baseline | not implemented yet | operator learning: enforcement `N`, no physical guarantee |
-| **B — physics-only PINN** | **implemented** | hard BC (Axis A) x strong form (Axis B); `H`/`S` row |
-| C — hybrid | not implemented yet | physics-informed DeepONet: `S`/`S` |
+This is the pure-PINN reference arm. Models A (data-driven) and C (hybrid) are
+not implemented here.
+
+> **Dataset.** This code targets the HotSpot-style dataset on `main`
+> (`data/raw/dataset`, 700 chips = 500 train / 100 validation / 100 test, POD-QR
+> sensor files in `data/generated`). An earlier version targeted a different,
+> Poisson-type dataset; its results are kept in `results_legacy_old_dataset/` and
+> are **not comparable** with anything produced now.
 
 ---
 
-## 1. Verified dataset facts
+## 1. What is solved
 
-Checked against the generated data, not only the generator README. Several
-assumptions in the original study design did **not** hold and the code reflects
-the corrected versions:
+The dataset's PDE (`generator/pde_solver.py`, `PROTOCOL.md`):
 
-| Quantity | Reality |
+```
+-div( t_die · k(T) · grad T ) + h_eff · (T - T_amb) = q(x, y, T)        on the 12 mm die
+dT/dn = 0                                                              on all four edges
+k(T)  = 22714 / (T[K] - 99) + 2   clipped to [20, 160] W/(m·K)
+q     = (p_dyn + p_leak0 · exp(β (T - 25))) · 1e4   W/m², block-wise uniform
+```
+
+Per chip the code knows `T_amb` (metadata) and the sensor readings. It does
+**not** know the block layout or powers: the source `q` is learned.
+
+Normalised units (see `src/losses.py`): `θ = (T - T_amb)/S`, `S` = hottest sensor's
+rise above ambient, coordinates scaled to the unit square. The equation becomes
+
+```
+-ε · div( k(T) grad θ ) + θ = q̃ ,      ε = t_die / (h_eff L²) ≈ 5.6e-4 ,   dθ/dn = 0
+```
+
+### Model
+
+| Part | Choice |
 |---|---|
-| Splits | already provided: **500 train / 100 val / 100 test** (`thermal_00001`… / `…00501`… / `…00601`…). No re-splitting needed; `data/splits/*.txt` records them. |
-| Governing equation | `-k ∇²T = Q` on `[0,1]²`, verified to ~4% FD residual (staircased rectangle edges on a 128 grid) |
-| Thermal conductivity `k` | **per-chip**, uniform in `[100, 150]` W/(m·K) — *not* shared across chips |
-| Boundary condition | `T = T_boundary` on all of `∂Ω`, **per-chip** in `[20, 40] °C`; equals `min_temperature` to 5e-5 and the matrix border reproduces it exactly. Never zero. |
-| Heat sources | axis-aligned **rectangles** `[x0, y0, x1, y1]` with uniform power density (up to 2.5e7 W/m²), 1–10 per chip — *not* Gaussians |
-| Matrices | `128 x 128` float32, `M[i, j] = T(x = j/127, y = i/127)` — **row index is y** |
-| Sensors | positions land exactly on grid nodes; 5/8/10-sensor files per chip |
-| Temperatures | peak from 66 to 15153 °C across chips — per-chip scaling is mandatory |
+| Field `θ(x, y)` | tanh MLP, 4 × 64 by default |
+| Boundary | **hard** (default): `θ = NN(cos πx, cos πy)` has `dθ/dn = 0` on every edge for *any* weights, so there is no boundary weight to tune. `soft`: plain MLP + Neumann penalty. `free`: plain MLP, no boundary term. |
+| Source | learned *dynamic* power density; leakage `1 + f·exp(β(T - 25))` is applied on top. `gaussian` (default, 6 blobs), `softrect`, or `mlp`. |
+| Loss | `w_residual · mean(R²) + w_data · mean((θ_sensor - θ̂)²)` (+ Neumann term in `soft`) |
+| Optimiser | Adam with cosine decay, then L-BFGS on a fixed collocation set; best iterate restored |
 
-Run `python tests/test_physics.py` to re-verify all of the above plus the
-autodiff Laplacian and the hard-BC construction.
+### Assumptions to be aware of
 
-## 2. Normalisation
+These are inherited from `PROTOCOL.md` ("ASSUMPTION — NOT SOURCED") and from the
+generator, and live in the `physics` block of the config:
 
-Model B is solved per chip in non-dimensional units:
+* `t_die = 500 µm`, `h_eff = 6256.3 W/(m²·K)`, `β = 0.012 /K`, `T0 = 25 °C`.
+* `leak_fraction = 0.0425`: the generator gives each block type its own leakage
+  fraction (CPU/GPU 0.05, Cache 0.04, MC 0.03). A physics-only model does not
+  know block types, so it uses their mean. Set it to `0` to drop leakage.
+
+---
+
+## 2. Setup
+
+From the repository root:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate            # Windows: .venv\Scripts\activate
+pip install -r requirements.txt      # numpy pandas scipy pyyaml matplotlib pillow pytest torch
+```
+
+CPU is enough (`"device": "cpu"` in the config). **Data needed** (both committed):
 
 ```
-T_norm = (T - T_boundary) / scale        with scale = max(sensor T) - T_boundary
-f_norm = Q / (k * scale)
+data/raw/dataset/<split>/matrices/thermal_NNNNN.npy      # ground-truth T   (evaluation only)
+data/raw/dataset/<split>/matrices/thermal_NNNNN_Q.npy    # ground-truth q   (evaluation only)
+data/raw/dataset/<split>/metadata.csv
+data/generated/<split>/thermal_NNNNN_sensors_{5,8,10}.json   # POD-QR sensor readings
 ```
 
-so `-k ∇²T = Q` becomes `∇²T_norm + f_norm = 0` with `T_norm = 0` on `∂Ω`.
+Sanity-check the data and the physics before training:
 
-`scale` comes from the **sensor readings and metadata only** — never from the
-ground-truth field — so no evaluation signal leaks into training. Metrics are
-computed after inverting the normalisation, in °C.
+```bash
+python -m src.data.validate_dataset --dir data/raw/dataset      # from the repo root
+python pure_pinn/tests/test_physics.py
+```
 
-## 3. Model B — physics-only PINN
+All paths inside `pure_pinn/` are resolved from the file location, so the
+commands below work from any directory. They are written for the repo root.
 
-* **Field**: MLP `(x, y) → T̂`, tanh, 4 x 64 by default.
-* **Hard BC** (default, `bc_mode: "hard"`):
-  `T_norm = d(x, y) · NN(x, y)` with `d = 16 x(1−x) y(1−y)`.
-  Exactly `T = T_boundary` on `∂Ω` for every chip, no boundary weight to tune.
-  The factor 16 normalises `max d = 1`.
-* **Trainable source** (`Q` is unknown), three parametrisations:
-  * `gaussian` — isotropic blobs, trainable amplitude/centre/width (study default)
-  * `softrect` — smoothed rectangles, **matched to how the data was generated**;
-    the matched-model arm of the §10 source-parametrisation ablation
-  * `mlp` — free-form second network, softplus output so `Q ≥ 0`
-  Amplitudes are exponential (they span orders of magnitude); centres and widths
-  pass through bounded sigmoids.
-* **Loss**: `L = w_r · L_residual + w_d · L_data` (+ `w_b · L_boundary` in the
-  soft ablation only). `weight_scheme: "annealing"` implements gradient-norm
-  balancing (Wang et al., graded E1 in the survey) as an alternative to fixed weights.
-* **Optimisation**: Adam with cosine decay, collocation resampled every step,
-  then L-BFGS with `strong_wolfe` on a *fixed* collocation set (resampling
-  breaks its line search). The best iterate by total loss is restored at the end,
-  because L-BFGS does step uphill on this objective.
+---
 
-### Boundary ablation arms
+## 3. Train one chip (manual run)
 
-`bc_mode` has three settings, which disentangle the two readings of the
-secondary experiment in the study design:
+```bash
+python pure_pinn/src/train_pinn.py \
+    --split train --chips thermal_00001 --sensors 5 --seeds 0
+```
 
-| `bc_mode` | `T_boundary` known? | Boundary term | Question it answers |
-|---|---|---|---|
-| `hard` | yes, by construction | none | headline configuration |
-| `soft` | yes, as a penalty target | `L_boundary` at sampled edge points | what does construction buy over a penalty, at equal budget? |
-| `free` | **no** | none | can residual + interior sensors alone recover `T_boundary`? |
+That fits one PINN for chip `thermal_00001` with 5 sensors and seed 0, prints
+progress, and appends **one row** to `pure_pinn/results/metrics.csv`. At the
+default budget (5000 Adam + 2000 L-BFGS steps) it took about **3 minutes** on a
+4-core CPU.
 
-In `soft`/`free` the scaler offset is 0, so the network must represent the
-boundary level itself rather than being handed it through the normalisation.
-`boundary_mae` in `metrics.csv` reports the answer for every arm.
+Pick the chip, split, and sensor count yourself:
 
-## 4. Calibration evidence for the defaults
+| Goal | Command |
+|---|---|
+| Another chip | `--chips thermal_00002` (the id must belong to `--split`) |
+| Another split | `--split validation` or `--split test` (`val` also works) |
+| 8 or 10 sensors | `--sensors 8` / `--sensors 10` |
+| Several sensor counts | `--sensors 5,8,10` |
+| Several seeds | `--seeds 0,1,2` |
+| Several chips | `--chips thermal_00001,thermal_00002` |
+| K chips of a split (fixed-seed random subsample, same K chips every time) | `--n-chips 20` |
+| Every chip in a split | leave out `--chips` and `--n-chips` |
 
-All on `thermal_00601` (test split, N=5, seed 0, 3000 Adam + 1000 L-BFGS steps).
-These are single-chip single-seed numbers used to *pick defaults*, not results.
+Which split a chip belongs to: the splits are interleaved across ids 1–700, so check
+`data/raw/dataset/splits.csv` (e.g. `thermal_00001` → train, `thermal_00008` →
+validation, `thermal_00014` → test). A chip id given with the wrong `--split` is
+rejected with an error.
 
-**Loss balancing** — `w_data=100` is the default: it saturates the sensor fit
-without an extreme weight, and gradient annealing bought nothing here, so fixed
-weights stay the simpler choice.
+### Useful flags
 
-| balancing | rel L2 | max abs err | sensor fit (`L_data`) |
-|---|---|---|---|
-| `w_data=1` | 0.317 | 1292 °C | 2.0e-03 |
-| gradient annealing | 0.325 | 1326 °C | 3.7e-06 |
-| **`w_data=100`** | **0.295** | 1245 °C | 1.7e-06 |
-| `w_data=1e4` | 0.290 | 1217 °C | 3.4e-07 |
+| Flag | Meaning |
+|---|---|
+| `--save-figs` | write a true / predicted / error picture to `pure_pinn/results/figures/` |
+| `--save-fields` | save the predicted 128×128 field as `.npy` in `pure_pinn/results/runs/` |
+| `--quiet` | print only the final line per solve |
+| `--metrics PATH` | write the metrics row to a different CSV |
+| `--runs-dir DIR` | where per-run JSON (config, loss history, scaler) goes |
+| `--tag NAME` | suffix for the run files, to tell variants apart |
+| `--config FILE` | a different config JSON (default `experiments/configs/model_b_default.json`) |
+| `--override '{...}'` | JSON merged on top of the config |
 
-**Source parametrisation** — `gaussian` with 6 blobs is the default.
+Example with figure and field saved:
 
-| source | rel L2 | max abs err | source rel L2 | hotspot centre err |
-|---|---|---|---|---|
-| **gaussian, 6 blobs** | **0.275** | 1191 °C | 0.851 | 0.086 |
-| gaussian, oracle count (4) | 0.283 | 1212 °C | 0.854 | 0.077 |
-| gaussian, 10 blobs | 0.302 | 1267 °C | 0.865 | 0.134 |
-| gaussian 6 + wider field (128x5) | 0.290 | 1239 °C | 0.863 | 0.088 |
-| free-form `mlp` source | 0.384 | 1486 °C | 0.911 | — |
-| `softrect` | 0.414 | 1553 °C | 0.922 | 0.231 |
+```bash
+python pure_pinn/src/train_pinn.py --split train --chips thermal_00001 \
+    --sensors 5,8,10 --seeds 0 --save-figs --save-fields
+```
 
-Three points worth carrying into the writeup:
+### Variants via `--override`
 
-1. **The correctly specified source loses.** `softrect` matches how the dataset
-   was generated (uniform rectangles) yet does worst: its sharp sigmoid edges
-   make the inverse problem much harder to optimise, so the mis-specified but
-   smooth Gaussian wins. Model-form correctness and trainability pull in
-   opposite directions here.
-2. **The oracle hotspot count does not help.** Six free blobs match four correct
-   ones, so the main comparison needs no oracle-count variant.
-3. **Localisation is good while source *shape* recovery is poor**
-   (`source_rel_l2` ~0.85 against `source_centre_err` ~0.08). Model B finds
-   *where* the heat is, not *how it is distributed* — the right claim to make
-   given the engineering interest is hotspot location.
+```bash
+# shorter budget (quick check, ~10 s)
+--override '{"training":{"adam_steps":300,"lbfgs_steps":50}}'
 
-**The oracle-source floor** (`tests/test_forward_solve.py`, same chip): with the
-*true* source handed to the network and no sensor data at all, rel L2 = **0.086**,
-max abs error 218 °C, peak location error 0.000. So Model B's ~0.28 is dominated
-by source under-determination from sparse sensors, not by the network's ability
-to represent the field. Quote this floor whenever Model B is compared with A or C:
-it separates the inverse-problem limit from the representation limit.
+# boundary-treatment ablations (soft penalty / no boundary term)
+--override '{"model":{"bc_mode":"soft"}}'
+--override '{"model":{"bc_mode":"free"}}'
 
-The floor is **chip-dependent and not budget-limited**. On `thermal_00684` it is
-**0.038**; doubling Adam steps, tripling L-BFGS steps and quadrupling collocation
-points (2048 -> 8192) cut the final residual 3x (2.08 -> 0.68) but left the field
-error unchanged at **0.038**. So extra optimisation buys nothing: the remaining
-gap is the smooth network's inability to reproduce sharp-edged rectangular
-sources, not under-training. A third variant (width 128, depth 5) was killed
-before finishing and has not been measured.
+# other source parametrisations
+--override '{"model":{"source":{"kind":"softrect"}}}'
+--override '{"model":{"source":{"kind":"mlp"}}}'
 
-Consequence for the error budget, using `thermal_00684`: floor 0.038 against an
-actual Model B error of 0.118, so **roughly two thirds of Model B's error comes
-from source under-determination by sparse sensors**, not from representation.
-(An earlier read of this, based only on `thermal_00601`, had it the other way
-round -- that chip's 0.086 floor is unusually high.)
+# number of source blobs (or "oracle" = use the chip's true block count; label it an oracle run)
+--override '{"model":{"source":{"n_blobs":4}}}'
 
-Note that `thermal_00601` is a *hard* chip: 4 overlapping hotspots in a 2651 °C
-peak field, and Model B scores ~0.28 on it against ~0.13 averaged over the chips
-in Sec. 7.
-The calibration numbers above are therefore comparable to each other but are not
-representative of Model B's typical accuracy.
+# drop the temperature-dependent leakage
+--override '{"physics":{"leak_fraction":0.0}}'
+```
 
-## 5. Layout
+Use `--tag` together with an override so the variant's run files do not overwrite
+the default ones, and `--metrics` to keep its rows in a separate CSV.
+
+### What you get
+
+* `results/metrics.csv`: one row per solve (appended; running the same solve twice
+  adds two rows). Columns:
+
+  | Group | Columns |
+  |---|---|
+  | Run | `model, bc_mode, source_kind, split, sample_id, n_sensors, seed` |
+  | Field error (non-sensor nodes, °C) | `rel_l2, rmse, mae, mse, max_abs_err` |
+  | Peak | `peak_temp_err, hotspot_loc_cells, pred_peak_temp, true_peak_temp` |
+  | Constraint / fit | `boundary_flux_mean` (mean \|dT/dn\| on the edges, K/m), `sensor_rmse` |
+  | Source recovery | `source_rel_l2, source_centre_err` |
+  | Cost | `n_params, train_seconds, inference_seconds, final_loss, final_residual, final_data_loss` |
+
+  All field errors are over the **non-sensor nodes only**, as `PROTOCOL.md` requires.
+* `results/runs/<chip>_N<n>_seed<s>_<bc>_<source>[_tag].json`: config, loss history, scaler.
+* `*_pred.npy` and `results/figures/*.png` when requested.
+
+---
+
+## 4. Many chips in parallel
+
+`experiments/run_model_b.sh` runs one process per (chip, sensor count, seed), a few
+at a time, each writing its own CSV (concurrent appends to one file are not safe):
+
+```bash
+cd pure_pinn
+# usage: experiments/run_model_b.sh [N_CHIPS] [SENSORS] [SEEDS] [JOBS] [CONFIG]
+SPLIT=test experiments/run_model_b.sh 20 5,8,10 0,1,2 4
+
+# explicit chip list instead of a subsample
+SPLIT=train CHIPS=thermal_00001,thermal_00002 experiments/run_model_b.sh 2 5,8,10 0 2
+
+# a variant arm, kept apart
+OVERRIDE='{"model":{"bc_mode":"soft"}}' TAG=soft PARTS=results/parts_bc \
+    SPLIT=test experiments/run_model_b.sh 3 5 0,1,2 3
+
+# merge the per-process CSVs, print the comparison table, plot error vs sensors
+python src/evaluate.py --merge results/parts --plot
+```
+
+Environment knobs: `SPLIT` (default `test`), `CHIPS`, `OVERRIDE`, `TAG`, `PARTS`,
+`THREADS_PER_JOB` (default 2), `FIGS=0` to skip figures. Keep `JOBS × THREADS_PER_JOB`
+near your core count. Wall-clock times are only comparable at the same `JOBS`.
+
+Cost to plan around: one solve is ~3 minutes, so all **500 train chips × 3 sensor counts
+× 1 seed** is 1,500 solves, roughly **75 hours** at one solve at a time, or ~19 hours
+with 4 at a time on a 4-core box if scaling were perfect (it is not; measure first).
+Use `--n-chips` to subsample. There is no shared model, so nothing is saved for
+re-use: the 500 train chips are simply a pool of chips to tune on or evaluate on.
+
+---
+
+## 5. Tests and diagnostics
+
+```bash
+python pure_pinn/tests/test_physics.py                      # 18 checks, ~10 s
+python pure_pinn/tests/test_forward_solve.py --chip thermal_00001 --split train
+```
+
+* `test_physics.py` checks the autodiff operators against analytic results, that
+  `k(T)` equals the generator's `k_silicon`, that the hard BC is exactly adiabatic,
+  that the **dataset's own fields satisfy the normalised PDE** (median 7% residual,
+  while a wrong `t_die` gives >100%), that stored `Q` integrates to the recorded
+  input power, sensor/matrix index alignment, and that metrics ignore sensor nodes.
+* `test_forward_solve.py` is the **oracle floor**: it gives the network the true source
+  and no sensor data. It reached **rel L2 = 0.0012** on `thermal_00001`, so the PDE,
+  units, boundary embedding and loss are not what limits Model B. Quote this whenever
+  Model B is compared with another model.
+
+---
+
+## 6. How to read the results
+
+The network represents the field essentially perfectly when the source is known
+(oracle floor above). With the source unknown and 5-10 sensors, the problem is
+**under-determined**: many source layouts fit the sensors and satisfy the PDE.
+Expect `sensor_rmse` to be tiny while `peak_temp_err` and `source_rel_l2` are not, and
+expect longer training to sometimes *worsen* the field error (it pins the sensors and
+the residual harder, which can lock in a spurious hotspot). Judge Model B by
+`rel_l2`, `peak_temp_err` and `hotspot_loc_cells` together, over many chips and
+seeds, never from one chip.
+
+---
+
+## 7. Layout
 
 ```
 src/
-  data_loader.py   metadata/sensor/matrix loading, per-chip + global scalers, splits
-  losses.py        autodiff Laplacian, PDE residual, data/boundary losses,
-                   collocation sampling, gradient-norm annealing  (shared with Model C)
-  models/pinn.py   hard-BC temperature field + the three source parametrisations
-  train_pinn.py    Model B driver: one solve per (chip, sensor count, seed)
-  evaluate.py      metrics, results/metrics.csv, comparison table, error-vs-N plot
-tests/
-  test_physics.py       8 checks: autodiff Laplacian, manufactured solution,
-                        exact hard BC, dataset/PDE consistency, indexing
-  test_forward_solve.py oracle-source forward solve -> representation floor
-experiments/
-  configs/         one JSON per configuration
-  run_model_b.sh   parallel matrix runner (per-process CSVs, merged afterwards)
-results/
-  metrics.csv  parts/  runs/  logs/  figures/
+  data_loader.py   new-dataset loading, per-chip scaler (ambient offset)
+  losses.py        Physics constants, flux-divergence PDE residual, data/Neumann losses
+  models/pinn.py   hard-Neumann temperature field + source parametrisations
+  train_pinn.py    driver: one solve per (chip, sensor count, seed)
+  evaluate.py      non-sensor-node metrics, results CSV, merge/plot
+  make_flowchart.py  design-flow figure (unchanged)
+tests/             test_physics.py, test_forward_solve.py
+experiments/       configs/model_b_default.json, run_model_b.sh
+results_legacy_old_dataset/   results from the previous (incompatible) dataset
+docs/              original implementation note (describes the previous dataset)
 ```
-
-## 6. Usage
-
-```bash
-# one-time: record the split ID lists
-python -c "import sys;sys.path.insert(0,'src');import data_loader as d;print(d.write_split_lists())"
-
-# sanity-check on a single chip (milestone 3)
-python src/train_pinn.py --split test --chips thermal_00601 --sensors 5 --seeds 0 --save-figs
-
-# Model B arm of the experiment matrix, test set subsampled for cost (§10).
-# 4 concurrent solves, per-process CSVs under results/parts/
-experiments/run_model_b.sh 20 5,8,10 0,1,2 4
-python src/evaluate.py --merge results/parts --plot
-
-# boundary ablation arms
-OVERRIDE='{"model":{"bc_mode":"soft"}}' TAG=soft PARTS=results/parts_bc \
-  experiments/run_model_b.sh 3 5 0,1,2 3
-OVERRIDE='{"model":{"bc_mode":"free"}}' TAG=free PARTS=results/parts_bc \
-  experiments/run_model_b.sh 3 5 0,1,2 3
-
-# representation floor for a given chip
-python tests/test_forward_solve.py --chip thermal_00601
-
-# ablations
-python src/train_pinn.py --chips thermal_00601 --override '{"model":{"source":{"kind":"softrect"}}}'
-python src/train_pinn.py --chips thermal_00601 --override '{"model":{"bc_mode":"free"}}'
-
-# summarise
-python src/evaluate.py --metric rel_l2
-```
-
-`--n-chips K` takes a *deterministic* subsample of the split (fixed RNG), so the
-Model B arm is reproducible and the writeup can state exactly which chips were
-used. `--override` merges a JSON dict into the config, which is how the ablation
-arms are run without duplicating config files.
-
-### Notes and caveats
-
-* **Cost asymmetry is a result, not a nuisance.** Model B re-solves per chip;
-  `train_seconds` / `inference_seconds` are recorded per run so the comparison
-  table can report it (§6 of the design).
-* **`n_blobs`** defaults to 6. Setting it to `null` or `"oracle"` uses the chip's
-  true `hotspot_count` from metadata — label this an *oracle-count* variant in
-  any writeup, since a deployed solver would not know M. With N=5 sensors and
-  6 blobs the source is heavily under-determined; that is the point of the
-  physics term, and `source_rel_l2` / `source_centre_err` measure how much of
-  the true source is actually recovered.
-* Ground-truth fields, `hotspot_positions` and `hotspot_power_values` are read
-  **only** inside `evaluate.py` / `evaluate_source`, never in the training path.
-
-## 7. Results so far (Model B only)
-
-Real runs, `results/metrics.csv`: 3 test chips (`thermal_00652`, `00664`, `00684`)
-x N in {5, 8, 10} x 2 seeds = 18 solves, default config. `+/-` is **seed** std
-(per-chip runs averaged within a seed first); chip-to-chip spread is much larger
-at ~0.04-0.05.
-
-| N sensors | rel L2 | max abs err | peak loc err | boundary MAE | sensor RMSE | s/chip |
-|---|---|---|---|---|---|---|
-| 5 | 0.135 +/- 0.002 | 558 °C | 0.075 | **0.0** | 4.0 °C | 873 |
-| 8 | 0.124 +/- 0.004 | 430 °C | 0.064 | **0.0** | 2.8 °C | 865 |
-| 10 | 0.126 +/- 0.002 | 478 °C | 0.060 | **0.0** | 4.9 °C | 710 |
-
-Findings to carry into the writeup:
-
-* **Sensor count barely matters for Model B.** 5 -> 10 sensors moves rel L2 from
-  0.135 to 0.126, less than the chip-to-chip spread. The physics term, not the
-  data, is doing the work. Expect the opposite for Model A, which is the point
-  of the §5 ablation plot.
-* **`boundary_mae` is exactly 0.0 on every run**, with no boundary weight in the
-  loss. This is the Axis-A hard-enforcement claim demonstrated, not asserted.
-* **The peak is systematically under-predicted** while its *location* is nearly
-  exact (0.008 on `thermal_00602`, under one pixel). The smooth Gaussian source
-  flattens the true rectangular heater's plateau. So `max_abs_err` carries
-  information `rel_l2` hides -- keep both in the headline table.
-* **Cost asymmetry**: ~12-15 min *per chip*, re-solved from scratch every time,
-  against a single training run plus millisecond inference for Models A and C.
-  Wall-clock figures above were measured at 4-way concurrency on a 12-core
-  CPU-only box; state the concurrency setting whenever quoting them.
-
-**Reproducibility**: re-solving the nine (chip, N) combinations at seed 0 in a
-separate invocation reproduced `rel_l2` exactly (max abs difference 0.0 over 9
-pairs), so figures and table rows always correspond. `run_model_b.sh` now passes
-`--save-figs --save-fields` by default (`FIGS=0` to disable) and accepts an
-explicit `CHIPS=` list, so this cannot drift again.
-
-Example figures in `results/figures/`:
-`error_vs_sensors.png` (headline plot) and
-`thermal_006{52,64,84}_N{5,8,10}_seed0_hard_gaussian.png` (true / predicted / error
-triptychs for the three tabulated chips at every sensor count), and
-`design_flow.png` (the design-flow diagram, regenerate via `python src/make_flowchart.py`).
-The two `*_figdemo.png` files are the *calibration* chips, not results.
-
-### Not done yet
-
-* Models A and C (`losses.py` is written so Model C imports the physics unchanged).
-* Full-scale arm: 20 chips x 3 N x 3 seeds via `experiments/run_model_b.sh 20 5,8,10 0,1,2 4` (~3 h here).
-* The `soft` / `free` boundary ablation arms -- implemented and wired, not yet run.

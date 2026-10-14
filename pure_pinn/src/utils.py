@@ -11,7 +11,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[1]          # pure_pinn/
+PROJECT_ROOT = REPO_ROOT.parent                          # repository root (holds data/)
 
 
 def set_seed(seed: int) -> None:
@@ -50,6 +51,12 @@ def timer():
 
 
 def resolve_path(path: str | os.PathLike) -> Path:
-    """Interpret relative paths against the repository root, not the cwd."""
+    """Interpret relative paths against ``pure_pinn/``, not the cwd."""
     p = Path(path)
     return p if p.is_absolute() else (REPO_ROOT / p).resolve()
+
+
+def resolve_project_path(path: str | os.PathLike) -> Path:
+    """Interpret relative paths against the repository root (where ``data/`` lives)."""
+    p = Path(path)
+    return p if p.is_absolute() else (PROJECT_ROOT / p).resolve()

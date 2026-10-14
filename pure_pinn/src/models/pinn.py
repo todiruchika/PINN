@@ -1,19 +1,25 @@
-"""Model B -- physics-only PINN with hard boundary-condition enforcement.
+"""Model B -- physics-only PINN with hard (exact) adiabatic boundary conditions.
 
-Survey placement: soft/strong cell for the governing equation (there is no
-other option -- see Sec. IV-A: hard enforcement applies to BC/IC and
-essentially never to the PDE) and the *hard* column of Axis A for the
-boundary condition, via the Lagaris-style construction.
+Survey placement: strong-form residual for the governing equation (hard
+enforcement applies to BC/IC and essentially never to the PDE) and the *hard*
+column of Axis A for the boundary condition.
 
-    T_norm(x, y) = 0 + d(x, y) * NN(x, y),   d(x, y) = 16 x(1-x) y(1-y)
+The dataset's lateral edges are adiabatic (``dT/dn = 0``), not Dirichlet, so the
+Lagaris-style ``d(x, y) * NN`` construction of the original Model B does not
+apply. The Neumann analogue is an even-extension embedding:
 
-In normalised units the Dirichlet value is 0, so this satisfies
-``T = T_boundary`` on the whole of ``dOmega`` by construction, for every chip,
-with no boundary weight to tune. The factor 16 makes ``max d = 1`` so the
-network output is not forced to be large just to reach realistic temperatures.
+    theta(x, y) = NN( cos(pi x), cos(pi y) )
 
-The source field ``f_norm`` is unknown and therefore trainable. Three
-parametrisations are provided:
+Every function of ``(cos pi x, cos pi y)`` has ``d theta / d x = 0`` on
+``x in {0, 1}`` and ``d theta / d y = 0`` on ``y in {0, 1}`` exactly, for any
+weights, and the family is complete for smooth fields with that property. So
+the adiabatic condition holds by construction on every chip, with no boundary
+weight to tune.
+
+The source field is unknown and therefore trainable. It represents the
+*dynamic* power density in normalised units (``p_dyn * 1e4 / (h_eff S)``); the
+temperature-dependent leakage is applied on top by :class:`PhysicsOnlyPINN`.
+Three parametrisations are provided:
 
 ``gaussian``   isotropic Gaussian blobs (the study's default choice)
 ``softrect``   smoothed axis-aligned rectangles -- matches how the dataset was
@@ -28,6 +34,8 @@ import math
 
 import torch
 from torch import nn
+
+from losses import Physics
 
 
 # --------------------------------------------------------------------------- #
@@ -107,23 +115,17 @@ class MLP(nn.Module):
 # --------------------------------------------------------------------------- #
 # temperature field
 # --------------------------------------------------------------------------- #
-def distance_function(xy: torch.Tensor) -> torch.Tensor:
-    """``d(x, y) = 16 x(1-x) y(1-y)``: vanishes on ``dOmega``, peaks at 1 in the centre."""
-    x, y = xy[:, 0:1], xy[:, 1:2]
-    return 16.0 * x * (1.0 - x) * y * (1.0 - y)
-
-
 class TemperatureField(nn.Module):
-    """``T_norm(x, y)`` with hard, soft, or free boundary treatment.
+    """``theta(x, y)`` with hard, soft, or free adiabatic-edge treatment.
 
     ``bc_mode``:
 
-    ``hard``  ``T_norm = d(x, y) * NN(x, y)`` -- exact Dirichlet by construction
-              (normalised units put the boundary value at 0).
-    ``soft``  ``T_norm = NN(x, y)``, boundary imposed by a penalty term.
+    ``hard``  ``theta = NN(cos(pi x), cos(pi y))`` -- exact ``d theta/dn = 0``
+              on all four edges by construction.
+    ``soft``  ``theta = NN(x, y)``, adiabatic edges imposed by a penalty term.
     ``free``  identical network to ``soft`` but trained with *no* boundary
-              term, to test whether residual + interior sensors alone recover
-              the boundary temperature.
+              term, to test whether residual + sensors alone recover the
+              adiabatic behaviour.
     """
 
     def __init__(self, bc_mode: str = "hard", out_scale: float = 1.0, **mlp_kwargs):
@@ -135,19 +137,18 @@ class TemperatureField(nn.Module):
         self.net = MLP(in_dim=2, out_dim=1, **mlp_kwargs)
 
     def forward(self, xy: torch.Tensor) -> torch.Tensor:
-        raw = self.out_scale * self.net(xy)
         if self.bc_mode == "hard":
-            return distance_function(xy) * raw
-        return raw
+            xy = torch.cos(math.pi * xy)
+        return self.out_scale * self.net(xy)
 
 
 # --------------------------------------------------------------------------- #
-# source parametrisations -- all return f_norm = Q / (k * scale) >= 0
+# source parametrisations -- all return the normalised dynamic source >= 0
 # --------------------------------------------------------------------------- #
 class GaussianSource(nn.Module):
     """Sum of ``n_blobs`` isotropic Gaussians with trainable amplitude, centre, width."""
 
-    def __init__(self, n_blobs: int = 6, init_amp: float = 10.0, init_width: float = 0.12,
+    def __init__(self, n_blobs: int = 6, init_amp: float = 1.0, init_width: float = 0.12,
                  min_width: float = 0.02, max_width: float = 0.5):
         super().__init__()
         self.n_blobs = int(n_blobs)
@@ -182,7 +183,7 @@ class SoftRectSource(nn.Module):
     a differentiable indicator with trainable centre, half-extent, and amplitude.
     """
 
-    def __init__(self, n_blocks: int = 6, init_amp: float = 10.0, init_half: float = 0.12,
+    def __init__(self, n_blocks: int = 6, init_amp: float = 1.0, init_half: float = 0.12,
                  sharpness: float = 60.0, min_half: float = 0.01, max_half: float = 0.5):
         super().__init__()
         self.n_blocks = int(n_blocks)
@@ -211,10 +212,10 @@ class SoftRectSource(nn.Module):
 
 
 class MLPSource(nn.Module):
-    """Free-form source network with a softplus output so ``f_norm >= 0``."""
+    """Free-form source network with a softplus output so the source is ``>= 0``."""
 
     def __init__(self, width: int = 32, depth: int = 3, activation: str = "tanh",
-                 out_scale: float = 10.0, fourier: dict | None = None):
+                 out_scale: float = 1.0, fourier: dict | None = None):
         super().__init__()
         self.net = MLP(in_dim=2, out_dim=1, width=width, depth=depth,
                        activation=activation, fourier=fourier)
@@ -224,26 +225,31 @@ class MLPSource(nn.Module):
         return self.out_scale * nn.functional.softplus(self.net(xy))
 
 
-class FixedRectSource(nn.Module):
-    """Non-trainable exact rectangles from metadata -- **diagnostic only**.
+class FixedGridSource(nn.Module):
+    """Non-trainable source read from a ground-truth ``Q`` grid -- **diagnostic only**.
 
-    Used by ``tests/test_forward_solve.py`` to check that the field network plus
-    hard BC can represent a dataset solution when the source is *known*. It uses
-    ground-truth hotspot data and must never appear in a Model B run.
+    Bilinearly interpolates the dataset's stored total source ``Q`` (W/m^2),
+    divided by ``h_eff S``. It is already the *total* source at the converged
+    temperature, so :class:`PhysicsOnlyPINN` skips the leakage factor for it
+    (``includes_leakage``). Used by ``tests/test_forward_solve.py`` to check
+    that the field network can represent a dataset solution when the source is
+    *known*. It uses ground-truth data and must never appear in a Model B run.
     """
 
-    def __init__(self, rects, amplitudes, sharpness: float = 400.0):
+    includes_leakage = True
+
+    def __init__(self, q_grid, q_scale: float):
         super().__init__()
-        self.register_buffer("rects", torch.as_tensor(rects, dtype=torch.float32).reshape(-1, 4))
-        self.register_buffer("amps", torch.as_tensor(amplitudes, dtype=torch.float32).reshape(-1))
-        self.sharpness = float(sharpness)
+        grid = torch.as_tensor(q_grid, dtype=torch.float32) / float(q_scale)
+        self.register_buffer("grid", grid[None, None])           # (1, 1, H=y, W=x)
 
     def forward(self, xy: torch.Tensor) -> torch.Tensor:
-        x, y = xy[:, 0:1], xy[:, 1:2]
-        r = self.rects
-        wx = torch.sigmoid(self.sharpness * (x - r[:, 0])) * torch.sigmoid(self.sharpness * (r[:, 2] - x))
-        wy = torch.sigmoid(self.sharpness * (y - r[:, 1])) * torch.sigmoid(self.sharpness * (r[:, 3] - y))
-        return torch.sum(self.amps[None, :] * wx * wy, dim=1, keepdim=True)
+        # grid_sample wants (x, y) in [-1, 1]; align_corners puts +-1 on the
+        # first/last node, which is exactly the dataset's j/(n-1) convention
+        coords = (2.0 * xy - 1.0).reshape(1, -1, 1, 2)
+        out = nn.functional.grid_sample(self.grid, coords, mode="bilinear",
+                                        padding_mode="border", align_corners=True)
+        return out.reshape(-1, 1)
 
 
 SOURCES = {"gaussian": GaussianSource, "softrect": SoftRectSource, "mlp": MLPSource}
@@ -278,16 +284,17 @@ def build_source(kind: str, **kwargs) -> nn.Module:
 # the assembled model
 # --------------------------------------------------------------------------- #
 class PhysicsOnlyPINN(nn.Module):
-    """Model B: ``(x, y) -> T_norm``, plus a trainable source field.
+    """Model B: ``(x, y) -> theta``, plus a trainable source field.
 
     Holding both in one module keeps a single parameter list for the
     optimiser and one checkpoint per chip.
     """
 
-    def __init__(self, field: TemperatureField, source: nn.Module):
+    def __init__(self, field: TemperatureField, source: nn.Module, physics: Physics | None = None):
         super().__init__()
         self.field = field
         self.source = source
+        self.physics = physics or Physics()
 
     def forward(self, xy: torch.Tensor) -> torch.Tensor:
         return self.field(xy)
@@ -296,17 +303,26 @@ class PhysicsOnlyPINN(nn.Module):
     def temperature_fn(self, xy: torch.Tensor) -> torch.Tensor:
         return self.field(xy)
 
-    def source_fn(self, xy: torch.Tensor) -> torch.Tensor:
-        return self.source(xy)
+    def source_fn(self, xy: torch.Tensor, T_celsius: torch.Tensor) -> torch.Tensor:
+        """Total normalised source ``q / (h_eff S)`` at temperature ``T_celsius``.
+
+        Learned sources are *dynamic* densities, so the temperature-dependent
+        leakage ``1 + f exp(beta (T - T0))`` is applied on top. A fixed oracle
+        source already contains its leakage and is returned as is.
+        """
+        s = self.source(xy)
+        if getattr(self.source, "includes_leakage", False):
+            return s
+        return s * self.physics.leakage_factor(T_celsius)
 
 
-def build_pinn(config: dict) -> PhysicsOnlyPINN:
+def build_pinn(config: dict, physics: Physics | None = None) -> PhysicsOnlyPINN:
     """Assemble Model B from the ``model`` block of a config dict."""
     field_cfg = dict(config.get("field", {}))
     source_cfg = dict(config.get("source", {}))
     kind = source_cfg.pop("kind", "gaussian")
     field = TemperatureField(bc_mode=config.get("bc_mode", "hard"), **field_cfg)
-    return PhysicsOnlyPINN(field=field, source=build_source(kind, **source_cfg))
+    return PhysicsOnlyPINN(field=field, source=build_source(kind, **source_cfg), physics=physics)
 
 
 # --------------------------------------------------------------------------- #

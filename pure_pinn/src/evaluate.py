@@ -1,13 +1,16 @@
 """Shared metrics and results bookkeeping for all three models.
 
-Metrics follow Sec. 6 of the study design:
+Metrics follow ``PROTOCOL.md``: every field error is computed on the
+**non-sensor nodes only** (the sensor pixels of the chip's N-sensor layout are
+masked out), and reported in degC.
 
-primary    relative L2 field error over the full held-out image
-secondary  max absolute error (hotspot misses matter more than mean error)
-localisation  distance between predicted and true peak location
-plus        boundary MAE (does the BC actually hold?), sensor fit, and -- for
-            Model B only -- how well the inferred source field recovers the
-            ground-truth hotspots.
+primary       relative L2 field error
+secondary     MAE, RMSE, MSE, and max absolute error (hotspot misses matter more
+              than mean error)
+peak          peak-temperature error and hotspot localisation (grid cells)
+plus          boundary flux (does the adiabatic edge hold?), sensor fit, model
+              size, and -- for Model B only -- how well the inferred source
+              recovers the ground-truth blocks.
 """
 from __future__ import annotations
 
@@ -24,51 +27,75 @@ from utils import resolve_path
 METRIC_FIELDS = [
     # run identification
     "model", "bc_mode", "source_kind", "split", "sample_id", "n_sensors", "seed",
-    # field accuracy
-    "rel_l2", "rmse", "mae", "max_abs_err",
-    # structure
-    "peak_loc_err", "pred_peak_temp", "true_peak_temp",
+    # field accuracy (non-sensor nodes)
+    "rel_l2", "rmse", "mae", "mse", "max_abs_err",
+    # structure (non-sensor nodes)
+    "peak_temp_err", "hotspot_loc_cells", "pred_peak_temp", "true_peak_temp",
     # constraint satisfaction / fit
-    "boundary_mae", "sensor_rmse",
+    "boundary_flux_mean", "sensor_rmse",
     # inferred source (Model B)
     "source_rel_l2", "source_centre_err",
     # cost
-    "train_seconds", "inference_seconds", "final_loss", "final_residual", "final_data_loss",
+    "n_params", "train_seconds", "inference_seconds", "final_loss", "final_residual", "final_data_loss",
 ]
 
 
 # --------------------------------------------------------------------------- #
 # field metrics
 # --------------------------------------------------------------------------- #
+def sensor_node_mask(positions: np.ndarray, n: int = 128) -> np.ndarray:
+    """Boolean ``(n, n)`` mask, ``True`` on the sensor pixels (row = y, col = x)."""
+    mask = np.zeros((n, n), dtype=bool)
+    j = np.rint(positions[:, 0] * (n - 1)).astype(int)
+    i = np.rint(positions[:, 1] * (n - 1)).astype(int)
+    mask[i, j] = True
+    return mask
+
+
 def relative_l2(pred: np.ndarray, true: np.ndarray) -> float:
-    """``||pred - true||_2 / ||true||_2`` over the whole field."""
+    """``||pred - true||_2 / ||true||_2`` over the given values."""
     return float(np.linalg.norm(pred - true) / np.linalg.norm(true))
 
 
-def peak_location(field: np.ndarray) -> tuple[float, float]:
-    """``(x, y)`` in ``[0, 1]^2`` of the field's maximum."""
-    n = field.shape[0]
-    i, j = np.unravel_index(int(np.argmax(field)), field.shape)
-    return j / (n - 1), i / (n - 1)
+def _peak_cell(field: np.ndarray, valid: np.ndarray) -> tuple[int, int]:
+    """``(row, col)`` of the maximum over the ``valid`` nodes."""
+    masked = np.where(valid, field, -np.inf)
+    i, j = np.unravel_index(int(np.argmax(masked)), field.shape)
+    return int(i), int(j)
 
 
-def field_metrics(pred: np.ndarray, true: np.ndarray, T_boundary: float) -> dict:
-    """Field-level metrics in physical units (degC)."""
-    if pred.shape != true.shape:
-        raise ValueError(f"shape mismatch: {pred.shape} vs {true.shape}")
-    err = pred - true
-    px, py = peak_location(pred)
-    tx, ty = peak_location(true)
-    border = np.concatenate([pred[0, :], pred[-1, :], pred[1:-1, 0], pred[1:-1, -1]])
+def boundary_flux_mean(field: np.ndarray, L: float = 0.012) -> float:
+    """Mean ``|dT/dn|`` on the four edges (K/m), by one-sided differences.
+
+    The adiabatic condition says this is 0. The dataset itself is not exactly
+    0 (stride-downsampling artifact, see ``PROTOCOL.md``), so compare against
+    the same number computed on the ground truth.
+    """
+    h = L / (field.shape[0] - 1)
+    edges = [(field[:, 1] - field[:, 0]) / h, (field[:, -1] - field[:, -2]) / h,
+             (field[1, :] - field[0, :]) / h, (field[-1, :] - field[-2, :]) / h]
+    return float(np.mean(np.abs(np.concatenate(edges))))
+
+
+def field_metrics(pred: np.ndarray, true: np.ndarray, sensor_mask: np.ndarray, L: float = 0.012) -> dict:
+    """Field-level metrics in degC over the non-sensor nodes."""
+    if pred.shape != true.shape or sensor_mask.shape != true.shape:
+        raise ValueError(f"shape mismatch: {pred.shape} vs {true.shape} vs mask {sensor_mask.shape}")
+    valid = ~sensor_mask
+    err = (pred - true)[valid]
+    pi, pj = _peak_cell(pred, valid)
+    ti, tj = _peak_cell(true, valid)
     return {
-        "rel_l2": relative_l2(pred, true),
+        "rel_l2": relative_l2(pred[valid], true[valid]),
         "rmse": float(np.sqrt(np.mean(err**2))),
         "mae": float(np.mean(np.abs(err))),
+        "mse": float(np.mean(err**2)),
         "max_abs_err": float(np.max(np.abs(err))),
-        "peak_loc_err": float(np.hypot(px - tx, py - ty)),
-        "pred_peak_temp": float(np.max(pred)),
-        "true_peak_temp": float(np.max(true)),
-        "boundary_mae": float(np.mean(np.abs(border - T_boundary))),
+        "peak_temp_err": float(abs(pred[pi, pj] - true[ti, tj])),
+        "hotspot_loc_cells": float(np.hypot(pi - ti, pj - tj)),
+        "pred_peak_temp": float(pred[pi, pj]),
+        "true_peak_temp": float(true[ti, tj]),
+        "boundary_flux_mean": boundary_flux_mean(pred, L),
     }
 
 
@@ -92,7 +119,7 @@ def source_metrics(pred_Q: np.ndarray, true_Q: np.ndarray,
 
     ``source_rel_l2`` is the relative L2 error of the rasterised field.
     ``source_centre_err`` greedily matches the strongest predicted blobs to the
-    true hotspot rectangles (by power) and averages the centre distances, so it
+    true blocks (by power) and averages the centre distances, so it
     stays meaningful when the two counts differ.
     """
     out = {"source_rel_l2": relative_l2(pred_Q, true_Q) if np.linalg.norm(true_Q) > 0 else float("nan"),

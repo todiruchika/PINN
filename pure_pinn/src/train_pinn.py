@@ -1,15 +1,16 @@
 """Train Model B: one physics-only PINN per (chip, sensor count, seed).
 
-Model B never touches the train/val split and never sees a ground-truth field.
-Its only inputs are that chip's N sparse sensor readings, its metadata
-constants (k, T_boundary), and the governing equation. "Testing" therefore
-means re-solving from scratch on every held-out chip and reporting the
-distribution of errors, not a generalisation check.
+Model B never learns across chips and never sees a ground-truth field. Its only
+inputs are that chip's N sparse (noisy) sensor readings, its known ambient
+temperature, and the governing equation. Every chip is therefore solved from
+scratch, and any split can be used: "training" a chip means fitting its PINN,
+and the reported errors are per-chip reconstruction errors, not a
+generalisation check.
 
 Usage
 -----
     python src/train_pinn.py --config experiments/configs/model_b_default.json \
-        --split test --chips thermal_00501 --sensors 5 --seeds 0
+        --split train --chips thermal_00001 --sensors 5 --seeds 0
 
     # full arm of the experiment matrix, subsampling the test set for cost
     python src/train_pinn.py --config experiments/configs/model_b_default.json \
@@ -28,11 +29,14 @@ import torch  # type: ignore[import-not-found]
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # allow flat imports
 
 from data_loader import (  # noqa: E402
-    ChipSample, ChipScaler, chip_ids, field_from_points, grid_points, load_chip,
+    ChipSample, ChipScaler, chip_ids, field_from_points, grid_points, load_chip, normalise_split,
 )
-from evaluate import append_metrics_row, field_metrics, sensor_rmse, source_metrics  # noqa: E402
+from evaluate import (  # noqa: E402
+    append_metrics_row, field_metrics, sensor_node_mask, sensor_rmse, source_metrics,
+)
 from losses import (  # noqa: E402
-    annealed_weight, boundary_loss, data_loss, residual_loss, sample_boundary, sample_interior,
+    ChipContext, Physics, annealed_weight, data_loss, neumann_loss, residual_loss,
+    sample_boundary, sample_interior,
 )
 from models.pinn import build_pinn  # noqa: E402
 from utils import deep_update, load_config, resolve_path, set_seed, timer  # noqa: E402
@@ -53,18 +57,13 @@ def train_one_chip(chip: ChipSample, n_sensors: int, seed: int, config: dict, ve
     bc_mode = config["model"].get("bc_mode", "hard")
 
     # ---- inputs the model is allowed to see ------------------------------- #
-    positions, temps = chip.sensors(n_sensors)
-    if bc_mode == "hard":
-        # boundary value enters by construction, so normalise around it
-        scaler = ChipScaler.from_sensors(chip, temps)
-    else:
-        # soft/free arms are not handed T_boundary by construction; keep the
-        # offset at 0 so the network has to represent the boundary level itself
-        scaler = ChipScaler(offset=0.0, scale=max(float(np.max(temps)), 1.0))
+    positions, temps = chip.sensors(n_sensors)            # noisy readings only
+    scaler = ChipScaler.from_sensors(chip, temps)         # T_amb is a known model constant
+    physics = Physics.from_config(config.get("physics"))
+    ctx = ChipContext(T_amb=scaler.offset, scale=scaler.scale)
 
     xy_data = torch.tensor(positions, dtype=DTYPE, device=device)
     t_data = torch.tensor(scaler.normalise(temps), dtype=DTYPE, device=device).reshape(-1, 1)
-    t_boundary_norm = float(scaler.normalise(chip.T_boundary))
 
     # ---- model ------------------------------------------------------------ #
     model_cfg = json.loads(json.dumps(config["model"]))  # deep copy
@@ -74,11 +73,11 @@ def train_one_chip(chip: ChipSample, n_sensors: int, seed: int, config: dict, ve
         requested = src_cfg.pop("n_blobs", None)
         requested = src_cfg.pop("n_blocks", requested)
         if requested in (None, "oracle"):
-            # oracle-count variant: use the chip's true hotspot count. Flagged as
+            # oracle-count variant: use the chip's true block count. Flagged as
             # an oracle because a deployed solver would not know M.
-            requested = chip.hotspot_count
+            requested = chip.block_count
         src_cfg[count_key] = int(requested)
-    model = build_pinn(model_cfg).to(device)
+    model = build_pinn(model_cfg, physics).to(device)
 
     params = list(model.parameters())
     w_r = float(tr.get("w_residual", 1.0))
@@ -88,11 +87,12 @@ def train_one_chip(chip: ChipSample, n_sensors: int, seed: int, config: dict, ve
     scheme = tr.get("weight_scheme", "fixed")
 
     def losses_at(xy_col: torch.Tensor, xy_bnd: torch.Tensor | None):
-        l_res = residual_loss(model.temperature_fn, model.source_fn, xy_col, residual_scale=res_scale)
+        l_res = residual_loss(model.temperature_fn, model.source_fn, xy_col, physics, ctx,
+                              residual_scale=res_scale)
         l_dat = data_loss(model.temperature_fn, xy_data, t_data)
         l_bnd = torch.zeros((), device=device)
         if bc_mode == "soft" and xy_bnd is not None:
-            l_bnd = boundary_loss(model.temperature_fn, xy_bnd, t_boundary_norm)
+            l_bnd = neumann_loss(model.temperature_fn, xy_bnd)
         return l_res, l_dat, l_bnd
 
     def total(l_res, l_dat, l_bnd, wd, wb):
@@ -193,13 +193,15 @@ def train_one_chip(chip: ChipSample, n_sensors: int, seed: int, config: dict, ve
     if true_field.shape[0] != grid_n:
         raise ValueError(f"eval grid {grid_n} does not match matrix size {true_field.shape[0]}")
 
+    sensor_mask = sensor_node_mask(positions, grid_n)
     row = {"model": "B", "bc_mode": bc_mode,
            "source_kind": config["model"]["source"].get("kind", "gaussian"),
            "split": chip.split, "sample_id": chip.sample_id,
            "n_sensors": n_sensors, "seed": seed}
-    row.update(field_metrics(pred_field, true_field, chip.T_boundary))
+    row.update(field_metrics(pred_field, true_field, sensor_mask, chip.die_L))
     row["sensor_rmse"] = sensor_rmse(pred_field, positions, temps)
-    row.update(evaluate_source(model, chip, scaler, grid_n, device))
+    row.update(evaluate_source(model, chip, scaler, pred_field, grid_n, device))
+    row["n_params"] = sum(p.numel() for p in model.parameters())
     last = history[-1]
     row.update({"train_seconds": train_time["seconds"], "inference_seconds": infer_time["seconds"],
                 "final_loss": last["loss"], "final_residual": last["residual"],
@@ -221,18 +223,24 @@ def predict_field(model, scaler: ChipScaler, n: int, device, chunk: int = 8192) 
 
 
 @torch.no_grad()
-def predict_source(model, scaler: ChipScaler, k: float, n: int, device, chunk: int = 8192) -> np.ndarray:
-    """Inferred ``Q(x, y)`` in physical W/m^2 on the ``(n, n)`` grid."""
+def predict_source(model, scaler: ChipScaler, pred_field: np.ndarray, n: int, device, chunk: int = 8192) -> np.ndarray:
+    """Inferred total source ``q(x, y)`` in physical W/m^2 on the ``(n, n)`` grid.
+
+    The leakage part depends on temperature, so the source is evaluated at the
+    model's own predicted field.
+    """
     pts = torch.tensor(grid_points(n), dtype=DTYPE, device=device)
-    out = [model.source_fn(pts[i : i + chunk]).cpu().numpy().ravel() for i in range(0, len(pts), chunk)]
-    f_norm = np.concatenate(out)
-    return field_from_points(f_norm / scaler.source_scale(k), n)  # Q = f_norm * k * scale
+    temp = torch.tensor(np.asarray(pred_field).reshape(-1, 1), dtype=DTYPE, device=device)
+    out = [model.source_fn(pts[i : i + chunk], temp[i : i + chunk]).cpu().numpy().ravel()
+           for i in range(0, len(pts), chunk)]
+    q_norm = np.concatenate(out)
+    return field_from_points(q_norm * model.physics.h_eff * scaler.scale, n)   # q = q_tilde * h_eff * S
 
 
-def evaluate_source(model, chip: ChipSample, scaler: ChipScaler, n: int, device) -> dict:
-    """Validate the inferred source against metadata hotspots (Sec. 4 of the design)."""
-    pred_Q = predict_source(model, scaler, chip.k, n, device)
-    true_Q = chip.source_field(n)
+def evaluate_source(model, chip: ChipSample, scaler: ChipScaler, pred_field: np.ndarray, n: int, device) -> dict:
+    """Validate the inferred source against the stored ground-truth ``Q`` and blocks."""
+    pred_Q = predict_source(model, scaler, pred_field, n, device)
+    true_Q = chip.source_field()
     src = model.source
     centres = weights = None
     if hasattr(src, "centres"):
@@ -244,7 +252,7 @@ def evaluate_source(model, chip: ChipSample, scaler: ChipScaler, n: int, device)
             areas = np.prod(4 * src.half_extents().detach().cpu().numpy(), axis=1)
             weights = amps * areas
     return source_metrics(pred_Q, true_Q, centres, weights,
-                          chip.hotspot_centres(), chip.powers)
+                          chip.block_centres(), chip.block_powers())
 
 
 # --------------------------------------------------------------------------- #
@@ -255,7 +263,8 @@ def parse_int_list(text: str) -> list[int]:
 
 
 def select_chips(split: str, chips: str | None, n_chips: int | None, root, seed: int = 0) -> list[str]:
-    """Explicit ids, or a deterministic subsample of the split (see Sec. 10 cost note)."""
+    """Explicit ids, or a deterministic subsample of the split (see README cost note)."""
+    split = normalise_split(split)
     if chips:
         return [c for c in chips.replace(" ", "").split(",") if c]
     ids = chip_ids(root, split)
@@ -268,14 +277,15 @@ def select_chips(split: str, chips: str | None, n_chips: int | None, root, seed:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Train Model B (physics-only PINN), one solve per chip")
     ap.add_argument("--config", default="experiments/configs/model_b_default.json")
-    ap.add_argument("--split", default="test", choices=("train", "val", "test"))
+    ap.add_argument("--split", default="test", choices=("train", "validation", "val", "test"))
     ap.add_argument("--chips", default=None, help="comma-separated sample ids; overrides --n-chips")
     ap.add_argument("--n-chips", type=int, default=None, help="deterministic subsample of the split")
     ap.add_argument("--sensors", default="5,8,10")
     ap.add_argument("--seeds", default="0,1,2")
     ap.add_argument("--metrics", default="results/metrics.csv")
     ap.add_argument("--runs-dir", default="results/runs")
-    ap.add_argument("--data-root", default=None)
+    ap.add_argument("--data-root", default=None, help="default: <repo>/data/raw/dataset")
+    ap.add_argument("--sensor-root", default=None, help="default: <repo>/data/generated")
     ap.add_argument("--tag", default=None, help="suffix for run artefact filenames")
     ap.add_argument("--save-fields", action="store_true", help="store predicted fields as .npy")
     ap.add_argument("--save-figs", action="store_true", help="store true/pred/error triptychs")
@@ -287,6 +297,7 @@ def main() -> None:
     if args.override:
         config = deep_update(config, json.loads(args.override))
 
+    args.split = normalise_split(args.split)
     ids = select_chips(args.split, args.chips, args.n_chips, args.data_root)
     sensors = parse_int_list(args.sensors)
     seeds = parse_int_list(args.seeds)
@@ -300,17 +311,17 @@ def main() -> None:
 
     done = 0
     for sample_id in ids:
-        chip = load_chip(sample_id, args.split, args.data_root)
+        chip = load_chip(sample_id, args.split, args.data_root, args.sensor_root)
         for n_sensors in sensors:
             for seed in seeds:
                 done += 1
                 print(f"[{done}/{total_runs}] {sample_id} N={n_sensors} seed={seed} "
-                      f"(k={chip.k:.1f}, T_b={chip.T_boundary:.2f}, hotspots={chip.hotspot_count})")
+                      f"(T_amb={chip.T_amb:.2f}, blocks={chip.block_count}, peak={chip.peak_temperature:.1f} degC)")
                 result = train_one_chip(chip, n_sensors, seed, config, verbose=not args.quiet)
                 row = result["row"]
                 append_metrics_row(row, args.metrics)
-                print(f"      rel_L2={row['rel_l2']:.4f} max_abs={row['max_abs_err']:.1f} degC "
-                      f"peak_loc_err={row['peak_loc_err']:.3f} bnd_mae={row['boundary_mae']:.3f} "
+                print(f"      rel_L2={row['rel_l2']:.4f} mae={row['mae']:.3f} max_abs={row['max_abs_err']:.2f} degC "
+                      f"peak_err={row['peak_temp_err']:.2f} degC hotspot_loc={row['hotspot_loc_cells']:.1f} cells "
                       f"({row['train_seconds']:.1f} s)")
 
                 stem = f"{sample_id}_N{n_sensors}_seed{seed}_{row['bc_mode']}_{row['source_kind']}{tag}"
@@ -344,7 +355,7 @@ def save_triptych(pred: np.ndarray, chip: ChipSample, row: dict, stem: str) -> N
                        vmin=true.min() if cmap == "inferno" else None, vmax=vmax)
         ax.set_title(title, fontsize=10)
         fig.colorbar(im, ax=ax, fraction=0.046)
-    fig.suptitle(f"{chip.sample_id} (k={chip.k:.1f}, T_b={chip.T_boundary:.1f} degC)", fontsize=11)
+    fig.suptitle(f"{chip.sample_id} (T_amb={chip.T_amb:.1f} degC, {chip.block_count} blocks)", fontsize=11)
     fig.tight_layout()
     out = resolve_path("results/figures") / f"{stem}.png"
     out.parent.mkdir(parents=True, exist_ok=True)
