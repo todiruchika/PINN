@@ -76,7 +76,7 @@ def fields_norm(d: dict, scale: float) -> np.ndarray:
     return ((d["T"] - d["T_amb"][:, None, None]) / scale).reshape(len(d["ids"]), -1).astype(np.float32)
 
 
-def train_one_config(n_sensors: int, seed: int, config: dict, data: dict, quiet: bool = True) -> dict:
+def train_one_config(n_sensors: int, seed: int, config: dict, data: dict, quiet: bool = True, save_maps: int = 0) -> dict:
     set_seed(seed)
     device = torch.device(config.get("device", "cpu"))
     tr = config["training"]
@@ -155,9 +155,45 @@ def train_one_config(n_sensors: int, seed: int, config: dict, data: dict, quiet:
             rows.append({"sample_id": sid, "n_sensors": n_sensors, "seed": seed,
                          **all_metrics(pred, te_d["T"][i], te_d["mask"][i]),
                          "inference_seconds": inf_s})
-    return {"rows": rows, "best_val_rel_l2": best["val"], "best_epoch": best["epoch"],
+    maps = None
+    if save_maps:
+        with torch.no_grad():
+            maps = []
+            for i in range(min(save_maps, len(te_d["ids"]))):
+                pf = model.predict_field(test_b[i], grid_xy).cpu().numpy()
+                maps.append((te_d["ids"][i], pf.reshape(GRID, GRID) * scale + te_d["T_amb"][i],
+                             te_d["T"][i], te_d["pos"][i]))
+    return {"maps": maps, "rows": rows, "best_val_rel_l2": best["val"], "best_epoch": best["epoch"],
             "train_seconds": train_seconds, "model": model,
             "n_params": sum(p.numel() for p in model.parameters())}
+
+
+def save_map_figure(maps: list, n_sensors: int, seed: int, out_dir: Path) -> Path:
+    """True | predicted | abs error per test sample, sensors drawn as white dots."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig, axes = plt.subplots(len(maps), 3, figsize=(12, 3.6 * len(maps)), squeeze=False)
+    for r, (sid, pred, true, pos) in enumerate(maps):
+        vmin, vmax = true.min(), true.max()
+        err = np.abs(pred - true)
+        for c, (img, title, cmap, lim) in enumerate([
+            (true, f"{sid}: true (C)", "inferno", (vmin, vmax)),
+            (pred, "DeepONet prediction (C)", "inferno", (vmin, vmax)),
+            (err, "absolute error (C)", "viridis", (0, None)),
+        ]):
+            im = axes[r, c].imshow(img, cmap=cmap, vmin=lim[0], vmax=lim[1], origin="upper")
+            axes[r, c].scatter(pos[:, 0] * (GRID - 1), pos[:, 1] * (GRID - 1), c="white", s=18, edgecolors="k")
+            axes[r, c].set_title(title)
+            axes[r, c].axis("off")
+            plt.colorbar(im, ax=axes[r, c], fraction=0.046)
+    fig.suptitle(f"Model A, N={n_sensors} sensors, seed={seed}")
+    fig.tight_layout()
+    path = out_dir / f"maps_n{n_sensors}_seed{seed}.png"
+    fig.savefig(path, dpi=110)
+    plt.close(fig)
+    return path
 
 
 def main() -> None:
@@ -168,6 +204,7 @@ def main() -> None:
     ap.add_argument("--strategy", default=None, help="overrides config sensor_strategy")
     ap.add_argument("--epochs", type=int, default=None)
     ap.add_argument("--out-dir", default=str(RESULTS_DIR))
+    ap.add_argument("--save-maps", type=int, default=0, help="save true/pred/error figures for first K test samples")
     ap.add_argument("--save-checkpoints", action="store_true")
     ap.add_argument("--quiet", action="store_true")
     args = ap.parse_args()
@@ -191,7 +228,7 @@ def main() -> None:
         data = {sp: load_split(splits[sp], n, strategy, meta) for sp in ("train", "validation", "test")}
         for seed in seeds:
             print(f"=== Model A: N={n}, seed={seed} ===", flush=True)
-            res = train_one_config(n, seed, config, data, quiet=args.quiet)
+            res = train_one_config(n, seed, config, data, quiet=args.quiet, save_maps=args.save_maps)
             df = pd.DataFrame(res["rows"])
             df.to_csv(out_dir / f"per_sample_n{n}_seed{seed}.csv", index=False)
             summary = {"config": f"deeponet_{strategy}_n{n}", "seed": seed,
@@ -205,6 +242,8 @@ def main() -> None:
                   f"-> test rel_l2={summary['relative_l2']:.4f}, MAE={summary['mae_C']:.2f} C, "
                   f"RMSE={summary['rmse_C']:.2f} C, params={res['n_params']}, "
                   f"train={res['train_seconds']:.0f}s", flush=True)
+            if res["maps"]:
+                print("    saved", save_map_figure(res["maps"], n, seed, out_dir))
             if args.save_checkpoints:
                 ck = out_dir / "checkpoints"
                 ck.mkdir(exist_ok=True)

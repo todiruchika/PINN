@@ -78,13 +78,14 @@ python -m src.train.train_deeponet --sensors 5 --seeds 0 --epochs 20   # smoke t
 Code: `src/models/deeponet.py`, `src/train/train_deeponet.py`, `configs/deeponet.yaml`,
 `tests/test_deeponet.py`. Results: `results/model_a/` (`summary.md`, `seed_*.csv`, `per_sample_*.csv`).
 
-Test results, mean +/- std over 5 seeds (CPU, ~1.7 min per run):
+Test results, mean +/- std over 5 seeds (CPU, ~2 min per run), POD-QR layout as refit on the
+500 train samples:
 
 | N sensors | rel. L2 | MAE (C) | RMSE (C) |
 |---|---|---|---|
-| 5  | 0.1134 +/- 0.0006 | 4.60 +/- 0.04 | 6.46 +/- 0.03 |
-| 8  | 0.0822 +/- 0.0007 | 3.24 +/- 0.03 | 4.69 +/- 0.04 |
-| 10 | 0.0662 +/- 0.0001 | 2.58 +/- 0.01 | 3.73 +/- 0.01 |
+| 5  | 0.1146 +/- 0.0010 | 4.66 +/- 0.06 | 6.55 +/- 0.05 |
+| 8  | 0.0862 +/- 0.0006 | 3.37 +/- 0.03 | 4.85 +/- 0.04 |
+| 10 | 0.0613 +/- 0.0003 | 2.38 +/- 0.02 | 3.45 +/- 0.02 |
 
-The POD-QR layout is the one already on `main` (fit on the earlier 80-sample train
-split); it was not refit on the 500-sample train split.
+Thermal maps (true | prediction | abs. error, first 3 test samples) are saved as
+`results/model_a/maps_n{N}_seed{k}.png` (`--save-maps 3`).
