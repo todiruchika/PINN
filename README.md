@@ -89,3 +89,38 @@ Test results, mean +/- std over 5 seeds (CPU, ~2 min per run), POD-QR layout as 
 
 Thermal maps (true | prediction | abs. error, first 3 test samples) are saved as
 `results/model_a/maps_n{N}_seed{k}.png` (`--save-maps 3`).
+
+## Model C: hybrid physics-informed DeepONet (branch `smriti-hybrid`)
+
+Same data, split, sensors, scaling, seeds and metrics as Model A. Full table: `results/model_c_summary.md`.
+
+* **Stage 1** (`src/models/hybrid.py`, `src/train/train_hybrid.py`): DeepONet with a second, non-negative
+  source output and exactly adiabatic edges (trunk input `cos(pi x), cos(pi y)`); optional heat-equation
+  residual term from `src/physics/losses.py` (copied from `ruchika-per-chip-pinn`).
+* **Stage 2** (`src/train/refine_hybrid.py`): per-chip refinement at test time. Fit Gaussian power blobs to the
+  source the stage-1 map implies, then tune the chip's 128 coefficients on sensor fit + heat-equation residual
+  + closeness to stage 1. Settings were chosen on validation chips only.
+* **Physics-validity metric** (`src/physics/residual.py`): relative finite-difference residual of the governing
+  equation against the dataset's true source `Q`. Ground truth scores about 0.15 (discretisation floor).
+
+```bash
+python -m src.train.train_hybrid --config configs/hybrid_pretrain.yaml --save-checkpoints --out-dir results/model_c_pretrain/n5 --sensors 5
+python -m src.train.refine_hybrid --split test --sensors 5 --seeds 0 --w-prior 1 --w-pde 10 --w-data 10
+```
+
+**Result: the hybrid does not beat Model A here.** Test rel. L2 (mean over 5 seeds for A and stage 1):
+
+| N | Model A | C stage 1 | C stage 2 (seed 0) |
+|---|---|---|---|
+| 5  | 0.1146 | 0.1147 | 0.1188 (stage 1 same seed: 0.1130) |
+| 8  | 0.0862 | 0.0861 | 0.0894 (0.0860) |
+| 10 | 0.0613 | 0.0616 | 0.0678 (0.0623) |
+
+Validation sweeps (N=5, seed 0) found the same thing: adding the residual term during training gave
+0.1183 (weight 0), 0.1177 (0.1), 0.1240 (1), 0.1419 (10); supplying the true power map as extra labels gave
+about 0.116. Refinement was worse in all 9 settings tried and worse with a larger physics weight.
+Predicted maps are far from satisfying the equation for every model (residual 0.79 to 0.86 vs 0.15 floor) and
+the physics terms did not reduce it. Likely cause: the source is unknown, so the heat equation does not pin the
+temperature down, and 500 training maps already give Model A plenty of data. Untested ideas: fewer training
+chips, a better source prior.
+

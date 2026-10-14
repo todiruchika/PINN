@@ -1,0 +1,27 @@
+# Model C: physics-informed DeepONet (Model A + heat-equation residual).
+name: hybrid
+sensor_strategy: podqr
+n_sensors: [5, 8, 10]
+seeds: [0, 1, 2, 3, 4]
+device: cpu
+model:
+  p: 128
+  branch_width: 128
+  branch_depth: 3
+  trunk_width: 128
+  trunk_depth: 4
+  activation: tanh
+  hard_bc: true          # temperature trunk sees (cos pi x, cos pi y): exact adiabatic edges
+# physics constants default to src/physics/losses.py (= generator/pde_solver.py values)
+training:
+  epochs: 400
+  batch_size: 32
+  lr: 1.0e-3
+  lr_min: 1.0e-5
+  n_query: 1024
+  n_colloc: 64           # interior collocation points per chip per step
+  lambda_pde: 0.1        # weight of the heat-equation residual (0 = physics off)
+  pde_ramp_epochs: 40    # linearly ramp the physics weight from 0 over these epochs
+  lambda_q: 0.0          # ablation: supervise predicted source with ground-truth Q
+  eval_every: 10
+  patience: 10

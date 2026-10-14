@@ -1,0 +1,2 @@
+config,seed,relative_l2,mae_C,rmse_C,mse_C2,peak_temp_error_C,hotspot_localization_cells,pde_residual_rel,source_rel_l2,inference_seconds,best_val_rel_l2,best_epoch,n_params,train_hours
+hybrid_pretrain_podqr_n5,0,0.1130188382504819,4.599971096540927,6.47369603811755,54.07228482000661,-12.4265642090805,33.614234518805176,0.8545020069598052,1.986320066948616,0.19363940299488605,0.11829279341791354,360,200962,0.10564880730558393

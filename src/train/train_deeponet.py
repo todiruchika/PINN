@@ -29,6 +29,7 @@ from src.data.dataset import GRID, RAW_DIR, load_metadata, load_sample
 from src.data.splits import load_splits
 from src.eval.metrics import all_metrics
 from src.models.deeponet import build_deeponet
+from src.physics.residual import relative_pde_residual
 from src.sensors.readers import metre_to_idx, sensor_mask
 
 DTYPE = torch.float32
@@ -48,16 +49,17 @@ def grid_points(n: int = GRID) -> np.ndarray:
 
 def load_split(ids: list, n_sensors: int, strategy: str, meta: pd.DataFrame) -> dict:
     """Raw arrays for a split: T, T_amb, sensor positions (unit square) and noisy readings."""
-    T, T_amb, pos, noisy, masks = [], [], [], [], []
+    T, Q, T_amb, pos, noisy, masks = [], [], [], [], [], []
     for sid in ids:
         s = load_sample(sid, n_sensors, strategy=strategy, meta=meta)
         T.append(s["T"].astype(np.float64))
+        Q.append(s["Q"].astype(np.float64))
         T_amb.append(float(s["meta"]["T_amb_C"]))
         positions_m = s["sensors"]["positions"]
         pos.append(np.array(positions_m) / 0.012)
         noisy.append(np.array(s["sensors"]["temperatures_noisy"], dtype=np.float64))
         masks.append(~sensor_mask(positions_m))
-    return {"ids": ids, "T": np.stack(T), "T_amb": np.array(T_amb), "pos": np.stack(pos),
+    return {"ids": ids, "T": np.stack(T), "Q": np.stack(Q), "T_amb": np.array(T_amb), "pos": np.stack(pos),
             "noisy": np.stack(noisy), "mask": np.stack(masks)}
 
 
@@ -154,6 +156,7 @@ def train_one_config(n_sensors: int, seed: int, config: dict, data: dict, quiet:
             pred = pred_norm.reshape(GRID, GRID) * scale + te_d["T_amb"][i]
             rows.append({"sample_id": sid, "n_sensors": n_sensors, "seed": seed,
                          **all_metrics(pred, te_d["T"][i], te_d["mask"][i]),
+                         "pde_residual_rel": relative_pde_residual(pred, te_d["Q"][i], te_d["T_amb"][i]),
                          "inference_seconds": inf_s})
     maps = None
     if save_maps:
