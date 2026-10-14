@@ -283,6 +283,13 @@ What the table says about the model:
 Judge Model B by `rel_l2`, `peak_temp_err` and `hotspot_loc_cells` together, over many
 chips and seeds, never from one chip.
 
+**Error against sensor count, 3 seeds** (`results/verification/metrics_chips_1_2_3_seeds_0_2.csv`: chips
+`thermal_00001-00003`, N ∈ {5, 8, 10}, seeds 0-2, 27 solves). Relative L2, mean over the three chips,
+then mean ± std over seeds: N=5 0.109 ± 0.003, N=8 0.090 ± 0.002, N=10 0.073 ± 0.002. N=10 beat N=5 in
+all 9 (chip, seed) pairs, so the gain from more sensors is not seed noise. It is not monotonic per chip
+(e.g. `thermal_00003` is worse at N=8 than at N=5, reproducibly), and hotspot location does not improve
+with N (about 28-30 cells throughout). Only 3 chips, all from the train split.
+
 ---
 
 ## 7. Layout
