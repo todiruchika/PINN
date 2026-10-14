@@ -1,0 +1,137 @@
+[
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data/raw/dataset/train/matrices exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data/raw/dataset/train/images exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data/raw/dataset/train/sensors exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data/raw/dataset/validation/matrices exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data/raw/dataset/validation/images exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data/raw/dataset/validation/sensors exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data/raw/dataset/test/matrices exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data/raw/dataset/test/images exists"
+  },
+  {
+    "check": "Layout",
+    "status": "PASS",
+    "message": "data/raw/dataset/test/sensors exists"
+  },
+  {
+    "check": "Layout.IDs",
+    "status": "PASS",
+    "message": "700 IDs consistent across metadata and splits.csv"
+  },
+  {
+    "check": "Layout.train.matrix_ids",
+    "status": "PASS",
+    "message": "500 IDs match"
+  },
+  {
+    "check": "Layout.validation.matrix_ids",
+    "status": "PASS",
+    "message": "100 IDs match"
+  },
+  {
+    "check": "Layout.test.matrix_ids",
+    "status": "PASS",
+    "message": "100 IDs match"
+  },
+  {
+    "check": "Splits.counts",
+    "status": "PASS",
+    "message": "train=500, validation=100, test=100"
+  },
+  {
+    "check": "Splits.overlap",
+    "status": "PASS",
+    "message": "No overlap across splits"
+  },
+  {
+    "check": "Splits.train.meta_agree",
+    "status": "PASS",
+    "message": "500 IDs agree"
+  },
+  {
+    "check": "Splits.validation.meta_agree",
+    "status": "PASS",
+    "message": "100 IDs agree"
+  },
+  {
+    "check": "Splits.test.meta_agree",
+    "status": "PASS",
+    "message": "100 IDs agree"
+  },
+  {
+    "check": "Grids",
+    "status": "PASS",
+    "message": "All grids (128,128), finite, Q>=0"
+  },
+  {
+    "check": "Temperature",
+    "status": "PASS",
+    "message": "peak_T: min=30.3 median=83.9 max=124.6 degC; 0 samples > 125 degC"
+  },
+  {
+    "check": "Boundary.ZeroFlux",
+    "status": "WARN",
+    "message": "Lateral-edge |dT/dn|: mean=170.1 K/m, max=3498.0 K/m. Non-zero values are expected (stride-downsampling artifact; BC is adiabatic Neumann)."
+  },
+  {
+    "check": "Energy",
+    "status": "PASS",
+    "message": "max |ratio-1| = 0.0001, median = 0.0000"
+  },
+  {
+    "check": "Energy.err_pct",
+    "status": "WARN",
+    "message": "energy_bal_err_pct max = 2.71% > 2.5%"
+  },
+  {
+    "check": "Sensors",
+    "status": "PASS",
+    "message": "All N in {5,8,10} present, positions in [0,0.012]"
+  },
+  {
+    "check": "Sensors.placement",
+    "status": "WARN",
+    "message": "Stored reference sensors use block_centre_with_jitter (not podqr)"
+  },
+  {
+    "check": "Metadata.conductivity",
+    "status": "WARN",
+    "message": "k not in metadata \u2014 expected. Compute at runtime: k(T[K]) = 22714/(T[K]-99)+2 (source: pde_solver.py). See PROTOCOL.md."
+  },
+  {
+    "check": "Metadata.BC",
+    "status": "WARN",
+    "message": "boundary_condition not in metadata \u2014 expected. BC is adiabatic Neumann on all lateral edges + h_eff distributed sink. Source: pde_solver.py."
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "sample_id": "thermal_00001",
+  "split": "train",
+  "floorplan_id": 0,
+  "solver_tag": "FineMesh512_to_128",
+  "T_amb_C": 32.49080237694725,
+  "peak_temp_C": 43.0282,
+  "min_temp_C": 33.040000915527344,
+  "thermal_violation": false,
+  "energy_bal_P_in": 2.886,
+  "energy_bal_P_out": 2.8924,
+  "energy_bal_err_pct": 0.222,
+  "newton_iters": 1,
+  "thermo_iters": 2,
+  "block_count": 2,
+  "blocks_json": "[{\"id\": \"block_00\", \"type\": \"MC\", \"x_min\": 0.0010364067626662588, \"y_min\": 0.0, \"x_max\": 0.002031565514613088, \"y_max\": 0.0055105249046137105, \"width\": 0.000995, \"height\": 0.005511, \"power_density_dynamic\": 29.4637, \"power_density_leakage0\": 0.8839, \"leakage_beta\": 0.012}, {\"id\": \"block_01\", \"type\": \"MC\", \"x_min\": 0.005784763963240088, \"y_min\": 0.0021513357796044265, \"x_max\": 0.012, \"y_max\": 0.0030983658778486836, \"width\": 0.006215, \"height\": 0.000947, \"power_density_dynamic\": 18.2679, \"power_density_leakage0\": 0.548, \"leakage_beta\": 0.012}]",
+  "die_L_x_m": 0.012,
+  "die_L_y_m": 0.012,
+  "units": "coords_m_power_W_per_cm2_temp_C"
+}
