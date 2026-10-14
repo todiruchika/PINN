@@ -1,0 +1,52 @@
+{
+  "sensor_count": 5,
+  "positions": [
+    [
+      0.009637795275590551,
+      0.00047244094488188977
+    ],
+    [
+      0.00510236220472441,
+      0.005385826771653543
+    ],
+    [
+      0.005858267716535434,
+      0.01020472440944882
+    ],
+    [
+      0.010488188976377953,
+      0.004440944881889764
+    ],
+    [
+      0.0005669291338582678,
+      0.005763779527559055
+    ]
+  ],
+  "temperatures_true": [
+    32.0306,
+    32.1731,
+    34.8149,
+    32.8424,
+    37.1513
+  ],
+  "temperatures_noisy": [
+    31.0,
+    35.0,
+    35.0,
+    32.0,
+    38.0
+  ],
+  "noise_sigma_C": 1.0,
+  "quant_step_C": 1.0,
+  "calibration_offsets_C": [
+    -0.712,
+    1.757,
+    0.255,
+    -1.27,
+    1.838
+  ],
+  "placement_strategy": "block_centre_with_jitter",
+  "boundary_margin_cells": 3,
+  "_source_noise": "arXiv 0709.1861 (Intel Core Duo A/D quantization)",
+  "_source_digital_sensor": "Intel Agilex 7 AN 944 [TBD: confirm accuracy spec]"
+}
