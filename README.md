@@ -60,3 +60,30 @@ Remote branches that model work goes on:
 |--------|---------|
 | `smriti` | Model work (smriti). |
 | `Ruchika` | Model work (Ruchika). |
+
+## Model A: DeepONet baseline (branch `smriti`)
+
+Pure data-driven DeepONet, no physics term, on the current 500/100/100 dataset
+(`data/raw/dataset`). Branch net: sensor positions + `temperatures_noisy`;
+trunk net: query coordinate. Fields are scaled as `(T - T_amb) / dT_scale`
+(global train scale). Metrics are on non-sensor nodes (`src/eval/metrics.py`).
+
+```bash
+python -m src.sensors.generate_sensors            # POD-QR sensor files for all 700 samples (local, not committed)
+python -m src.train.train_deeponet                # configs/deeponet.yaml: N in {5,8,10} x seeds 0-4
+python -m src.train.train_deeponet --sensors 5 --seeds 0 --epochs 20   # smoke test
+```
+
+Code: `src/models/deeponet.py`, `src/train/train_deeponet.py`, `configs/deeponet.yaml`,
+`tests/test_deeponet.py`. Results: `results/model_a/` (`summary.md`, `seed_*.csv`, `per_sample_*.csv`).
+
+Test results, mean +/- std over 5 seeds (CPU, ~1.7 min per run):
+
+| N sensors | rel. L2 | MAE (C) | RMSE (C) |
+|---|---|---|---|
+| 5  | 0.1134 +/- 0.0006 | 4.60 +/- 0.04 | 6.46 +/- 0.03 |
+| 8  | 0.0822 +/- 0.0007 | 3.24 +/- 0.03 | 4.69 +/- 0.04 |
+| 10 | 0.0662 +/- 0.0001 | 2.58 +/- 0.01 | 3.73 +/- 0.01 |
+
+The POD-QR layout is the one already on `main` (fit on the earlier 80-sample train
+split); it was not refit on the 500-sample train split.

@@ -1,0 +1,23 @@
+# Model A: data-driven DeepONet, no physics term.
+name: deeponet
+sensor_strategy: podqr     # podqr | random_uniform | block_centre_reference
+n_sensors: [5, 8, 10]
+seeds: [0, 1, 2, 3, 4]
+device: cpu
+model:
+  p: 128
+  branch_width: 128
+  branch_depth: 3
+  trunk_width: 128
+  trunk_depth: 4
+  activation: tanh
+  fourier_freqs: 0
+  fourier_sigma: 8.0
+training:
+  epochs: 400
+  batch_size: 32
+  lr: 1.0e-3
+  lr_min: 1.0e-5
+  n_query: 1024
+  eval_every: 10
+  patience: 10
