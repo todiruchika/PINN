@@ -68,7 +68,7 @@ Reference: Manohar, Brunton, Kutz & Brunton, IEEE Control Systems Magazine 2018;
 | Split used for fitting | DECIDED | Training split only. Validation and test splits never opened during layout computation. |
 | Normalisation | DECIDED (2026-10-13) | θ_i = (T_i − T_amb,i) / (max T_i − T_amb,i) per sample. T_amb from metadata column `T_amb_C`. |
 | T_b rule | DECIDED (2026-10-13) | Use per-sample `T_amb_C` from metadata (consistent with the physics: T_amb is the known ambient temperature in the model). |
-| Matrix dimensions | DECIDED | 16384 × 80 (flattened 128×128, 80 train samples). |
+| Matrix dimensions | DECIDED | 16384 × 500 (flattened 128×128, 500 train samples). Layout refit on the 500-sample train split (r = 11 at 95% energy, `train_ids_sha256` 599325f6…); sensor files regenerated for all 700 samples with `python -m src.sensors.generate_sensors`. `generate_sensors` does not refit the layout — run `fit_podqr_layout` first if the train split changes. |
 | SVD centring | DECIDED | Subtract training mean before SVD. |
 | Mode count r | DECIDED | Keep r modes where cumulative energy ≥ 95%. Sensitivity reported at 90% and 99%. |
 | QR pivoting | DECIDED | QR with column pivoting on Ψ_r^T. First 10 pivots → sensors. Nested by construction. |
@@ -103,7 +103,7 @@ Reference: Manohar, Brunton, Kutz & Brunton, IEEE Control Systems Magazine 2018;
 | Item | Status | Detail |
 |------|--------|--------|
 | Source | DECIDED | `splits.csv` as given. Do not regenerate. |
-| Split sizes | DECIDED | train=80, validation=10, test=10. |
+| Split sizes | DECIDED | train=500, validation=100, test=100 (700 total). |
 | Pixel-level leakage | DECIDED | Not split by pixel. |
 
 ### Sampling strategy
@@ -127,7 +127,7 @@ Describes what the generator code does. Sources: `generator/dataset_generator.py
 
 **UNKNOWN**
 
-- Whether the delivered 100 samples were produced by the current generator. `results/dataset_extension_report.md` records a historical regression check for samples 00001–00002, but there is no complete generation record for the delivered set.
+- Whether the delivered 700 samples were produced by the current generator. `results/dataset_extension_report.md` records a historical regression check for samples 00001–00002, but there is no complete generation record for the delivered set.
 - Provenance of the delivered `splits.csv` is unknown. The current generator writes a manifest for newly generated data; it does not regenerate the delivered split assignment.
 - Block-count range: the `generate_single_sample` docstring says 1–10 blocks; the code samples 2–8. The code is used as the behavioural reference here.
 - Power-density ranges, leakage fractions, T_amb bounds, and the 125 °C threshold are all labelled ASSUMPTION — NOT SOURCED in `generator/PARAMETERS.md`.
@@ -191,7 +191,7 @@ Describes what the generator code does. Sources: `generator/dataset_generator.py
 2. **Governing equation resolved (2026-10-13)** — PDE confirmed: −∇·(t_die · k(T)∇T) + h_eff(T − T_amb) = q(x,y,T) with temperature-dependent k(T) and leakage. Source: `pde_solver.py`.
 3. **k resolved (2026-10-13)** — k(T) = 22714/(T[K]−99) + 2, clipped to [20, 160] W/(m·K). Source: `pde_solver.py`. Note: k is NOT in the metadata CSV; it must be computed at runtime from each sample's T field.
 4. **Three assumptions need external confirmation** — t_die = 500 µm, h_eff = 6256.3 W/(m²·K), β = 0.012 /K. All flagged as ASSUMPTION — NOT SOURCED in `generator/PARAMETERS.md`. Must confirm against HotSpot `default.config` and published data before submission.
-5. **100 samples** — Far below ≥ 2,000 target cited for the paper. Acquiring more data is a hard dependency for publication.
+5. **700 samples** — Below the ≥ 2,000 target cited for the paper. Acquiring more data is a hard dependency for publication.
 6. **Energy balance tolerance** — The validator now uses the generator convention (dA = (L/(N−1))²) and a 2.5% threshold. See `results/validation/energy_investigation.md` for the measured coarse-grid residual.
 
 ---
