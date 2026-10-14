@@ -14,11 +14,11 @@ def test_no_overlap():
 def test_union_covers_all():
     splits = load_splits()
     all_ids = set(splits["train"]) | set(splits["validation"]) | set(splits["test"])
-    assert len(all_ids) == 100
+    assert len(all_ids) == 700
 
 
 def test_split_sizes():
     splits = load_splits()
-    assert len(splits["train"]) == 80
-    assert len(splits["validation"]) == 10
-    assert len(splits["test"]) == 10
+    assert len(splits["train"]) == 500
+    assert len(splits["validation"]) == 100
+    assert len(splits["test"]) == 100

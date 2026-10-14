@@ -13,7 +13,8 @@ pip install -r requirements.txt
 
 ## Data
 
-The canonical 100-sample dataset and its POD-QR sensor records are committed under
+The canonical 700-sample dataset (500 train / 100 validation / 100 test) and its
+POD-QR sensor records are committed under
 `data/raw/dataset/` and `data/generated/`. Clone or pull the repository to get the
 same train/validation/test data on every approach branch. The incomplete extended
 and scratch datasets remain local and are not committed.
