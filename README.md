@@ -70,7 +70,7 @@ trunk net: query coordinate. Fields are scaled as `(T - T_amb) / dT_scale`
 (global train scale). Metrics are on non-sensor nodes (`src/eval/metrics.py`).
 
 ```bash
-python -m src.sensors.generate_sensors            # POD-QR sensor files for all 700 samples (local, not committed)
+python -m src.sensors.generate_sensors            # only needed if data/generated is missing (it is committed on main)
 python -m src.train.train_deeponet                # configs/deeponet.yaml: N in {5,8,10} x seeds 0-4
 python -m src.train.train_deeponet --sensors 5 --seeds 0 --epochs 20   # smoke test
 ```
