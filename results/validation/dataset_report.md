@@ -2,15 +2,15 @@
 
 | Check | Status | Message |
 |-------|--------|---------|
-| Layout | PASS | data/raw/dataset/train/matrices exists |
-| Layout | PASS | data/raw/dataset/train/images exists |
-| Layout | PASS | data/raw/dataset/train/sensors exists |
-| Layout | PASS | data/raw/dataset/validation/matrices exists |
-| Layout | PASS | data/raw/dataset/validation/images exists |
-| Layout | PASS | data/raw/dataset/validation/sensors exists |
-| Layout | PASS | data/raw/dataset/test/matrices exists |
-| Layout | PASS | data/raw/dataset/test/images exists |
-| Layout | PASS | data/raw/dataset/test/sensors exists |
+| Layout | PASS | data\raw\dataset\train\matrices exists |
+| Layout | PASS | data\raw\dataset\train\images exists |
+| Layout | PASS | data\raw\dataset\train\sensors exists |
+| Layout | PASS | data\raw\dataset\validation\matrices exists |
+| Layout | PASS | data\raw\dataset\validation\images exists |
+| Layout | PASS | data\raw\dataset\validation\sensors exists |
+| Layout | PASS | data\raw\dataset\test\matrices exists |
+| Layout | PASS | data\raw\dataset\test\images exists |
+| Layout | PASS | data\raw\dataset\test\sensors exists |
 | Layout.IDs | PASS | 700 IDs consistent across metadata and splits.csv |
 | Layout.train.matrix_ids | PASS | 500 IDs match |
 | Layout.validation.matrix_ids | PASS | 100 IDs match |
@@ -27,5 +27,5 @@
 | Energy.err_pct | WARN | energy_bal_err_pct max = 2.71% > 2.5% |
 | Sensors | PASS | All N in {5,8,10} present, positions in [0,0.012] |
 | Sensors.placement | WARN | Stored reference sensors use block_centre_with_jitter (not podqr) |
-| Metadata.conductivity | WARN | k not in metadata â€” expected. Compute at runtime: k(T[K]) = 22714/(T[K]-99)+2 (source: pde_solver.py). See PROTOCOL.md. |
-| Metadata.BC | WARN | boundary_condition not in metadata â€” expected. BC is adiabatic Neumann on all lateral edges + h_eff distributed sink. Source: pde_solver.py. |
+| Metadata.conductivity | WARN | k not in metadata — expected. Compute at runtime: k(T[K]) = 22714/(T[K]-99)+2 (source: pde_solver.py). See PROTOCOL.md. |
+| Metadata.BC | WARN | boundary_condition not in metadata — expected. BC is adiabatic Neumann on all lateral edges + h_eff distributed sink. Source: pde_solver.py. |
