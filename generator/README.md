@@ -18,4 +18,20 @@ If an earlier interrupted run left sample files without matching metadata,
 the generator stops instead of skipping those IDs or overwriting files. Move
 or restore those incomplete samples before retrying.
 
+To replace samples marked `thermal_violation=True` without changing their
+sample IDs or split assignments, run:
+
+```bash
+python generator/dataset_generator.py --regenerate-violations --out-dir data/raw/dataset --seed 42 --max-attempts-per-sample 50
+```
+
+Each candidate uses a new floorplan and ambient temperature. A replacement is
+saved only if it is at or below 125 °C and passes the validator's hard physical,
+analytic-power, and sensor-noise checks. Fine-mesh replacements retain the
+existing dataset's energy-balance behavior rather than being rejected by the
+validator's 0.5% threshold, which the current fine-mesh data also exceeds.
+Successful replacements are saved as they complete, so the command can be
+rerun after an interruption. If no candidate passes within the attempt limit,
+the command stops and reports the sample and failed checks.
+
 Output goes to `data/raw/` (gitignored).
