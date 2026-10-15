@@ -124,3 +124,24 @@ the physics terms did not reduce it. Likely cause: the source is unknown, so the
 temperature down, and 500 training maps already give Model A plenty of data. Untested ideas: fewer training
 chips, a better source prior.
 
+### Model C, variant 2: blend of DeepONet and per-chip PINN (`src/eval/blend.py`)
+
+`pred = w * DeepONet + (1 - w) * PINN` per chip, with `w` chosen per sensor count on validation chips only and
+then scored once on test chips. The PINN is Ruchika's model (code copied to `pure_pinn/` from
+`ruchika-per-chip-pinn`), run with a cheaper budget (600 Adam + 100 L-BFGS steps; about 3 min per solve),
+1 seed. DeepONet = Model A, seed 0. Scale: **20 validation chips, 31 test chips** (the first 31 in id order),
+not the full 100, because each PINN solve is slow. Raw output: `results/blend/`, `results/pinn2_metrics/`.
+
+Test relative L2 on the same 31 chips (lower is better):
+
+| N | DeepONet (A) | PINN (B) | Blend (w = DeepONet share) |
+|---|---|---|---|
+| 5  | 0.1212 | 0.1254 | **0.1194** (w=0.9) |
+| 8  | 0.0946 | 0.0954 | **0.0937** (w=0.1) |
+| 10 | 0.0655 | 0.0687 | **0.0641** (w=0.5) |
+
+The blend has the lowest mean error at every sensor count, but the gains are small (1-2%) and only some are
+clearly above noise (`results/blend/paired_analysis.md`): vs DeepONet at N=5, and vs PINN at N=8 and N=10. The
+blend does not improve hotspot localisation (N=8, 10: worse than the DeepONet) and the physics-validity metric
+stays at 0.78-0.88 for all variants. Single seed for the PINN and 31 test chips: treat this as indicative.
+

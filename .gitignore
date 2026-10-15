@@ -20,3 +20,5 @@ venv/
 *.pt
 thermal_pinn_comparison/results/checkpoints/
 results/checkpoints/
+results/pinn_runs/
+results/pinn2_runs/
