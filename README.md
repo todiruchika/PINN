@@ -39,20 +39,31 @@ python -m src.eval.coverage
 
 ## Branch Workflow
 
-- Work on your own branch; never commit `data/` or `.zip` files.
+- Work on your own branch. Keep extended/scratch datasets and archive files out of Git; the canonical dataset is maintained on `main`.
 - Merge `main` into your branch regularly to stay current with the harness.
 - Open a PR back to `main` to integrate validated results.
 
-## Branch Status
+## Hybrid PINN (siya branch)
 
-`main` contains:
+This branch adds a sensor-conditioned coordinate MLP trained with supervised,
+PDE-residual, and lateral Neumann-boundary losses. The model predicts the
+temperature field from noisy POD-QR sensor readings. The PDE uses the shared
+generator constants and the sample's `Q` map.
 
-- `src/data/`: dataset loader, splits, dataset validator
-- `src/sensors/`: sensor layouts, POD-QR placement, readers
-- `src/eval/`: metrics, gappy POD baseline, report aggregator, coverage check
-- `src/physics/heat.py`: stubs that raise `NotImplementedError`
-- `tests/`: pytest suite
-- No model or training code (`src/train/` is an empty package)
+The POD-QR records are included in the shared dataset. Train with:
+
+```bash
+python -m src.train.hybrid_pinn --epochs 20 --n-sensors 10
+```
+
+The training command uses train and validation splits only. It writes the best
+validation checkpoint to `results/hybrid_pinn/best.pt` by default. Loss weights,
+model size, point counts, and other run settings are configurable through CLI
+arguments; `python -m src.train.hybrid_pinn --help` lists them.
+
+The shared data, sensor, evaluation, and physics contracts remain inherited
+from `main`. Other approach branches should keep their model and training code
+isolated from this branch.
 
 Remote branches that model work goes on:
 

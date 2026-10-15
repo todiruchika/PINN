@@ -1,4 +1,1 @@
-"""Training utilities — implementations go on per-person branches.
-
-main: no training loops here.
-"""
+"""Training entry points for this method branch."""
