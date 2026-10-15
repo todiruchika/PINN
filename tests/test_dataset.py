@@ -27,9 +27,9 @@ def test_loader_shape():
                 assert len(result["sensors"]["positions"]) == n
 
 
-def test_all_100_samples():
+def test_all_samples():
     meta = get_meta()
-    assert len(meta) == 100
+    assert len(meta) == 700
     for _, row in meta.iterrows():
         for n in ALL_NS:
             result = load_sample(row["sample_id"], n, strategy="block_centre_with_jitter")
