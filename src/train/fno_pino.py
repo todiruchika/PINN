@@ -126,7 +126,15 @@ def train(args: argparse.Namespace) -> dict:
         grid_in = batch_input(train_data, idx)
         theta_pred, q_pred = model(grid_in)
 
-        loss_temp = F.mse_loss(theta_pred, theta_train[idx])
+        if args.hot_weight > 0:
+            # Weight each pixel by how hot it is relative to its chip's peak, so
+            # under-predicting a hotspot costs more than under-predicting background.
+            target = theta_train[idx]
+            rel = target / target.amax(dim=(1, 2), keepdim=True).clamp(min=1e-6)
+            weight = 1.0 + args.hot_weight * rel.clamp(min=0)
+            loss_temp = (weight * (theta_pred - target) ** 2).sum() / weight.sum()
+        else:
+            loss_temp = F.mse_loss(theta_pred, theta_train[idx])
         loss_src = F.mse_loss(q_pred, q_train[idx])
         residual = grid_residual(theta_pred, q_pred, train_data["T_amb"][idx])
         loss_phys = torch.mean(residual ** 2)
@@ -188,6 +196,8 @@ def parse_args(argv: list | None = None) -> argparse.Namespace:
     parser.add_argument("--w-temp", type=float, default=1.0)
     parser.add_argument("--w-src", type=float, default=1.0)
     parser.add_argument("--w-phys", type=float, default=0.01, help="0 gives the data-only ablation")
+    parser.add_argument("--hot-weight", type=float, default=0.0,
+                        help="extra weight on hot pixels in the temperature loss; 0 = plain MSE")
     parser.add_argument("--phys-warmup", type=float, default=0.2)
     parser.add_argument("--width", type=int, default=32)
     parser.add_argument("--modes", type=int, default=8)

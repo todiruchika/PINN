@@ -1,7 +1,7 @@
 """Ground-truth vs generated heatmaps for the FNO/PINO model, with error maps.
 
 Usage (from the repo root):
-    python -m src.eval.heatmaps_fno results/fno_pino_wsrc0.1/N10_seed0/best.pt <out.png> 4
+    python -m src.eval.heatmaps_fno results/fno_pino_wsrc0.1/N10_seed0/best.pt <out.png> 4 10
 """
 import sys
 from pathlib import Path
@@ -18,8 +18,9 @@ from src.eval.metrics import relative_l2
 from src.sensors.readers import sensor_mask
 
 ckpt, out_png, n_chips = Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[3])
+n_sensors = int(sys.argv[4]) if len(sys.argv) > 4 else 10
 splits = load_splits(); meta = load_metadata()
-test = load_split_arrays(splits["test"][:n_chips], 10, meta)
+test = load_split_arrays(splits["test"][:n_chips], n_sensors, meta)
 model = FNOPINO(width=32, modes=8, depth=4)
 model.load_state_dict(torch.load(ckpt))
 pred = predict_fields(model, test).numpy()
@@ -42,6 +43,6 @@ for i in range(n_chips):
         ax.set_title(titles[j], fontsize=9); ax.axis("off")
     fig.colorbar(im, ax=axes[i, :2].tolist(), fraction=0.03, label="C")
     fig.colorbar(im2, ax=axes[i, 2], fraction=0.046, label="C")
-fig.suptitle("FNO/PINO, 10 sensors (cyan circles), test chips", fontsize=11)
+fig.suptitle(f"FNO/PINO, {n_sensors} sensors (cyan circles), test chips", fontsize=11)
 fig.tight_layout(); fig.savefig(out_png, dpi=110)
 print("saved", out_png)
