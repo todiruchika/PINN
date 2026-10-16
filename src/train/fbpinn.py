@@ -23,7 +23,9 @@ from src.data.dataset import load_metadata
 from src.data.splits import load_splits
 from src.models.fbpinn import FBPINN, grid_coordinates, sensor_features
 from src.physics.grid_residual import TEMP_SCALE_C, grid_residual
-from src.train.fno_pino import load_split_arrays, make_targets, physics_weight, score
+from src.models.pod_prior import fit_basis
+from src.models.xpinn import XPINN
+from src.train.fno_pino import attach_prior, load_split_arrays, make_targets, physics_weight, score
 
 DEFAULT_OUT = Path("results/fbpinn")
 
@@ -40,6 +42,8 @@ def predict_fields(model: FBPINN, data: dict, coords: torch.Tensor, batch: int =
     for start in range(0, len(data["ids"]), batch):
         idx = torch.arange(start, min(start + batch, len(data["ids"])))
         theta, _ = model(_features(data, idx), coords)
+        if "prior" in data:
+            theta = theta + data["prior"][idx].reshape(len(idx), -1)
         outputs.append(data["T_amb"][idx].view(-1, 1) + TEMP_SCALE_C * theta)
     model.train()
     return torch.cat(outputs).reshape(-1, 128, 128)
@@ -60,11 +64,19 @@ def train(args: argparse.Namespace) -> dict:
     train_data = load_split_arrays(train_ids, args.sensors, meta)
     val_data = load_split_arrays(splits["validation"], args.sensors, meta)
     test_data = load_split_arrays(splits["test"], args.sensors, meta)
+    if args.prior == "pod":
+        mean, basis = fit_basis(train_data["T"].numpy(), train_data["T_amb"].numpy(), args.prior_rank)
+        for split_data in (train_data, val_data, test_data):
+            attach_prior(split_data, mean, basis)
     theta_train, q_train = make_targets(train_data)
     coords = grid_coordinates()
 
-    model = FBPINN(n_sensors=args.sensors, windows_per_side=args.windows, window_width=args.window_width,
-                   embed_dim=args.embed, hidden=args.hidden)
+    if args.model == "xpinn":
+        model = XPINN(n_sensors=args.sensors, tiles_per_side=args.windows, embed_dim=args.embed,
+                      hidden=args.hidden, interface_points=args.interface_points)
+    else:
+        model = FBPINN(n_sensors=args.sensors, windows_per_side=args.windows, window_width=args.window_width,
+                       embed_dim=args.embed, hidden=args.hidden)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.steps, eta_min=args.lr_min)
     n_params = sum(p.numel() for p in model.parameters())
@@ -77,16 +89,41 @@ def train(args: argparse.Namespace) -> dict:
 
     for step in range(1, args.steps + 1):
         idx = torch.randint(0, len(train_ids), (args.batch,))
-        theta_pred, q_pred = model(_features(train_data, idx), coords)
-        theta_pred = theta_pred.reshape(-1, 128, 128)
-        q_pred = q_pred.reshape(-1, 128, 128)
-
-        loss_temp = F.mse_loss(theta_pred, theta_train[idx])
-        loss_src = F.mse_loss(q_pred, q_train[idx])
-        residual = grid_residual(theta_pred, q_pred, train_data["T_amb"][idx])
-        loss_phys = torch.mean(residual ** 2)
+        features = _features(train_data, idx)
         w_phys = physics_weight(step, args.steps, args.w_phys, args.phys_warmup)
+        if args.points > 0:
+            # Efficient mode: random grid nodes (shared across the batch) for the data losses,
+            # and the full-grid physics residual on only the first few chips of the batch.
+            nodes = torch.randint(0, 128 * 128, (args.points,))
+            theta_pred, q_pred = model(features, coords[nodes])
+            if "prior" in train_data:
+                theta_pred = theta_pred + train_data["prior"][idx].reshape(len(idx), -1)[:, nodes]
+            loss_temp = F.mse_loss(theta_pred, theta_train[idx].reshape(len(idx), -1)[:, nodes])
+            loss_src = F.mse_loss(q_pred, q_train[idx].reshape(len(idx), -1)[:, nodes])
+            loss_phys = torch.zeros(())
+            if args.phys_chips > 0 and w_phys > 0:
+                k = args.phys_chips
+                theta_full, q_full = model(features[:k], coords)
+                theta_full = theta_full.reshape(-1, 128, 128)
+                if "prior" in train_data:
+                    theta_full = theta_full + train_data["prior"][idx[:k]]
+                residual = grid_residual(theta_full, q_full.reshape(-1, 128, 128), train_data["T_amb"][idx[:k]])
+                loss_phys = torch.mean(residual ** 2)
+        else:
+            theta_pred, q_pred = model(features, coords)
+            theta_pred = theta_pred.reshape(-1, 128, 128)
+            q_pred = q_pred.reshape(-1, 128, 128)
+            if "prior" in train_data:
+                theta_pred = theta_pred + train_data["prior"][idx]
+            loss_temp = F.mse_loss(theta_pred, theta_train[idx])
+            loss_src = F.mse_loss(q_pred, q_train[idx])
+            residual = grid_residual(theta_pred, q_pred, train_data["T_amb"][idx])
+            loss_phys = torch.mean(residual ** 2)
         loss = args.w_temp * loss_temp + args.w_src * loss_src + w_phys * loss_phys
+        loss_iface = torch.zeros(())
+        if args.model == "xpinn":
+            loss_iface = model.interface_loss(features)
+            loss = loss + args.w_iface * loss_iface
 
         optimizer.zero_grad()
         loss.backward()
@@ -102,6 +139,7 @@ def train(args: argparse.Namespace) -> dict:
                 "loss_temp": float(loss_temp.detach()),
                 "loss_src": float(loss_src.detach()),
                 "loss_phys": float(loss_phys.detach()),
+                "loss_iface": float(loss_iface.detach()),
                 "val_relative_l2": val_metrics["relative_l2"],
                 "elapsed_s": round(time.time() - start_time, 1),
             }
@@ -115,7 +153,7 @@ def train(args: argparse.Namespace) -> dict:
     model.load_state_dict(best_state)
     torch.save(best_state, out_dir / "best.pt")
     final = {
-        "model": "fbpinn",
+        "model": args.model,
         "sensors": args.sensors,
         "seed": args.seed,
         "steps": args.steps,
@@ -134,6 +172,9 @@ def train(args: argparse.Namespace) -> dict:
 
 def parse_args(argv: list | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--model", choices=["fbpinn", "xpinn"], default="fbpinn")
+    parser.add_argument("--w-iface", type=float, default=1.0, help="XPINN interface-condition weight")
+    parser.add_argument("--interface-points", type=int, default=16)
     parser.add_argument("--sensors", type=int, default=5, choices=[5, 8, 10])
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--steps", type=int, default=3000)
@@ -144,6 +185,13 @@ def parse_args(argv: list | None = None) -> argparse.Namespace:
     parser.add_argument("--w-src", type=float, default=0.1)
     parser.add_argument("--w-phys", type=float, default=0.01)
     parser.add_argument("--phys-warmup", type=float, default=0.2)
+    parser.add_argument("--points", type=int, default=0,
+                        help="random grid nodes per step for the data loss; 0 = full grid (slow, original mode)")
+    parser.add_argument("--phys-chips", type=int, default=2,
+                        help="chips per step that get the full-grid physics residual (with --points > 0)")
+    parser.add_argument("--prior", choices=["none", "pod"], default="none",
+                        help="pod: add a POD first estimate (train-only basis) and learn the correction")
+    parser.add_argument("--prior-rank", type=int, default=10)
     parser.add_argument("--windows", type=int, default=3, help="windows per side (3 gives 9 windows)")
     parser.add_argument("--window-width", type=float, default=0.35)
     parser.add_argument("--embed", type=int, default=32)
