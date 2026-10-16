@@ -46,7 +46,8 @@ def main() -> None:
     else:
         model = FBPINN(n_sensors=n_sensors, windows_per_side=run_config["windows"],
                        window_width=run_config["window_width"], embed_dim=run_config["embed"],
-                       hidden=run_config["hidden"])
+                       hidden=run_config["hidden"], encoder_width=run_config.get("encoder_width", 64),
+                       encoder_depth=run_config.get("encoder_depth", 1))
     model.load_state_dict(torch.load(ckpt))
     pred = predict_fields(model, test, grid_coordinates()).numpy()
 

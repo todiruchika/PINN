@@ -44,6 +44,8 @@ class FBPINN(nn.Module):
         window_width: float = 0.35,
         embed_dim: int = 32,
         hidden: int = 32,
+        encoder_width: int = 64,
+        encoder_depth: int = 1,
     ) -> None:
         super().__init__()
         self.n_sensors = n_sensors
@@ -51,7 +53,7 @@ class FBPINN(nn.Module):
         cy, cx = torch.meshgrid(side, side, indexing="ij")
         self.register_buffer("centres", torch.stack([cx.reshape(-1), cy.reshape(-1)], dim=-1))  # (K, 2)
         self.window_width = window_width
-        self.encoder = mlp([3 * n_sensors + 1, 64, embed_dim])
+        self.encoder = mlp([3 * n_sensors + 1] + [encoder_width] * encoder_depth + [embed_dim])
         self.windows = nn.ModuleList(
             mlp([2 + embed_dim, hidden, hidden, 2]) for _ in range(len(self.centres))
         )

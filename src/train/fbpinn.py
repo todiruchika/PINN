@@ -76,7 +76,27 @@ def train(args: argparse.Namespace) -> dict:
                       hidden=args.hidden, interface_points=args.interface_points)
     else:
         model = FBPINN(n_sensors=args.sensors, windows_per_side=args.windows, window_width=args.window_width,
-                       embed_dim=args.embed, hidden=args.hidden)
+                       embed_dim=args.embed, hidden=args.hidden, encoder_width=args.encoder_width,
+                       encoder_depth=args.encoder_depth)
+    seam_mask = None
+    if args.model == "xpinn" and args.seam_mask:
+        # Nodes whose neighbours lie in a different tile see a jump in the stitched field. The grid
+        # residual would punish that jump, so those nodes are left out of the physics loss and the
+        # interface loss handles the tile edges instead.
+        tile = model.tile_index(coords).reshape(128, 128)
+        differs = torch.zeros(128, 128, dtype=torch.bool)
+        differs[:, :-1] |= tile[:, :-1] != tile[:, 1:]
+        differs[:, 1:] |= tile[:, :-1] != tile[:, 1:]
+        differs[:-1, :] |= tile[:-1, :] != tile[1:, :]
+        differs[1:, :] |= tile[:-1, :] != tile[1:, :]
+        seam_mask = (~differs).float()
+
+    def physics_loss(residual: torch.Tensor) -> torch.Tensor:
+        squared = residual ** 2
+        if seam_mask is None:
+            return torch.mean(squared)
+        return (squared * seam_mask).sum() / (seam_mask.sum() * squared.shape[0])
+
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.steps, eta_min=args.lr_min)
     n_params = sum(p.numel() for p in model.parameters())
@@ -108,7 +128,7 @@ def train(args: argparse.Namespace) -> dict:
                 if "prior" in train_data:
                     theta_full = theta_full + train_data["prior"][idx[:k]]
                 residual = grid_residual(theta_full, q_full.reshape(-1, 128, 128), train_data["T_amb"][idx[:k]])
-                loss_phys = torch.mean(residual ** 2)
+                loss_phys = physics_loss(residual)
         else:
             theta_pred, q_pred = model(features, coords)
             theta_pred = theta_pred.reshape(-1, 128, 128)
@@ -118,7 +138,7 @@ def train(args: argparse.Namespace) -> dict:
             loss_temp = F.mse_loss(theta_pred, theta_train[idx])
             loss_src = F.mse_loss(q_pred, q_train[idx])
             residual = grid_residual(theta_pred, q_pred, train_data["T_amb"][idx])
-            loss_phys = torch.mean(residual ** 2)
+            loss_phys = physics_loss(residual)
         loss = args.w_temp * loss_temp + args.w_src * loss_src + w_phys * loss_phys
         loss_iface = torch.zeros(())
         if args.model == "xpinn":
@@ -175,6 +195,7 @@ def parse_args(argv: list | None = None) -> argparse.Namespace:
     parser.add_argument("--model", choices=["fbpinn", "xpinn"], default="fbpinn")
     parser.add_argument("--w-iface", type=float, default=1.0, help="XPINN interface-condition weight")
     parser.add_argument("--interface-points", type=int, default=16)
+    parser.add_argument("--seam-mask", action="store_true", help="XPINN: leave nodes next to tile edges out of the physics loss")
     parser.add_argument("--sensors", type=int, default=5, choices=[5, 8, 10])
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--steps", type=int, default=3000)
@@ -196,6 +217,8 @@ def parse_args(argv: list | None = None) -> argparse.Namespace:
     parser.add_argument("--window-width", type=float, default=0.35)
     parser.add_argument("--embed", type=int, default=32)
     parser.add_argument("--hidden", type=int, default=32)
+    parser.add_argument("--encoder-width", type=int, default=64, help="sensor encoder hidden width (FBPINN)")
+    parser.add_argument("--encoder-depth", type=int, default=1, help="sensor encoder hidden layers (FBPINN)")
     parser.add_argument("--eval-every", type=int, default=250)
     parser.add_argument("--train-chips", type=int, default=0, help="0 uses all 500 training chips")
     parser.add_argument("--threads", type=int, default=0, help="0 keeps the torch default")
