@@ -91,6 +91,7 @@ def build_grid_input(
     ambient_c: torch.Tensor,
     ambient_centre_c: float = AMBIENT_CENTRE_C,
     ambient_span_c: float = AMBIENT_SPAN_C,
+    prior_theta: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """Turn sparse sensor readings into the (B, 5, H, W) input image.
 
@@ -112,13 +113,13 @@ def build_grid_input(
     ambient_norm = ((ambient_c - ambient_centre_c) / ambient_span_c).view(batch, 1, 1).expand(-1, GRID, GRID)
     coords = torch.linspace(0.0, 1.0, GRID)
     y_grid, x_grid = torch.meshgrid(coords, coords, indexing="ij")
-    return torch.stack(
-        [
-            values,
-            mask,
-            ambient_norm,
-            x_grid.expand(batch, -1, -1),
-            y_grid.expand(batch, -1, -1),
-        ],
-        dim=1,
-    )
+    channels = [
+        values,
+        mask,
+        ambient_norm,
+        x_grid.expand(batch, -1, -1),
+        y_grid.expand(batch, -1, -1),
+    ]
+    if prior_theta is not None:
+        channels.append(prior_theta)   # first estimate from the sensors (optional sixth channel)
+    return torch.stack(channels, dim=1)

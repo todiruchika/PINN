@@ -25,6 +25,7 @@ from src.data.dataset import load_metadata, load_sample
 from src.data.splits import load_splits
 from src.eval.metrics import all_metrics
 from src.models.fno_pino import FNOPINO, build_grid_input
+from src.models.pod_prior import fit_basis, prior_theta
 from src.physics.grid_residual import TEMP_SCALE_C, grid_residual
 from src.sensors.readers import sensor_mask
 
@@ -59,7 +60,14 @@ def make_targets(data: dict) -> tuple[torch.Tensor, torch.Tensor]:
 
 
 def batch_input(data: dict, idx: torch.Tensor) -> torch.Tensor:
-    return build_grid_input(data["positions"][idx], data["readings"][idx], data["T_amb"][idx])
+    prior = data["prior"][idx] if "prior" in data else None
+    return build_grid_input(data["positions"][idx], data["readings"][idx], data["T_amb"][idx], prior_theta=prior)
+
+
+def attach_prior(data: dict, mean: np.ndarray, basis: np.ndarray) -> None:
+    """Add the POD first estimate (in theta units) to a split's data."""
+    data["prior"] = prior_theta(data["positions"].numpy(), data["readings"].numpy(),
+                                data["T_amb"].numpy(), mean, basis)
 
 
 def physics_weight(step: int, total: int, target: float, warmup_fraction: float) -> float:
@@ -76,6 +84,8 @@ def predict_fields(model: FNOPINO, data: dict, batch: int = 32) -> torch.Tensor:
     for start in range(0, len(data["ids"]), batch):
         idx = torch.arange(start, min(start + batch, len(data["ids"])))
         theta, _ = model(batch_input(data, idx))
+        if "prior" in data:
+            theta = theta + data["prior"][idx]   # network predicts a correction to the estimate
         outputs.append(data["T_amb"][idx].view(-1, 1, 1) + TEMP_SCALE_C * theta)
     model.train()
     return torch.cat(outputs)
@@ -110,7 +120,12 @@ def train(args: argparse.Namespace) -> dict:
     test_data = load_split_arrays(test_ids, args.sensors, meta)
     theta_train, q_train = make_targets(train_data)
 
-    model = FNOPINO(width=args.width, modes=args.modes, depth=args.depth)
+    if args.prior == "pod":
+        mean, basis = fit_basis(train_data["T"].numpy(), train_data["T_amb"].numpy(), args.prior_rank)
+        for split_data in (train_data, val_data, test_data):
+            attach_prior(split_data, mean, basis)
+    model = FNOPINO(width=args.width, modes=args.modes, depth=args.depth,
+                    in_channels=6 if args.prior == "pod" else 5)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.steps, eta_min=args.lr_min)
     n_params = sum(p.numel() for p in model.parameters())
@@ -125,6 +140,8 @@ def train(args: argparse.Namespace) -> dict:
         idx = torch.randint(0, len(train_ids), (args.batch,))
         grid_in = batch_input(train_data, idx)
         theta_pred, q_pred = model(grid_in)
+        if "prior" in train_data:
+            theta_pred = theta_pred + train_data["prior"][idx]
 
         if args.hot_weight > 0:
             # Weight each pixel by how hot it is relative to its chip's peak, so
@@ -198,6 +215,9 @@ def parse_args(argv: list | None = None) -> argparse.Namespace:
     parser.add_argument("--w-phys", type=float, default=0.01, help="0 gives the data-only ablation")
     parser.add_argument("--hot-weight", type=float, default=0.0,
                         help="extra weight on hot pixels in the temperature loss; 0 = plain MSE")
+    parser.add_argument("--prior", choices=["none", "pod"], default="none",
+                        help="pod: feed a POD first estimate and learn the correction to it")
+    parser.add_argument("--prior-rank", type=int, default=10)
     parser.add_argument("--phys-warmup", type=float, default=0.2)
     parser.add_argument("--width", type=int, default=32)
     parser.add_argument("--modes", type=int, default=8)

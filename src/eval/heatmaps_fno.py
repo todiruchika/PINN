@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 from src.data.splits import load_splits
 from src.data.dataset import load_metadata
 from src.models.fno_pino import FNOPINO
-from src.train.fno_pino import load_split_arrays, predict_fields
+from src.train.fno_pino import attach_prior, load_split_arrays, predict_fields
+from src.models.pod_prior import fit_basis
 from src.sensors.readers import metre_to_idx
 from src.eval.metrics import relative_l2
 from src.sensors.readers import sensor_mask
@@ -23,9 +24,16 @@ ckpt, out_png, n_chips = Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[3])
 # The run's own results.json records its architecture and sensor count.
 run_config = json.loads((ckpt.parent / "results.json").read_text(encoding="utf-8"))["config"]
 n_sensors = int(sys.argv[4]) if len(sys.argv) > 4 else int(run_config["sensors"])
+use_prior = run_config.get("prior", "none") == "pod"
 splits = load_splits(); meta = load_metadata()
 test = load_split_arrays(splits["test"][:n_chips], n_sensors, meta)
-model = FNOPINO(width=run_config["width"], modes=run_config["modes"], depth=run_config["depth"])
+if use_prior:
+    # Same training-only basis the run used: refit it on the training chips.
+    train = load_split_arrays(splits["train"], n_sensors, meta)
+    mean, basis = fit_basis(train["T"].numpy(), train["T_amb"].numpy(), int(run_config["prior_rank"]))
+    attach_prior(test, mean, basis)
+model = FNOPINO(width=run_config["width"], modes=run_config["modes"], depth=run_config["depth"],
+                in_channels=6 if use_prior else 5)
 model.load_state_dict(torch.load(ckpt))
 pred = predict_fields(model, test).numpy()
 fig, axes = plt.subplots(n_chips, 3, figsize=(10, 3.4 * n_chips))
