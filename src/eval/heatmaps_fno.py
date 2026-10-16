@@ -1,8 +1,10 @@
 """Ground-truth vs generated heatmaps for the FNO/PINO model, with error maps.
 
 Usage (from the repo root):
-    python -m src.eval.heatmaps_fno results/fno_pino_wsrc0.1/N10_seed0/best.pt <out.png> 4 10
+    python -m src.eval.heatmaps_fno results/fno_pino_wsrc0.1/N10_seed0/best.pt <out.png> 4
+The sensor count and architecture are read from results.json next to best.pt.
 """
+import json
 import sys
 from pathlib import Path
 import numpy as np, torch
@@ -18,10 +20,12 @@ from src.eval.metrics import relative_l2
 from src.sensors.readers import sensor_mask
 
 ckpt, out_png, n_chips = Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[3])
-n_sensors = int(sys.argv[4]) if len(sys.argv) > 4 else 10
+# The run's own results.json records its architecture and sensor count.
+run_config = json.loads((ckpt.parent / "results.json").read_text(encoding="utf-8"))["config"]
+n_sensors = int(sys.argv[4]) if len(sys.argv) > 4 else int(run_config["sensors"])
 splits = load_splits(); meta = load_metadata()
 test = load_split_arrays(splits["test"][:n_chips], n_sensors, meta)
-model = FNOPINO(width=32, modes=8, depth=4)
+model = FNOPINO(width=run_config["width"], modes=run_config["modes"], depth=run_config["depth"])
 model.load_state_dict(torch.load(ckpt))
 pred = predict_fields(model, test).numpy()
 fig, axes = plt.subplots(n_chips, 3, figsize=(10, 3.4 * n_chips))

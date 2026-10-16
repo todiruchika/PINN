@@ -27,6 +27,12 @@ VARIANTS = {
     "source w 0.1": Path("results/fno_pino_wsrc0.1"),
     "source w 0.1 + hot-pixel w 4": Path("results/fno_pino_hotw4"),
 }
+# Single-run ablations at 10 sensors (seed 0). Shown in the table only.
+ABLATIONS = {
+    "physics weight 0.1": Path("results/fno_pino_wphys0.1"),
+    "16 Fourier modes": Path("results/fno_pino_modes16"),
+    "10000 steps (source w 1.0)": Path("results/fno_pino_10k"),
+}
 SENSOR_COUNTS = [5, 8, 10]
 METRICS = [
     ("relative_l2", "relative L2 error (%)", 100.0),
@@ -110,8 +116,8 @@ def plot_training_curves() -> None:
 
 def main() -> None:
     rows, table = [], {}
-    for label, folder in VARIANTS.items():
-        table[label] = {}
+    for label, folder in {**VARIANTS, **ABLATIONS}.items():
+        table.setdefault(label, {})
         for n in SENSOR_COUNTS:
             runs = load_runs(folder, n)
             if not runs:
@@ -133,7 +139,7 @@ def main() -> None:
     if not rows:
         raise SystemExit("no results found")
     write_summary(rows)
-    plot_error_vs_sensors(table)
+    plot_error_vs_sensors({label: table[label] for label in VARIANTS})
     plot_training_curves()
     print(f"wrote {len(rows)} summary rows and figures to {OUT_DIR}")
 

@@ -194,7 +194,7 @@ def parse_args(argv: list | None = None) -> argparse.Namespace:
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--lr-min", type=float, default=1e-5)
     parser.add_argument("--w-temp", type=float, default=1.0)
-    parser.add_argument("--w-src", type=float, default=1.0)
+    parser.add_argument("--w-src", type=float, default=0.1, help="source-loss weight; 1.0 was the first baseline")
     parser.add_argument("--w-phys", type=float, default=0.01, help="0 gives the data-only ablation")
     parser.add_argument("--hot-weight", type=float, default=0.0,
                         help="extra weight on hot pixels in the temperature loss; 0 = plain MSE")
