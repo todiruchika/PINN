@@ -67,7 +67,29 @@ improvement is consistent across seeds.
 At 5 sensors, the hot-pixel weighting gave 13.36% against 13.20% without it, with a peak error of −12.7 °C against −14.0 °C.
 It improves the peak but not the overall fit, so it is not part of the final configuration.
 
-### 4.4 Figures
+### 4.4 Plain POD estimate and residual learning (5 sensors)
+
+A linear POD estimate, fitted to the sensor readings on the training basis, is used as an extra input. The network
+learns the correction to it. The basis is fitted on training chips only, and at test time the estimate uses only the
+sensor readings and the ambient temperature.
+
+| Method (test set) | 5 sensors | 8 sensors | 10 sensors |
+|---|---|---|---|
+| Plain POD estimate alone (10 modes) | 21.0% | 11.6% | 10.5% |
+| FNO/PINO, final configuration | 13.2% (1 seed) | 10.8% (1 seed) | 9.8% (3 seeds) |
+| FNO/PINO + POD estimate input | **11.2%** (1 seed) | not run | not run |
+
+For the POD + FNO row at 5 sensors: MAE 4.50 °C (vs 5.46), peak error −9.8 °C (vs −14.0), hotspot error 33.5 cells (vs 34.5).
+
+The plain POD estimate is almost as good as the network at 8 and 10 sensors, and its peak error at 10 sensors is much smaller
+(−2.2 °C against −8.5 °C). Its hotspot location is worse. The two methods fail in different ways.
+
+The heatmaps (`results/fno_pino_podprior/N5_seed0/heatmaps.png`) show modest peak gains. The hotspot location is still
+off on some chips, so the overall gain is mainly in the fit and the intensity, not the location.
+
+Reproduce the estimate-only numbers with `python -m src.eval.pod_baseline`.
+
+### 4.5 Figures
 
 - `error_vs_sensors.png`: test error against sensor count, for the main variants.
 - `training_curves.png`: validation error against training step, for seed 0 at each sensor count.
@@ -75,7 +97,7 @@ It improves the peak but not the overall fit, so it is not part of the final con
 - Heatmaps (ground truth, generated map and error for four test chips, with sensors marked):
   `results/fno_pino_wsrc0.1/N<n>_seed0/heatmaps.png` for n = 5, 8, 10, and the same file names in the ablation folders.
 
-### 4.5 What the heatmaps show
+### 4.6 What the heatmaps show
 
 The generated maps follow the broad warm regions, and the sensor readings constrain the field near the sensors.
 The main failure is at the hotspot. Generated peaks are lower and more spread out than the true peaks, and the
@@ -103,6 +125,9 @@ explain the gap. The data-driven PINN on `data-driven-pinn` has only a 3000-step
 The per-chip PINN on `ruchika-per-chip-pinn` fits one network per chip, so it is not comparable either.
 
 ## 6. Limitations
+
+- **POD + FNO at 5 sensors** is a single seed, and was not run at 8 or 10 sensors.
+- **Existing `gappy_pod.py`** uses a basis fitted to normalised temperatures and is not used in the results above.
 
 - **Seeds:** the 5- and 8-sensor results are single runs. The 10-sensor results use three seeds.
 - **Budget:** 3000 steps is about 48 passes over the training chips, far below the teammates' budgets.

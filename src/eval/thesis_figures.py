@@ -32,6 +32,7 @@ ABLATIONS = {
     "physics weight 0.1": Path("results/fno_pino_wphys0.1"),
     "16 Fourier modes": Path("results/fno_pino_modes16"),
     "10000 steps (source w 1.0)": Path("results/fno_pino_10k"),
+    "POD first estimate as input": Path("results/fno_pino_podprior"),
 }
 SENSOR_COUNTS = [5, 8, 10]
 METRICS = [
