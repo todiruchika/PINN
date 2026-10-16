@@ -30,11 +30,13 @@ RUNS = {
     "FBPINN fast + POD estimate (10k steps)": Path("results/fbpinn_fast_pod"),
     "FBPINN fast, encoder 256 (10 sensors)": Path("results/fbpinn_fast_enc256"),
     "FBPINN fast, 16 windows (10 sensors)": Path("results/fbpinn_fast_w16"),
-    "XPINN fast (10k steps at 5, 6k at 10 sensors)": Path("results/xpinn_fast"),
-    "XPINN fast + POD estimate (10k steps)": Path("results/xpinn_fast_pod"),
+    "FBPINN fast, physics off (10 sensors)": Path("results/fbpinn_fast_wphys0"),
+    "XPINN fast, physics on, unmasked (first version)": Path("results/xpinn_fast"),
+    "XPINN fast, physics on, unmasked + POD estimate": Path("results/xpinn_fast_pod"),
     "XPINN fast, 96 hidden units": Path("results/xpinn_fast_h96"),
     "XPINN fast, physics off": Path("results/xpinn_fast_wphys0"),
     "XPINN fast, physics on, tile-edge nodes masked": Path("results/xpinn_fast_seam"),
+    "XPINN fast, patch-averaged physics, tile-edge nodes masked": Path("results/xpinn_fast_seam_pool16"),
 }
 SENSOR_COUNTS = [5, 8, 10]
 
@@ -94,17 +96,26 @@ def main() -> None:
                      f"| {r['relative_l2_pct']} | {r['mae_C']} | {r['peak_temp_error_C']} | {r['hotspot_localization_cells']} | {r['parameters']} |")
     (OUT_DIR / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
+    # The figure shows the main models only; every run is in summary.md / summary.csv.
+    main = ["FNO/PINO (final)",
+            "FBPINN fast (batch 32, 1024 points; 5 sensors: 10k steps, 8 and 10: 6k)",
+            "XPINN fast, physics off",
+            "XPINN fast, physics on, tile-edge nodes masked",
+            "DeepONet (teammates, reference)"]
+    colours = {m: f"C{i}" for i, m in enumerate(main)}
     fig, ax = plt.subplots(figsize=(8, 5))
     for label, by_n in curves.items():
+        if label not in main:
+            continue
         xs = [n for n in SENSOR_COUNTS if n in by_n]
         ys = [by_n[n][0] * 100 for n in xs]
         style = "--" if "reference" in label else "-"
-        ax.plot(xs, ys, style, marker="o", label=label)
+        ax.plot(xs, ys, style, marker="o", color=colours[label], label=label)
     ax.set_xlabel("number of sensors")
     ax.set_ylabel("test relative L2 error (%)")
     ax.set_xticks(SENSOR_COUNTS)
     ax.grid(alpha=0.3)
-    ax.legend(fontsize=7)
+    ax.legend(fontsize=8, loc="upper right")
     ax.set_title("Test error against sensor count (lower is better)", fontsize=10)
     fig.tight_layout()
     fig.savefig(OUT_DIR / "error_vs_sensors.png", dpi=150)

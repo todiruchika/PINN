@@ -92,6 +92,13 @@ def train(args: argparse.Namespace) -> dict:
         seam_mask = (~differs).float()
 
     def physics_loss(residual: torch.Tensor) -> torch.Tensor:
+        if args.phys_pool > 1:
+            # Weak form: average the residual over patches first. On the true maps the pointwise residual
+            # is about 33% of the signal (coarse-grid derivative error at hotspots and sharp sources);
+            # patch averages cut that to about 8% (16x16 patches).
+            if seam_mask is not None:
+                residual = residual * seam_mask
+            return torch.mean(F.avg_pool2d(residual[:, None], args.phys_pool) ** 2)
         squared = residual ** 2
         if seam_mask is None:
             return torch.mean(squared)
@@ -195,6 +202,8 @@ def parse_args(argv: list | None = None) -> argparse.Namespace:
     parser.add_argument("--model", choices=["fbpinn", "xpinn"], default="fbpinn")
     parser.add_argument("--w-iface", type=float, default=1.0, help="XPINN interface-condition weight")
     parser.add_argument("--interface-points", type=int, default=16)
+    parser.add_argument("--phys-pool", type=int, default=1,
+                        help="average the physics residual over NxN patches before squaring (weak form); 1 = pointwise")
     parser.add_argument("--seam-mask", action="store_true", help="XPINN: leave nodes next to tile edges out of the physics loss")
     parser.add_argument("--sensors", type=int, default=5, choices=[5, 8, 10])
     parser.add_argument("--seed", type=int, default=0)
