@@ -199,6 +199,19 @@ def save_map_figure(maps: list, n_sensors: int, seed: int, out_dir: Path) -> Pat
     return path
 
 
+def train_subset(ids: list, k: int | None, seed: int = 123) -> list:
+    """First ``k`` ids of a fixed seeded permutation (nested: the 25 are inside the 50, etc.). ``None`` = all."""
+    if k is None or k >= len(ids):
+        return sorted(ids)
+    order = np.random.default_rng(seed).permutation(sorted(ids))
+    return sorted(order[:k].tolist())
+
+
+def steps_matched_epochs(base_epochs: int, n_full: int, k: int, batch_size: int) -> int:
+    """Keep the number of gradient steps equal to the full-data run when training on ``k`` chips."""
+    return int(round(base_epochs * np.ceil(n_full / batch_size) / np.ceil(k / batch_size)))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Train Model A (DeepONet baseline, no physics)")
     ap.add_argument("--config", default="configs/deeponet.yaml")
@@ -207,6 +220,9 @@ def main() -> None:
     ap.add_argument("--strategy", default=None, help="overrides config sensor_strategy")
     ap.add_argument("--epochs", type=int, default=None)
     ap.add_argument("--out-dir", default=str(RESULTS_DIR))
+    ap.add_argument("--n-train", type=int, default=None,
+                    help="low-data experiment: train on this many chips (nested seeded subset); epochs are "
+                         "scaled so the number of gradient steps matches the full-data run")
     ap.add_argument("--save-maps", type=int, default=0, help="save true/pred/error figures for first K test samples")
     ap.add_argument("--save-checkpoints", action="store_true")
     ap.add_argument("--quiet", action="store_true")
@@ -223,6 +239,13 @@ def main() -> None:
 
     meta = load_metadata(RAW_DIR)
     splits = load_splits(RAW_DIR / "splits.csv")
+    if args.n_train is not None:
+        n_full = len(splits["train"])
+        splits["train"] = train_subset(splits["train"], args.n_train)
+        bs = config["training"]["batch_size"]
+        config["training"]["epochs"] = steps_matched_epochs(config["training"]["epochs"], n_full, args.n_train, bs)
+        config["training"]["eval_every"] = max(10, config["training"]["epochs"] // 40)
+        print(f"low-data: {len(splits['train'])} train chips, epochs={config['training']['epochs']}")
     hw = "CPU" if config.get("device", "cpu") == "cpu" else torch.cuda.get_device_name(0)
     print(f"splits: " + ", ".join(f"{k}={len(v)}" for k, v in splits.items()) + f"; strategy={strategy}; hw={hw}")
 

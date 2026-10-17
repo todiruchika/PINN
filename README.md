@@ -151,3 +151,36 @@ one of three settings. The PINN alone is worse than the DeepONet at every N on t
 is not improved by the blend, and the physics-validity metric is 0.76-0.87 for every variant. Caveats: 1 PINN seed, the
 shortened PINN budget, and 1 DeepONet seed in the blend. An early look at only the first 31 test chips showed a larger,
 1-2% blend advantage at every N; it did not hold on the full set.
+
+### Model C, low-data experiment (`results/low_data/`)
+
+Same models and test chips, but the DeepONet is trained on only 25, 50 or 100 chips (nested seeded subsets; epochs scaled so
+the number of gradient steps matches the 500-chip run). The PINN needs no training chips, so its results are unchanged. The blend
+weight is chosen on the 100 validation chips as before. Full table with confidence intervals: `results/low_data/summary.md`.
+Run: `python -m src.train.train_deeponet --n-train 25 --save-checkpoints --out-dir results/low_data/n25`, then
+`python -m src.eval.blend --n-train 25 --ckpt-dir results/low_data/n25/checkpoints --out results/low_data/blend_n25`.
+
+Test relative L2 on the 100 test chips (DeepONet = mean of 5 seeds):
+
+| N | training chips | DeepONet | PINN | Blend |
+|---|---|---|---|---|
+| 5  | 25  | 0.1383 | 0.1333 | **0.1276** |
+| 5  | 50  | 0.1334 | 0.1333 | **0.1251** |
+| 5  | 100 | 0.1244 | 0.1333 | **0.1221** |
+| 5  | 500 | **0.1146** | 0.1333 | 0.1162 |
+| 8  | 25  | 0.1274 | 0.0880 | **0.0878** |
+| 8  | 50  | 0.1134 | 0.0880 | **0.0872** |
+| 8  | 100 | 0.0952 | 0.0880 | **0.0853** |
+| 8  | 500 | 0.0862 | 0.0880 | **0.0821** |
+| 10 | 25  | 0.0933 | 0.0651 | **0.0644** |
+| 10 | 50  | 0.0726 | 0.0651 | **0.0623** |
+| 10 | 100 | 0.0642 | 0.0651 | **0.0611** |
+| 10 | 500 | 0.0613 | 0.0651 | **0.0601** |
+
+With little training data the DeepONet degrades sharply while the PINN does not, and the blend's advantage over the DeepONet grows
+(for example N=8, 25 chips: 0.1274 -> 0.0878, about 31% lower; all N=8 differences have a 95% interval above zero). At 500 chips
+the blend and the DeepONet tie at N=5 and N=10. Caveats: at the smallest training sets the blend is close to the PINN alone
+(N=8, 25 chips: 0.0878 vs 0.0880), so most of the gain comes from the PINN rather than from combining; the POD-QR sensor
+layout was fit on all 500 training chips and kept fixed; and the 100 validation chips (used for early stopping and blend
+weights) would not be available in a truly data-scarce setting.
+

@@ -43,9 +43,9 @@ def find_pinn_pred(sample_id: str, n: int) -> np.ndarray | None:
     return np.load(hits[0]).astype(np.float64) if hits else None
 
 
-def deeponet_preds(config: dict, n: int, data: dict, split: str) -> np.ndarray:
+def deeponet_preds(config: dict, n: int, data: dict, split: str, ckpt_dirs=None) -> np.ndarray:
     model = build_deeponet({"n_sensors": n, "net": config["model"]})
-    path = next(d / f"deeponet_n{n}_seed0.pt" for d in CKPT_DIRS if (d / f"deeponet_n{n}_seed0.pt").exists())
+    path = next(d / f"deeponet_n{n}_seed0.pt" for d in (ckpt_dirs or CKPT_DIRS) if (d / f"deeponet_n{n}_seed0.pt").exists())
     model.load_state_dict(torch.load(path, map_location="cpu"))
     model.eval()
     tr = data["train"]
@@ -63,15 +63,27 @@ def score(pred: np.ndarray, d: dict, i: int) -> dict:
 
 
 def main() -> None:
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--n-train", type=int, default=None, help="DeepONet trained on this many chips (low-data run)")
+    ap.add_argument("--ckpt-dir", default=None)
+    ap.add_argument("--out", default=None)
+    args = ap.parse_args()
+    global OUT
+    if args.out:
+        OUT = Path(args.out)
+    ckpt_dirs = [Path(args.ckpt_dir)] if args.ckpt_dir else None
     config = yaml.safe_load(open("configs/deeponet.yaml"))
     meta, splits = load_metadata(RAW_DIR), load_splits(RAW_DIR / "splits.csv")
     OUT.mkdir(parents=True, exist_ok=True)
     rows, chosen = [], {}
     for n in (5, 8, 10):
-        data = {sp: load_split(splits[sp], n, config["sensor_strategy"], meta) for sp in ("train", "validation", "test")}
+        from src.train.train_deeponet import train_subset
+        sp_ids = dict(splits, train=train_subset(splits["train"], args.n_train))
+        data = {sp: load_split(sp_ids[sp], n, config["sensor_strategy"], meta) for sp in ("train", "validation", "test")}
         preds = {}
         for sp in ("validation", "test"):
-            A = deeponet_preds(config, n, data, sp)
+            A = deeponet_preds(config, n, data, sp, ckpt_dirs)
             keep = []
             for i, sid in enumerate(data[sp]["ids"]):
                 P = find_pinn_pred(sid, n)
