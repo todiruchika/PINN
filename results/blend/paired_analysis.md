@@ -2,9 +2,9 @@ Paired comparison on test chips (relative L2 difference, positive = blend better
 
 | N | vs | blend better on | mean gain | 95% CI | n chips |
 |---|---|---|---|---|---|
-| 5 | DeepONet (A) | 71% of chips | +0.0018 | +0.0006 .. +0.0031 | 31 |
-| 5 | PINN (B) | 48% of chips | +0.0060 | -0.0079 .. +0.0228 | 31 |
-| 8 | DeepONet (A) | 61% of chips | +0.0009 | -0.0119 .. +0.0117 | 31 |
-| 8 | PINN (B) | 58% of chips | +0.0017 | +0.0001 .. +0.0035 | 31 |
-| 10 | DeepONet (A) | 48% of chips | +0.0013 | -0.0006 .. +0.0034 | 31 |
-| 10 | PINN (B) | 74% of chips | +0.0045 | +0.0010 .. +0.0089 | 31 |
+| 5 | DeepONet (A) | 63% of chips | -0.0003 | -0.0024 .. +0.0016 | 100 |
+| 5 | PINN (B) | 59% of chips | +0.0171 | +0.0082 .. +0.0265 | 100 |
+| 8 | DeepONet (A) | 67% of chips | +0.0038 | +0.0013 .. +0.0062 | 100 |
+| 8 | PINN (B) | 51% of chips | +0.0059 | +0.0022 .. +0.0103 | 100 |
+| 10 | DeepONet (A) | 59% of chips | +0.0015 | -0.0009 .. +0.0036 | 100 |
+| 10 | PINN (B) | 69% of chips | +0.0050 | +0.0024 .. +0.0079 | 100 |
