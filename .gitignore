@@ -12,6 +12,7 @@ data/generated/*
 data/raw_extended/
 data/raw_check/
 *.zip
+github_dataset/
 .pytest_cache/
 __pycache__/
 .venv/
