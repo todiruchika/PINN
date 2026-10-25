@@ -89,7 +89,7 @@ def prepare(processor: str, cfg: dict) -> dict:
     return {"maps": maps, "shape": shape, "mu": mu, "sd": sd, "pod_mean": mean, "pod_basis": basis, "rc": rc, "frames": sp}
 
 
-def baselines(D: dict, n: int, cfg: dict, readings: dict) -> list:
+def baselines(D: dict, n: int, cfg: dict, readings: dict, return_preds: bool = False):
     """Training-mean map and gappy POD, same sensor readings as the DeepONet. One row per test frame each.
 
     Gappy POD fits ``k`` POD coefficients to the ``n`` noisy readings by least squares. ``k`` (1..n) is chosen on the
@@ -118,7 +118,7 @@ def baselines(D: dict, n: int, cfg: dict, readings: dict) -> list:
     for k, true in enumerate(D["maps"]["test"]):
         rows.append({"model": "train-mean map", "frame": k, **metrics_row(mean_map, true, mask)})
         rows.append({"model": f"gappy POD", "frame": k, "pod_modes": k_best, **metrics_row(preds[k], true, mask)})
-    return rows
+    return (rows, preds) if return_preds else rows
 
 
 def train_one(D: dict, n: int, seed: int, cfg: dict, readings: dict, quiet: bool = True, save_maps: int = 0):

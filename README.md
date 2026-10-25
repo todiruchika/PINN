@@ -105,3 +105,9 @@ is weakest (RTX 4060 hotspot error of about 175 cells). The mean map is very poo
 a drifting recording. Gappy POD is deterministic, so it has one value per setting. The DeepONet input features
 (performance counters) are not used. No physics model is applied here: the heat equation, sources and boundaries are not known.
 
+Map comparison (ground truth vs DeepONet vs gappy POD, one typical test frame per processor, the frame with the median DeepONet error):
+`results/real_deeponet/comparison_maps_n8.png` and `comparison_maps_n5.png`, made by
+`python -m src.eval.real_compare_maps --sensors 8 --seed 0` (retrains the DeepONet, about 10 minutes). The figures show that the RTX 4060 and
+Ryzen maps contain fixed fine structure (die layout, printed text) that the DeepONet smooths away with only 68 training frames, which gappy POD
+recovers because the training-mean map already contains it.
+
