@@ -38,6 +38,11 @@ PROCESSORS = {
     "tpu": ["TPU_Google_Edge.pkl"],
 }
 
+# The study uses the two Intel CPUs, which have many recordings and smooth maps. The Ryzen and RTX 4060 maps contain fixed fine
+# structure (die layout, printed text) and have a single 100-frame recording, so they were dropped; the Coral TPU is set aside.
+# They remain downloadable with --processors.
+DEFAULT_PROCESSORS = ["i5", "i7"]
+
 _ALLOWED = {
     ("numpy", "ndarray"), ("numpy", "dtype"),
     ("numpy.core.multiarray", "_reconstruct"), ("numpy._core.multiarray", "_reconstruct"),
@@ -83,7 +88,7 @@ def download(processors=None, data_dir: Path = DATA_DIR) -> None:
     data_dir.mkdir(parents=True, exist_ok=True)
     manifest = read_manifest()
     new = {}
-    for proc in processors or PROCESSORS:
+    for proc in processors or DEFAULT_PROCESSORS:
         for fname in PROCESSORS[proc]:
             dest = data_dir / fname
             if not dest.exists():
@@ -146,10 +151,10 @@ def stack(workloads: dict, frames: list) -> np.ndarray:
 def main() -> None:
     ap = argparse.ArgumentParser(description="Real thermal-map dataset helper")
     ap.add_argument("--download", action="store_true", help="download the files into data/real_thermal/")
-    ap.add_argument("--processors", default=None, help="comma list of: " + ", ".join(PROCESSORS))
+    ap.add_argument("--processors", default=None, help="comma list of: " + ", ".join(PROCESSORS) + " (default: " + ", ".join(DEFAULT_PROCESSORS) + ")")
     ap.add_argument("--summary", action="store_true", help="print shapes and split sizes")
     args = ap.parse_args()
-    procs = args.processors.split(",") if args.processors else list(PROCESSORS)
+    procs = args.processors.split(",") if args.processors else list(DEFAULT_PROCESSORS)
     if args.download:
         download(procs)
     if args.summary:

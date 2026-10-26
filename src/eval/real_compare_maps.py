@@ -37,8 +37,9 @@ def main() -> None:
     procs = a.processors.split(",")
     out = Path(a.out or f"results/real_deeponet/comparison_maps_n{a.sensors}.png")
     n = a.sensors
-    fig = plt.figure(figsize=(12.5, 2.55 * len(procs) + 0.7))
-    gs = fig.add_gridspec(len(procs), 5, wspace=0.55, hspace=0.14, top=0.955, bottom=0.01, left=0.07, right=0.95)
+    H = 2.55 * len(procs) + 0.9
+    fig = plt.figure(figsize=(12.5, H))
+    gs = fig.add_gridspec(len(procs), 5, wspace=0.55, hspace=0.14, top=1 - 0.75 / H, bottom=0.01, left=0.07, right=0.95)
     for r, proc in enumerate(procs):
         D = prepare(proc, cfg)
         readings = {k: read_sensors(D["maps"][k], D["rc"], D["frames"][k][0][1] if k != "train" and len({w for w, _ in D["frames"][k]}) == 1 else 0,
@@ -69,8 +70,8 @@ def main() -> None:
                 cb = fig.colorbar(im, cax=ax.inset_axes([1.05, 0, 0.05, 1])); cb.ax.tick_params(labelsize=6); cb.set_label("deg C", fontsize=6)
         print(f"{proc}: frame {k} of {len(true)} (median error), DeepONet MAE {ed[mask].mean():.2f} C, gappy POD MAE {eg[mask].mean():.2f} C", flush=True)
     fig.suptitle(f"Real thermal maps, {n} sensors (white dots): ground truth vs DeepONet vs gappy POD, one typical test frame per processor "
-                 f"(seed {a.seed})", x=0.01, y=0.995, ha="left", fontsize=10)
-    fig.text(0.01, 0.972, "The three left panels share one temperature scale (color bar on the gappy POD panel); each error pair shares one scale.", fontsize=8, color="#52514e")
+                 f"(seed {a.seed})", x=0.01, y=1 - 0.1 / H, ha="left", fontsize=10)
+    fig.text(0.01, 1 - 0.42 / H, "The three left panels share one temperature scale (color bar on the gappy POD panel); each error pair shares one scale.", fontsize=8, color="#52514e")
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=130, bbox_inches="tight", facecolor="white"); plt.close(fig)
     print("wrote", out)
