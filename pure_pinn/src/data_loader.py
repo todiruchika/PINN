@@ -157,25 +157,39 @@ def load_chip(sample_id: str, split: str, root: str | Path | None = None,
 # --------------------------------------------------------------------------- #
 # grid helpers
 # --------------------------------------------------------------------------- #
-@lru_cache(maxsize=8)
-def grid_coords(n: int = 128) -> tuple[np.ndarray, np.ndarray]:
-    """``(X, Y)`` with ``X[i, j] = j/(n-1)`` and ``Y[i, j] = i/(n-1)``."""
-    axis = np.linspace(0.0, 1.0, n)
-    X, Y = np.meshgrid(axis, axis)
+def _hw(n: int | tuple[int, int]) -> tuple[int, int]:
+    """Accept a square size ``n`` or an explicit ``(H, W)`` -- square by default
+    so every existing call site (synthetic 128x128 data) is unaffected."""
+    return (n, n) if isinstance(n, int) else (int(n[0]), int(n[1]))
+
+
+@lru_cache(maxsize=16)
+def grid_coords(n: int | tuple[int, int] = 128) -> tuple[np.ndarray, np.ndarray]:
+    """``(X, Y)`` with ``X[i, j] = j/(W-1)`` and ``Y[i, j] = i/(H-1)``.
+
+    ``n`` is either a single int (square ``n x n``, the synthetic-dataset case)
+    or an ``(H, W)`` tuple for a non-square field, e.g. a native-resolution
+    real-chip IR frame.
+    """
+    H, W = _hw(n)
+    x_axis = np.linspace(0.0, 1.0, W)
+    y_axis = np.linspace(0.0, 1.0, H)
+    X, Y = np.meshgrid(x_axis, y_axis)
     X.setflags(write=False)
     Y.setflags(write=False)
     return X, Y
 
 
-def grid_points(n: int = 128) -> np.ndarray:
-    """``(n*n, 2)`` array of ``(x, y)`` in the same row-major order as the matrix."""
+def grid_points(n: int | tuple[int, int] = 128) -> np.ndarray:
+    """``(H*W, 2)`` array of ``(x, y)`` in the same row-major order as the matrix."""
     X, Y = grid_coords(n)
     return np.stack([X.ravel(), Y.ravel()], axis=1)
 
 
-def field_from_points(values: np.ndarray, n: int = 128) -> np.ndarray:
-    """Inverse of :func:`grid_points`: fold a flat prediction back to ``(n, n)``."""
-    return np.asarray(values, dtype=np.float64).reshape(n, n)
+def field_from_points(values: np.ndarray, n: int | tuple[int, int] = 128) -> np.ndarray:
+    """Inverse of :func:`grid_points`: fold a flat prediction back to ``(H, W)``."""
+    H, W = _hw(n)
+    return np.asarray(values, dtype=np.float64).reshape(H, W)
 
 
 # --------------------------------------------------------------------------- #

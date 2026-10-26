@@ -186,12 +186,10 @@ def train_one_chip(chip: ChipSample, n_sensors: int, seed: int, config: dict, ve
         model.load_state_dict(best["state"])
 
     # ---- evaluation on the full field (ground truth used here only) ------- #
-    grid_n = int(config.get("eval", {}).get("grid", 128))
+    true_field = chip.field()
+    grid_n = true_field.shape  # (H, W); square for the synthetic dataset, native for real chips
     with timer() as infer_time:
         pred_field = predict_field(model, scaler, grid_n, device)
-    true_field = chip.field()
-    if true_field.shape[0] != grid_n:
-        raise ValueError(f"eval grid {grid_n} does not match matrix size {true_field.shape[0]}")
 
     sensor_mask = sensor_node_mask(positions, grid_n)
     row = {"model": "B", "bc_mode": bc_mode,
@@ -200,7 +198,14 @@ def train_one_chip(chip: ChipSample, n_sensors: int, seed: int, config: dict, ve
            "n_sensors": n_sensors, "seed": seed}
     row.update(field_metrics(pred_field, true_field, sensor_mask, chip.die_L))
     row["sensor_rmse"] = sensor_rmse(pred_field, positions, temps)
-    row.update(evaluate_source(model, chip, scaler, pred_field, grid_n, device))
+    # Source ground truth (floorplan/power) exists only for the synthetic dataset;
+    # real chips (e.g. the GitHub thermal-map dataset) have no such file, so the
+    # source-recovery metrics degrade to NaN rather than erroring out.
+    q_path = chip.root / chip.split / "matrices" / f"{chip.sample_id}_Q.npy"
+    if q_path.exists():
+        row.update(evaluate_source(model, chip, scaler, pred_field, grid_n, device))
+    else:
+        row.update({"source_rel_l2": float("nan"), "source_centre_err": float("nan")})
     row["n_params"] = sum(p.numel() for p in model.parameters())
     last = history[-1]
     row.update({"train_seconds": train_time["seconds"], "inference_seconds": infer_time["seconds"],

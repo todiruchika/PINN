@@ -43,11 +43,16 @@ METRIC_FIELDS = [
 # --------------------------------------------------------------------------- #
 # field metrics
 # --------------------------------------------------------------------------- #
-def sensor_node_mask(positions: np.ndarray, n: int = 128) -> np.ndarray:
-    """Boolean ``(n, n)`` mask, ``True`` on the sensor pixels (row = y, col = x)."""
-    mask = np.zeros((n, n), dtype=bool)
-    j = np.rint(positions[:, 0] * (n - 1)).astype(int)
-    i = np.rint(positions[:, 1] * (n - 1)).astype(int)
+def sensor_node_mask(positions: np.ndarray, n: int | tuple[int, int] = 128) -> np.ndarray:
+    """Boolean ``(H, W)`` mask, ``True`` on the sensor pixels (row = y, col = x).
+
+    ``n`` is a single int for a square grid (synthetic dataset) or an
+    ``(H, W)`` tuple for a non-square one (native-resolution real-chip frame).
+    """
+    H, W = (n, n) if isinstance(n, int) else (int(n[0]), int(n[1]))
+    mask = np.zeros((H, W), dtype=bool)
+    j = np.rint(positions[:, 0] * (W - 1)).astype(int)
+    i = np.rint(positions[:, 1] * (H - 1)).astype(int)
     mask[i, j] = True
     return mask
 
@@ -101,9 +106,9 @@ def field_metrics(pred: np.ndarray, true: np.ndarray, sensor_mask: np.ndarray, L
 
 def sensor_rmse(pred_field: np.ndarray, positions: np.ndarray, temps: np.ndarray) -> float:
     """RMSE at the sensor pixels -- how well the model honoured its own data."""
-    n = pred_field.shape[0]
-    j = np.rint(positions[:, 0] * (n - 1)).astype(int)
-    i = np.rint(positions[:, 1] * (n - 1)).astype(int)
+    H, W = pred_field.shape
+    j = np.rint(positions[:, 0] * (W - 1)).astype(int)
+    i = np.rint(positions[:, 1] * (H - 1)).astype(int)
     return float(np.sqrt(np.mean((pred_field[i, j] - temps) ** 2)))
 
 

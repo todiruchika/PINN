@@ -1,0 +1,53 @@
+{
+  "name": "model_b_github",
+  "notes": "Model B on the GitHub real-chip thermal-map dataset (data/github_real, data/generated_github). die_L_x_m is set to 1.0 (abstract unit square) since no physical die size is known for these parts. Rather than invent new physical units, t_die/h_eff are chosen so eps = t_die/(h_eff*L^2) matches the synthetic-dataset calibration (~5.55e-4): what matters for the PDE is the ratio of lateral conduction to vertical sinking, not absolute metres. leak_fraction is set to 0 (no basis for a per-block leakage fraction on real, floorplan-unknown chips) -- a further simplification beyond the synthetic config's already-approximate mean leak_fraction. k(T) keeps the synthetic generator's k_A/k_offset, a generic silicon conductivity law, not something uniquely calibrated to the 12mm geometry.",
+  "device": "cpu",
+  "physics": {
+    "L": 1.0,
+    "t_die": 0.0005,
+    "h_eff": 0.9009016393,
+    "beta": 0.012,
+    "T0": 25.0,
+    "leak_fraction": 0.0
+  },
+  "model": {
+    "bc_mode": "hard",
+    "field": {
+      "width": 64,
+      "depth": 4,
+      "activation": "tanh",
+      "out_scale": 1.0,
+      "fourier": null
+    },
+    "source": {
+      "kind": "gaussian",
+      "n_blobs": 6,
+      "init_amp": 1.0,
+      "init_width": 0.12,
+      "min_width": 0.02,
+      "max_width": 0.5
+    }
+  },
+  "training": {
+    "adam_steps": 5000,
+    "lr": 0.001,
+    "lr_min": 1e-05,
+    "lbfgs_steps": 2000,
+    "lbfgs_lr": 1.0,
+    "lbfgs_history": 50,
+    "n_collocation": 2048,
+    "n_collocation_lbfgs": 4096,
+    "n_boundary": 256,
+    "weight_scheme": "fixed",
+    "w_residual": 1.0,
+    "w_data": 100.0,
+    "w_boundary": 1.0,
+    "residual_scale": 1.0,
+    "anneal_every": 100,
+    "anneal_ema": 0.9,
+    "grad_clip": null,
+    "restore_best": true,
+    "log_every": 500,
+    "log_every_lbfgs": 200
+  }
+}
