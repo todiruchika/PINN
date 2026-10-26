@@ -18,3 +18,7 @@ __pycache__/
 venv/
 *.pyc
 *.pt
+
+# real IR-camera data (downloaded, regenerated)
+data/real_raw/
+data/real_cache/
