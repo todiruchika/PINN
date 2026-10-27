@@ -166,3 +166,41 @@ DeepONet, so blending it in (variant 1) does not help; the useful part is the ph
 its validation frames are much harder than its test frames (DeepONet validation error 0.5 vs test 0.15), so validation-based choices transfer imperfectly; frames inside a workload are
 strongly correlated, so the frame-level intervals are optimistic; the physics model is not a neural PINN and the physical constants are tuned, not known.
 
+### Hybrid with Ruchika's PINN (`pure-pinn` branch) on the real maps
+
+Her per-chip PINN (`pure_pinn/src`, unchanged, copied from branch `pure-pinn`; config `model_b_github.json`) was run on **our** validation and test frames with
+**our** sensor readings (`src/eval/real_pinn_runs.py`), so it is scored on exactly the frames and readings the DeepONet sees. It learns nothing across frames. Settings that
+differ from her own runs: a shortened budget (600 Adam + 100 L-BFGS steps, about 2 min per solve), one seed, and the sink temperature `T_amb` set to the minimum of the processor's
+training maps (real chips have no ambient temperature). Because every solve takes minutes, only a regular sample of frames is used:
+**10 validation + 10 test frames for the i5, 20 + 20 for the i7**, at 5, 8 and 10 sensors (180 solves). DeepONet = 5 seeds.
+
+Combining (`src/eval/real_hybrid_pinn.py`, summary `src/eval/real_hybrid_pinn_report.py`; every setting chosen on validation frames only):
+**A** blend `w*DeepONet + (1-w)*PINN`; **B** DeepONet plus the heat-equation correction of `src/physics/screened_poisson.py` fitted to its residual at the sensors (no PINN involved);
+**C** blend then correction. "The hybrid" in each experiment = the variant with the lowest mean validation error; it was **B** in every experiment.
+
+**Full training data** (test frames, error against temperature rise, mean of 5 seeds; `results/real_pinn_hybrid/`):
+
+| Processor | Sensors | DeepONet | PINN | A: blend | B: + physics correction |
+|---|---|---|---|---|---|
+| i5 | 5 / 8 / 10 | 0.209 / 0.150 / 0.149 | 0.762 / 0.233 / 0.236 | 0.416 / 0.182 / 0.201 | 0.229 / **0.132** / **0.139** |
+| i7 | 5 / 8 / 10 | 0.230 / 0.110 / 0.107 | 0.695 / 0.371 / 0.176 | 0.230 / 0.110 / 0.097 | 0.229 / 0.106 / **0.091** |
+
+With all training data the PINN is much weaker than the DeepONet and blending it in does not help (on the i5 it hurts, because the single validation workload is unlike the test
+workload and the blend over-trusts the PINN). The useful hybrid is B; it is better than the DeepONet in 2 of 6 settings and tied in 4 (paired 95% interval over the sampled test frames,
+`paired_comparison.csv`), and clearly better than the PINN in all 6.
+
+**Few training workloads (i7)**: the DeepONet is trained on 1, 2 or 4 of the 13 training workloads (nested, seeded; sensor layout kept as fitted on all 13); the PINN is unchanged.
+Test error against temperature rise (chart: `results/real_pinn_hybrid/results_few_workloads.png`):
+
+| Sensors | Training workloads | DeepONet | PINN | A: blend | B: + physics correction |
+|---|---|---|---|---|---|
+| 5 | 2 / 4 / 13 | 0.504 / 0.439 / 0.230 | 0.695 | 0.495 / 0.439 / 0.230 | **0.444** / 0.448 / 0.229 |
+| 8 | 2 / 4 / 13 | 0.432 / 0.356 / 0.110 | 0.371 | 0.270 / 0.293 / 0.110 | **0.196 / 0.163** / 0.106 |
+| 10 | 2 / 4 / 13 | 0.403 / 0.338 / 0.107 | 0.176 | 0.179 / 0.203 / 0.097 | 0.191 / **0.143** / **0.091** |
+
+With little training data the hybrids are clearly better than the DeepONet (paired intervals above zero in most cells) and, with 8 sensors, better than **both** models by a wide margin
+(for example 4 workloads: DeepONet 0.356, PINN 0.371, hybrid 0.163). The blend with the PINN (A) also helps there. Exceptions: with 10 sensors the PINN alone is as good as the hybrid
+(2 workloads: tie; with a single workload, the idle recording, the hybrid is worse than the PINN), and with 5 sensors and 4 workloads the hybrid ties the DeepONet. Caveats: the sampled test sets are small
+(10 and 20 frames, strongly correlated within a workload) so intervals are optimistic; the i5 has a single validation and a single test workload; the PINN has one seed and a reduced budget;
+a single training workload (idle) is an extreme case where the DeepONet fails completely (error 2.5).
+

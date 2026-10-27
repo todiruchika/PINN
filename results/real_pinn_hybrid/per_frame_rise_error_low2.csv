@@ -1,0 +1,1501 @@
+processor,n_sensors,seed,model,frame,rel_l2_rise
+i7,5,0,DeepONet,0,0.40360004057962745
+i7,5,0,DeepONet,16,0.43322780446464365
+i7,5,0,DeepONet,31,0.4174969016129798
+i7,5,0,DeepONet,47,0.3654332942004021
+i7,5,0,DeepONet,63,0.5582785908222404
+i7,5,0,DeepONet,79,0.34380791246121345
+i7,5,0,DeepONet,94,0.45743887755865825
+i7,5,0,DeepONet,110,0.7094721954243867
+i7,5,0,DeepONet,126,0.6805507816589021
+i7,5,0,DeepONet,142,0.6590627315840083
+i7,5,0,DeepONet,157,0.6820370101214597
+i7,5,0,DeepONet,173,0.6830245520846777
+i7,5,0,DeepONet,189,0.634380119081674
+i7,5,0,DeepONet,205,0.48059040939035236
+i7,5,0,DeepONet,220,0.47349261923527564
+i7,5,0,DeepONet,236,0.31537968578615116
+i7,5,0,DeepONet,252,0.3599836634973885
+i7,5,0,DeepONet,268,0.33300315391749513
+i7,5,0,DeepONet,283,0.2940931883371317
+i7,5,0,DeepONet,299,0.24783661376979593
+i7,5,0,PINN,0,0.41829001460493614
+i7,5,0,PINN,16,0.40511496706964945
+i7,5,0,PINN,31,0.39344220134630925
+i7,5,0,PINN,47,0.42351504862471717
+i7,5,0,PINN,63,0.4777961349122629
+i7,5,0,PINN,79,0.8340369866490678
+i7,5,0,PINN,94,0.9727876467600961
+i7,5,0,PINN,110,0.9001228047649863
+i7,5,0,PINN,126,0.8763655573159996
+i7,5,0,PINN,142,0.8533286520122684
+i7,5,0,PINN,157,0.849802978451765
+i7,5,0,PINN,173,1.0290037361774598
+i7,5,0,PINN,189,0.8624962470842152
+i7,5,0,PINN,205,0.4689399237480578
+i7,5,0,PINN,220,0.5342380843547397
+i7,5,0,PINN,236,0.5901521806824829
+i7,5,0,PINN,252,0.6059905072206326
+i7,5,0,PINN,268,0.7605501688326016
+i7,5,0,PINN,283,0.893286638208084
+i7,5,0,PINN,299,0.7441374879077132
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",0,0.37181515605425774
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",16,0.4034988823732703
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",31,0.38644942980236685
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",47,0.3443354741635351
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",63,0.46997614162498835
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",79,0.3847607481761475
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",94,0.5037119003642468
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",110,0.7258406426443055
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",126,0.6975293648899891
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",142,0.6718916234783254
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",157,0.6951961061418402
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",173,0.7158434341705129
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",189,0.6537883827423374
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",205,0.4001437986784739
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",220,0.4303773576340337
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",236,0.31586636477818003
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",252,0.3059855375161749
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",268,0.34799557887027904
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",283,0.24929423174740592
+i7,5,0,"Hybrid A: blend (DeepONet, PINN)",299,0.2618348394768133
+i7,5,0,Hybrid B: DeepONet + physics correction,0,0.270033514480696
+i7,5,0,Hybrid B: DeepONet + physics correction,16,0.3009378303005933
+i7,5,0,Hybrid B: DeepONet + physics correction,31,0.30684898530731647
+i7,5,0,Hybrid B: DeepONet + physics correction,47,0.2510935556112006
+i7,5,0,Hybrid B: DeepONet + physics correction,63,0.36408249270797605
+i7,5,0,Hybrid B: DeepONet + physics correction,79,0.4481582486913319
+i7,5,0,Hybrid B: DeepONet + physics correction,94,0.5368666911641499
+i7,5,0,Hybrid B: DeepONet + physics correction,110,0.6648313413442913
+i7,5,0,Hybrid B: DeepONet + physics correction,126,0.6536783898682595
+i7,5,0,Hybrid B: DeepONet + physics correction,142,0.6675815841421605
+i7,5,0,Hybrid B: DeepONet + physics correction,157,0.6877475413387498
+i7,5,0,Hybrid B: DeepONet + physics correction,173,0.700374990527285
+i7,5,0,Hybrid B: DeepONet + physics correction,189,0.661653925720906
+i7,5,0,Hybrid B: DeepONet + physics correction,205,0.35753427958768197
+i7,5,0,Hybrid B: DeepONet + physics correction,220,0.38726749701943725
+i7,5,0,Hybrid B: DeepONet + physics correction,236,0.2970945380669794
+i7,5,0,Hybrid B: DeepONet + physics correction,252,0.22572575505080436
+i7,5,0,Hybrid B: DeepONet + physics correction,268,0.37884255186878213
+i7,5,0,Hybrid B: DeepONet + physics correction,283,0.2207018436473386
+i7,5,0,Hybrid B: DeepONet + physics correction,299,0.3168259957486726
+i7,5,0,Hybrid C: blend + physics correction,0,0.2672006543941777
+i7,5,0,Hybrid C: blend + physics correction,16,0.29667580746595434
+i7,5,0,Hybrid C: blend + physics correction,31,0.2963000662843637
+i7,5,0,Hybrid C: blend + physics correction,47,0.25595856638964803
+i7,5,0,Hybrid C: blend + physics correction,63,0.3094288416879553
+i7,5,0,Hybrid C: blend + physics correction,79,0.47756314448825826
+i7,5,0,Hybrid C: blend + physics correction,94,0.5787450757322612
+i7,5,0,Hybrid C: blend + physics correction,110,0.6900818882541911
+i7,5,0,Hybrid C: blend + physics correction,126,0.6776906165213983
+i7,5,0,Hybrid C: blend + physics correction,142,0.6805449553804516
+i7,5,0,Hybrid C: blend + physics correction,157,0.7043025078436462
+i7,5,0,Hybrid C: blend + physics correction,173,0.7364168552518989
+i7,5,0,Hybrid C: blend + physics correction,189,0.6829812470205746
+i7,5,0,Hybrid C: blend + physics correction,205,0.310407671179815
+i7,5,0,Hybrid C: blend + physics correction,220,0.3776855650839591
+i7,5,0,Hybrid C: blend + physics correction,236,0.2981037546713609
+i7,5,0,Hybrid C: blend + physics correction,252,0.20170793156234407
+i7,5,0,Hybrid C: blend + physics correction,268,0.38611036421608935
+i7,5,0,Hybrid C: blend + physics correction,283,0.2000646889368358
+i7,5,0,Hybrid C: blend + physics correction,299,0.32929472946370614
+i7,5,1,DeepONet,0,0.43380530361895214
+i7,5,1,DeepONet,16,0.45518185447531473
+i7,5,1,DeepONet,31,0.43620173094945003
+i7,5,1,DeepONet,47,0.3929518303795975
+i7,5,1,DeepONet,63,0.5397246019762868
+i7,5,1,DeepONet,79,0.4278209326709833
+i7,5,1,DeepONet,94,0.5241594509080577
+i7,5,1,DeepONet,110,0.6905838201325827
+i7,5,1,DeepONet,126,0.675942575350234
+i7,5,1,DeepONet,142,0.6755621887226316
+i7,5,1,DeepONet,157,0.6896819979914894
+i7,5,1,DeepONet,173,0.7028636349552165
+i7,5,1,DeepONet,189,0.6616185243473189
+i7,5,1,DeepONet,205,0.5267763430063259
+i7,5,1,DeepONet,220,0.4710481969941253
+i7,5,1,DeepONet,236,0.3596400336489529
+i7,5,1,DeepONet,252,0.3846089362801913
+i7,5,1,DeepONet,268,0.4004146465605643
+i7,5,1,DeepONet,283,0.3591198459357616
+i7,5,1,DeepONet,299,0.33798352833639894
+i7,5,1,PINN,0,0.41829001460493614
+i7,5,1,PINN,16,0.40511496706964945
+i7,5,1,PINN,31,0.39344220134630925
+i7,5,1,PINN,47,0.42351504862471717
+i7,5,1,PINN,63,0.4777961349122629
+i7,5,1,PINN,79,0.8340369866490678
+i7,5,1,PINN,94,0.9727876467600961
+i7,5,1,PINN,110,0.9001228047649863
+i7,5,1,PINN,126,0.8763655573159996
+i7,5,1,PINN,142,0.8533286520122684
+i7,5,1,PINN,157,0.849802978451765
+i7,5,1,PINN,173,1.0290037361774598
+i7,5,1,PINN,189,0.8624962470842152
+i7,5,1,PINN,205,0.4689399237480578
+i7,5,1,PINN,220,0.5342380843547397
+i7,5,1,PINN,236,0.5901521806824829
+i7,5,1,PINN,252,0.6059905072206326
+i7,5,1,PINN,268,0.7605501688326016
+i7,5,1,PINN,283,0.893286638208084
+i7,5,1,PINN,299,0.7441374879077132
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",0,0.43380530361895214
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",16,0.45518185447531473
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",31,0.43620173094945003
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",47,0.3929518303795975
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",63,0.5397246019762868
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",79,0.4278209326709833
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",94,0.5241594509080577
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",110,0.6905838201325827
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",126,0.675942575350234
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",142,0.6755621887226316
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",157,0.6896819979914894
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",173,0.7028636349552165
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",189,0.6616185243473189
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",205,0.5267763430063259
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",220,0.4710481969941253
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",236,0.3596400336489529
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",252,0.3846089362801913
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",268,0.4004146465605643
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",283,0.3591198459357616
+i7,5,1,"Hybrid A: blend (DeepONet, PINN)",299,0.33798352833639894
+i7,5,1,Hybrid B: DeepONet + physics correction,0,0.2789508823069119
+i7,5,1,Hybrid B: DeepONet + physics correction,16,0.2915588764657354
+i7,5,1,Hybrid B: DeepONet + physics correction,31,0.28928442430005596
+i7,5,1,Hybrid B: DeepONet + physics correction,47,0.28248102842806055
+i7,5,1,Hybrid B: DeepONet + physics correction,63,0.1534426148184197
+i7,5,1,Hybrid B: DeepONet + physics correction,79,0.5786755648510958
+i7,5,1,Hybrid B: DeepONet + physics correction,94,0.6756678475209829
+i7,5,1,Hybrid B: DeepONet + physics correction,110,0.7458093075126757
+i7,5,1,Hybrid B: DeepONet + physics correction,126,0.7344949744313615
+i7,5,1,Hybrid B: DeepONet + physics correction,142,0.7261039148929918
+i7,5,1,Hybrid B: DeepONet + physics correction,157,0.7678533096155248
+i7,5,1,Hybrid B: DeepONet + physics correction,173,0.8054108625886499
+i7,5,1,Hybrid B: DeepONet + physics correction,189,0.752893436724311
+i7,5,1,Hybrid B: DeepONet + physics correction,205,0.21863559669036473
+i7,5,1,Hybrid B: DeepONet + physics correction,220,0.3077711188392076
+i7,5,1,Hybrid B: DeepONet + physics correction,236,0.39695618926522436
+i7,5,1,Hybrid B: DeepONet + physics correction,252,0.21058295085091241
+i7,5,1,Hybrid B: DeepONet + physics correction,268,0.4868179163934309
+i7,5,1,Hybrid B: DeepONet + physics correction,283,0.25779130982020104
+i7,5,1,Hybrid B: DeepONet + physics correction,299,0.4675548427133211
+i7,5,1,Hybrid C: blend + physics correction,0,0.2789508823069119
+i7,5,1,Hybrid C: blend + physics correction,16,0.2915588764657354
+i7,5,1,Hybrid C: blend + physics correction,31,0.28928442430005596
+i7,5,1,Hybrid C: blend + physics correction,47,0.28248102842806055
+i7,5,1,Hybrid C: blend + physics correction,63,0.1534426148184197
+i7,5,1,Hybrid C: blend + physics correction,79,0.5786755648510958
+i7,5,1,Hybrid C: blend + physics correction,94,0.6756678475209829
+i7,5,1,Hybrid C: blend + physics correction,110,0.7458093075126757
+i7,5,1,Hybrid C: blend + physics correction,126,0.7344949744313615
+i7,5,1,Hybrid C: blend + physics correction,142,0.7261039148929918
+i7,5,1,Hybrid C: blend + physics correction,157,0.7678533096155248
+i7,5,1,Hybrid C: blend + physics correction,173,0.8054108625886499
+i7,5,1,Hybrid C: blend + physics correction,189,0.752893436724311
+i7,5,1,Hybrid C: blend + physics correction,205,0.21863559669036473
+i7,5,1,Hybrid C: blend + physics correction,220,0.3077711188392076
+i7,5,1,Hybrid C: blend + physics correction,236,0.39695618926522436
+i7,5,1,Hybrid C: blend + physics correction,252,0.21058295085091241
+i7,5,1,Hybrid C: blend + physics correction,268,0.4868179163934309
+i7,5,1,Hybrid C: blend + physics correction,283,0.25779130982020104
+i7,5,1,Hybrid C: blend + physics correction,299,0.4675548427133211
+i7,5,2,DeepONet,0,0.4021022369008845
+i7,5,2,DeepONet,16,0.43160377422897034
+i7,5,2,DeepONet,31,0.3960197763732665
+i7,5,2,DeepONet,47,0.37325841005143073
+i7,5,2,DeepONet,63,0.4842839400394435
+i7,5,2,DeepONet,79,0.4279003329372933
+i7,5,2,DeepONet,94,0.5467884735265519
+i7,5,2,DeepONet,110,0.7902375355709378
+i7,5,2,DeepONet,126,0.7639631757931722
+i7,5,2,DeepONet,142,0.752008985645799
+i7,5,2,DeepONet,157,0.7699678425727347
+i7,5,2,DeepONet,173,0.7711062053976993
+i7,5,2,DeepONet,189,0.7201363422874543
+i7,5,2,DeepONet,205,0.43157193855979625
+i7,5,2,DeepONet,220,0.3813458450329903
+i7,5,2,DeepONet,236,0.45807368099267803
+i7,5,2,DeepONet,252,0.35377725929158477
+i7,5,2,DeepONet,268,0.4725978734818958
+i7,5,2,DeepONet,283,0.33408061330676797
+i7,5,2,DeepONet,299,0.4015185743613992
+i7,5,2,PINN,0,0.41829001460493614
+i7,5,2,PINN,16,0.40511496706964945
+i7,5,2,PINN,31,0.39344220134630925
+i7,5,2,PINN,47,0.42351504862471717
+i7,5,2,PINN,63,0.4777961349122629
+i7,5,2,PINN,79,0.8340369866490678
+i7,5,2,PINN,94,0.9727876467600961
+i7,5,2,PINN,110,0.9001228047649863
+i7,5,2,PINN,126,0.8763655573159996
+i7,5,2,PINN,142,0.8533286520122684
+i7,5,2,PINN,157,0.849802978451765
+i7,5,2,PINN,173,1.0290037361774598
+i7,5,2,PINN,189,0.8624962470842152
+i7,5,2,PINN,205,0.4689399237480578
+i7,5,2,PINN,220,0.5342380843547397
+i7,5,2,PINN,236,0.5901521806824829
+i7,5,2,PINN,252,0.6059905072206326
+i7,5,2,PINN,268,0.7605501688326016
+i7,5,2,PINN,283,0.893286638208084
+i7,5,2,PINN,299,0.7441374879077132
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",0,0.3545519312130035
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",16,0.3853362412996849
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",31,0.351516492815531
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",47,0.3435176945272035
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",63,0.32638620032743826
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",79,0.4993268320522187
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",94,0.6246330491542673
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",110,0.8062369849751017
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",126,0.7805781103085171
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",142,0.7575822265245458
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",157,0.7785476086512327
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",173,0.8194175180323613
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",189,0.7419504875171314
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",205,0.308153539712311
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",220,0.31073584437932106
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",236,0.44211890795650194
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",252,0.24408324970423673
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",268,0.4841049864451405
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",283,0.2645711511393497
+i7,5,2,"Hybrid A: blend (DeepONet, PINN)",299,0.42800617696379784
+i7,5,2,Hybrid B: DeepONet + physics correction,0,0.28100969457245345
+i7,5,2,Hybrid B: DeepONet + physics correction,16,0.31427679995518926
+i7,5,2,Hybrid B: DeepONet + physics correction,31,0.3216425870229569
+i7,5,2,Hybrid B: DeepONet + physics correction,47,0.26244522767575584
+i7,5,2,Hybrid B: DeepONet + physics correction,63,0.3778738457054447
+i7,5,2,Hybrid B: DeepONet + physics correction,79,0.44630340671564656
+i7,5,2,Hybrid B: DeepONet + physics correction,94,0.5381758369968318
+i7,5,2,Hybrid B: DeepONet + physics correction,110,0.6590577328754887
+i7,5,2,Hybrid B: DeepONet + physics correction,126,0.6496859873457247
+i7,5,2,Hybrid B: DeepONet + physics correction,142,0.658489647462052
+i7,5,2,Hybrid B: DeepONet + physics correction,157,0.6855893874733344
+i7,5,2,Hybrid B: DeepONet + physics correction,173,0.6984354356740985
+i7,5,2,Hybrid B: DeepONet + physics correction,189,0.6625445005625644
+i7,5,2,Hybrid B: DeepONet + physics correction,205,0.3591618164497344
+i7,5,2,Hybrid B: DeepONet + physics correction,220,0.3885347919340897
+i7,5,2,Hybrid B: DeepONet + physics correction,236,0.2883649472986892
+i7,5,2,Hybrid B: DeepONet + physics correction,252,0.2281758008489973
+i7,5,2,Hybrid B: DeepONet + physics correction,268,0.36178623662215537
+i7,5,2,Hybrid B: DeepONet + physics correction,283,0.21663338740370505
+i7,5,2,Hybrid B: DeepONet + physics correction,299,0.3109083238763463
+i7,5,2,Hybrid C: blend + physics correction,0,0.30041075916384036
+i7,5,2,Hybrid C: blend + physics correction,16,0.32845690984113207
+i7,5,2,Hybrid C: blend + physics correction,31,0.31394547695847896
+i7,5,2,Hybrid C: blend + physics correction,47,0.29568649594948393
+i7,5,2,Hybrid C: blend + physics correction,63,0.28557664972552266
+i7,5,2,Hybrid C: blend + physics correction,79,0.5113917459442476
+i7,5,2,Hybrid C: blend + physics correction,94,0.6297550474791276
+i7,5,2,Hybrid C: blend + physics correction,110,0.7207015540586461
+i7,5,2,Hybrid C: blend + physics correction,126,0.7090000853751423
+i7,5,2,Hybrid C: blend + physics correction,142,0.7006204447200728
+i7,5,2,Hybrid C: blend + physics correction,157,0.7295316292777053
+i7,5,2,Hybrid C: blend + physics correction,173,0.7799302345576434
+i7,5,2,Hybrid C: blend + physics correction,189,0.7153153825579017
+i7,5,2,Hybrid C: blend + physics correction,205,0.3024764669543179
+i7,5,2,Hybrid C: blend + physics correction,220,0.380032715243863
+i7,5,2,Hybrid C: blend + physics correction,236,0.30228015822990034
+i7,5,2,Hybrid C: blend + physics correction,252,0.20287321290035257
+i7,5,2,Hybrid C: blend + physics correction,268,0.39386316461777343
+i7,5,2,Hybrid C: blend + physics correction,283,0.2154327501897326
+i7,5,2,Hybrid C: blend + physics correction,299,0.34757671200701734
+i7,5,3,DeepONet,0,0.40878675784106716
+i7,5,3,DeepONet,16,0.4392508539487393
+i7,5,3,DeepONet,31,0.42354786038315545
+i7,5,3,DeepONet,47,0.37086160189794926
+i7,5,3,DeepONet,63,0.574340757989763
+i7,5,3,DeepONet,79,0.3512142406609534
+i7,5,3,DeepONet,94,0.45790903358679397
+i7,5,3,DeepONet,110,0.6819770152496689
+i7,5,3,DeepONet,126,0.6605829229274366
+i7,5,3,DeepONet,142,0.6587555324898312
+i7,5,3,DeepONet,157,0.6732379551997049
+i7,5,3,DeepONet,173,0.6694885334091254
+i7,5,3,DeepONet,189,0.6302223395238318
+i7,5,3,DeepONet,205,0.5641307480458886
+i7,5,3,DeepONet,220,0.49719971746913033
+i7,5,3,DeepONet,236,0.3068095237077177
+i7,5,3,DeepONet,252,0.3579315436115515
+i7,5,3,DeepONet,268,0.3309733418601484
+i7,5,3,DeepONet,283,0.29394531701700416
+i7,5,3,DeepONet,299,0.24629133236277606
+i7,5,3,PINN,0,0.41829001460493614
+i7,5,3,PINN,16,0.40511496706964945
+i7,5,3,PINN,31,0.39344220134630925
+i7,5,3,PINN,47,0.42351504862471717
+i7,5,3,PINN,63,0.4777961349122629
+i7,5,3,PINN,79,0.8340369866490678
+i7,5,3,PINN,94,0.9727876467600961
+i7,5,3,PINN,110,0.9001228047649863
+i7,5,3,PINN,126,0.8763655573159996
+i7,5,3,PINN,142,0.8533286520122684
+i7,5,3,PINN,157,0.849802978451765
+i7,5,3,PINN,173,1.0290037361774598
+i7,5,3,PINN,189,0.8624962470842152
+i7,5,3,PINN,205,0.4689399237480578
+i7,5,3,PINN,220,0.5342380843547397
+i7,5,3,PINN,236,0.5901521806824829
+i7,5,3,PINN,252,0.6059905072206326
+i7,5,3,PINN,268,0.7605501688326016
+i7,5,3,PINN,283,0.893286638208084
+i7,5,3,PINN,299,0.7441374879077132
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",0,0.40878675784106716
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",16,0.4392508539487393
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",31,0.42354786038315545
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",47,0.37086160189794926
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",63,0.574340757989763
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",79,0.3512142406609534
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",94,0.45790903358679397
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",110,0.6819770152496689
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",126,0.6605829229274366
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",142,0.6587555324898312
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",157,0.6732379551997049
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",173,0.6694885334091254
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",189,0.6302223395238318
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",205,0.5641307480458886
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",220,0.49719971746913033
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",236,0.3068095237077177
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",252,0.3579315436115515
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",268,0.3309733418601484
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",283,0.29394531701700416
+i7,5,3,"Hybrid A: blend (DeepONet, PINN)",299,0.24629133236277606
+i7,5,3,Hybrid B: DeepONet + physics correction,0,0.28260721558736107
+i7,5,3,Hybrid B: DeepONet + physics correction,16,0.31575262321806286
+i7,5,3,Hybrid B: DeepONet + physics correction,31,0.32346545778688524
+i7,5,3,Hybrid B: DeepONet + physics correction,47,0.26480300014425606
+i7,5,3,Hybrid B: DeepONet + physics correction,63,0.3880554174539559
+i7,5,3,Hybrid B: DeepONet + physics correction,79,0.43520991519326796
+i7,5,3,Hybrid B: DeepONet + physics correction,94,0.5301594323002
+i7,5,3,Hybrid B: DeepONet + physics correction,110,0.6551062417672826
+i7,5,3,Hybrid B: DeepONet + physics correction,126,0.6452091559248099
+i7,5,3,Hybrid B: DeepONet + physics correction,142,0.6556010820933926
+i7,5,3,Hybrid B: DeepONet + physics correction,157,0.6783221799675828
+i7,5,3,Hybrid B: DeepONet + physics correction,173,0.6944141874974334
+i7,5,3,Hybrid B: DeepONet + physics correction,189,0.6547024804334584
+i7,5,3,Hybrid B: DeepONet + physics correction,205,0.38304880307094
+i7,5,3,Hybrid B: DeepONet + physics correction,220,0.4071069816064268
+i7,5,3,Hybrid B: DeepONet + physics correction,236,0.27663666072354404
+i7,5,3,Hybrid B: DeepONet + physics correction,252,0.23795452887037571
+i7,5,3,Hybrid B: DeepONet + physics correction,268,0.3554032925772607
+i7,5,3,Hybrid B: DeepONet + physics correction,283,0.21754751044825693
+i7,5,3,Hybrid B: DeepONet + physics correction,299,0.2980059745324621
+i7,5,3,Hybrid C: blend + physics correction,0,0.28260721558736107
+i7,5,3,Hybrid C: blend + physics correction,16,0.31575262321806286
+i7,5,3,Hybrid C: blend + physics correction,31,0.32346545778688524
+i7,5,3,Hybrid C: blend + physics correction,47,0.26480300014425606
+i7,5,3,Hybrid C: blend + physics correction,63,0.3880554174539559
+i7,5,3,Hybrid C: blend + physics correction,79,0.43520991519326796
+i7,5,3,Hybrid C: blend + physics correction,94,0.5301594323002
+i7,5,3,Hybrid C: blend + physics correction,110,0.6551062417672826
+i7,5,3,Hybrid C: blend + physics correction,126,0.6452091559248099
+i7,5,3,Hybrid C: blend + physics correction,142,0.6556010820933926
+i7,5,3,Hybrid C: blend + physics correction,157,0.6783221799675828
+i7,5,3,Hybrid C: blend + physics correction,173,0.6944141874974334
+i7,5,3,Hybrid C: blend + physics correction,189,0.6547024804334584
+i7,5,3,Hybrid C: blend + physics correction,205,0.38304880307094
+i7,5,3,Hybrid C: blend + physics correction,220,0.4071069816064268
+i7,5,3,Hybrid C: blend + physics correction,236,0.27663666072354404
+i7,5,3,Hybrid C: blend + physics correction,252,0.23795452887037571
+i7,5,3,Hybrid C: blend + physics correction,268,0.3554032925772607
+i7,5,3,Hybrid C: blend + physics correction,283,0.21754751044825693
+i7,5,3,Hybrid C: blend + physics correction,299,0.2980059745324621
+i7,5,4,DeepONet,0,0.4054757055762603
+i7,5,4,DeepONet,16,0.4357774159443098
+i7,5,4,DeepONet,31,0.3958475751350391
+i7,5,4,DeepONet,47,0.3797290255103924
+i7,5,4,DeepONet,63,0.5515522326773332
+i7,5,4,DeepONet,79,0.4207891783663421
+i7,5,4,DeepONet,94,0.5548630883343606
+i7,5,4,DeepONet,110,0.7887178496013619
+i7,5,4,DeepONet,126,0.7689879967598598
+i7,5,4,DeepONet,142,0.7627166367489506
+i7,5,4,DeepONet,157,0.7763449193626303
+i7,5,4,DeepONet,173,0.7802061662977956
+i7,5,4,DeepONet,189,0.733454237378314
+i7,5,4,DeepONet,205,0.47637457609746947
+i7,5,4,DeepONet,220,0.3953394299023273
+i7,5,4,DeepONet,236,0.4253231781422959
+i7,5,4,DeepONet,252,0.36975806344791334
+i7,5,4,DeepONet,268,0.45086914087344593
+i7,5,4,DeepONet,283,0.36196603944472794
+i7,5,4,DeepONet,299,0.3800468914495264
+i7,5,4,PINN,0,0.41829001460493614
+i7,5,4,PINN,16,0.40511496706964945
+i7,5,4,PINN,31,0.39344220134630925
+i7,5,4,PINN,47,0.42351504862471717
+i7,5,4,PINN,63,0.4777961349122629
+i7,5,4,PINN,79,0.8340369866490678
+i7,5,4,PINN,94,0.9727876467600961
+i7,5,4,PINN,110,0.9001228047649863
+i7,5,4,PINN,126,0.8763655573159996
+i7,5,4,PINN,142,0.8533286520122684
+i7,5,4,PINN,157,0.849802978451765
+i7,5,4,PINN,173,1.0290037361774598
+i7,5,4,PINN,189,0.8624962470842152
+i7,5,4,PINN,205,0.4689399237480578
+i7,5,4,PINN,220,0.5342380843547397
+i7,5,4,PINN,236,0.5901521806824829
+i7,5,4,PINN,252,0.6059905072206326
+i7,5,4,PINN,268,0.7605501688326016
+i7,5,4,PINN,283,0.893286638208084
+i7,5,4,PINN,299,0.7441374879077132
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",0,0.3796177590072151
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",16,0.4112279198695569
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",31,0.3714871608704978
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",47,0.3630961446206931
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",63,0.4640156582226477
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",79,0.4559404047980038
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",94,0.5922166748050914
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",110,0.7965318063847159
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",126,0.7763711231114362
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",142,0.7631303467878543
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",157,0.7794434125783892
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",173,0.8031758175979016
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",189,0.7424329969138125
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",205,0.39718476778009126
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",220,0.35286603112437076
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",236,0.4163797876955064
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",252,0.3051627118179181
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",268,0.45387277458123576
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",283,0.30556024084446565
+i7,5,4,"Hybrid A: blend (DeepONet, PINN)",299,0.38984791483343806
+i7,5,4,Hybrid B: DeepONet + physics correction,0,0.2950256791936057
+i7,5,4,Hybrid B: DeepONet + physics correction,16,0.3265904686490921
+i7,5,4,Hybrid B: DeepONet + physics correction,31,0.3258349930729511
+i7,5,4,Hybrid B: DeepONet + physics correction,47,0.27684633770266004
+i7,5,4,Hybrid B: DeepONet + physics correction,63,0.3650878487293588
+i7,5,4,Hybrid B: DeepONet + physics correction,79,0.44527200476812456
+i7,5,4,Hybrid B: DeepONet + physics correction,94,0.5452120849741162
+i7,5,4,Hybrid B: DeepONet + physics correction,110,0.672896668060558
+i7,5,4,Hybrid B: DeepONet + physics correction,126,0.6617859666687431
+i7,5,4,Hybrid B: DeepONet + physics correction,142,0.6622762333871357
+i7,5,4,Hybrid B: DeepONet + physics correction,157,0.6938226414659494
+i7,5,4,Hybrid B: DeepONet + physics correction,173,0.7122071250510253
+i7,5,4,Hybrid B: DeepONet + physics correction,189,0.6699953004651114
+i7,5,4,Hybrid B: DeepONet + physics correction,205,0.3454216780255009
+i7,5,4,Hybrid B: DeepONet + physics correction,220,0.394966079744646
+i7,5,4,Hybrid B: DeepONet + physics correction,236,0.2903692523526581
+i7,5,4,Hybrid B: DeepONet + physics correction,252,0.24881815794319123
+i7,5,4,Hybrid B: DeepONet + physics correction,268,0.3665664574377179
+i7,5,4,Hybrid B: DeepONet + physics correction,283,0.21980336060702851
+i7,5,4,Hybrid B: DeepONet + physics correction,299,0.31950724487853915
+i7,5,4,Hybrid C: blend + physics correction,0,0.27717511292586383
+i7,5,4,Hybrid C: blend + physics correction,16,0.30876894880514005
+i7,5,4,Hybrid C: blend + physics correction,31,0.30662027442530315
+i7,5,4,Hybrid C: blend + physics correction,47,0.2672461639559558
+i7,5,4,Hybrid C: blend + physics correction,63,0.29620838540080807
+i7,5,4,Hybrid C: blend + physics correction,79,0.4783834316671323
+i7,5,4,Hybrid C: blend + physics correction,94,0.5840256115863357
+i7,5,4,Hybrid C: blend + physics correction,110,0.6935835636081135
+i7,5,4,Hybrid C: blend + physics correction,126,0.6810808434236725
+i7,5,4,Hybrid C: blend + physics correction,142,0.6751639845645008
+i7,5,4,Hybrid C: blend + physics correction,157,0.7060661299576989
+i7,5,4,Hybrid C: blend + physics correction,173,0.7424799834187814
+i7,5,4,Hybrid C: blend + physics correction,189,0.6861004821781513
+i7,5,4,Hybrid C: blend + physics correction,205,0.2767998218415146
+i7,5,4,Hybrid C: blend + physics correction,220,0.36595599223467873
+i7,5,4,Hybrid C: blend + physics correction,236,0.2999090286619242
+i7,5,4,Hybrid C: blend + physics correction,252,0.21046200112767102
+i7,5,4,Hybrid C: blend + physics correction,268,0.3837410461879313
+i7,5,4,Hybrid C: blend + physics correction,283,0.20097827306828595
+i7,5,4,Hybrid C: blend + physics correction,299,0.33903896220802776
+i7,8,0,DeepONet,0,0.5060795457819262
+i7,8,0,DeepONet,16,0.5235855633930755
+i7,8,0,DeepONet,31,0.4980020086415381
+i7,8,0,DeepONet,47,0.4852193231237366
+i7,8,0,DeepONet,63,0.46106992291995785
+i7,8,0,DeepONet,79,0.40050432941150454
+i7,8,0,DeepONet,94,0.4508231694495151
+i7,8,0,DeepONet,110,0.5410582034595739
+i7,8,0,DeepONet,126,0.5357501318449508
+i7,8,0,DeepONet,142,0.5279369477948422
+i7,8,0,DeepONet,157,0.5467822388306322
+i7,8,0,DeepONet,173,0.560372738560015
+i7,8,0,DeepONet,189,0.5395738125639148
+i7,8,0,DeepONet,205,0.5175770370732887
+i7,8,0,DeepONet,220,0.4167043024617503
+i7,8,0,DeepONet,236,0.40504507305498966
+i7,8,0,DeepONet,252,0.42771690292046655
+i7,8,0,DeepONet,268,0.3898439994659586
+i7,8,0,DeepONet,283,0.4247542765894145
+i7,8,0,DeepONet,299,0.3558655937623757
+i7,8,0,PINN,0,0.15591813273330143
+i7,8,0,PINN,16,0.2081576157871561
+i7,8,0,PINN,31,0.1791317757210937
+i7,8,0,PINN,47,0.2140636763286505
+i7,8,0,PINN,63,0.287956772974633
+i7,8,0,PINN,79,0.42057727360084474
+i7,8,0,PINN,94,0.3686783192192015
+i7,8,0,PINN,110,0.3854021169618104
+i7,8,0,PINN,126,0.3814235549132219
+i7,8,0,PINN,142,0.37690776320010516
+i7,8,0,PINN,157,0.4281463657014588
+i7,8,0,PINN,173,0.6307574258349058
+i7,8,0,PINN,189,0.40399002460840533
+i7,8,0,PINN,205,0.24904394167630925
+i7,8,0,PINN,220,0.6389222106145176
+i7,8,0,PINN,236,0.42770136013194104
+i7,8,0,PINN,252,0.5232070657071304
+i7,8,0,PINN,268,0.20942728988505036
+i7,8,0,PINN,283,0.6129495652092452
+i7,8,0,PINN,299,0.32409029882808804
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",0,0.3130356036606732
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",16,0.3499209128904413
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",31,0.3148038140037182
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",47,0.3285751549700641
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",63,0.2276702147538079
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",79,0.24434874321124936
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",94,0.2783504398408644
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",110,0.3322310094908999
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",126,0.332112880412586
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",142,0.3133067469356484
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",157,0.34484845373620837
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",173,0.4035939570386765
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",189,0.33291322509940613
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",205,0.3425452351495988
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",220,0.3432973549237374
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",236,0.19315533204684446
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",252,0.28825300515132396
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",268,0.24104083144343746
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",283,0.30692114348734495
+i7,8,0,"Hybrid A: blend (DeepONet, PINN)",299,0.15453866050942877
+i7,8,0,Hybrid B: DeepONet + physics correction,0,0.13209031950664038
+i7,8,0,Hybrid B: DeepONet + physics correction,16,0.14652312431945905
+i7,8,0,Hybrid B: DeepONet + physics correction,31,0.13947306410206978
+i7,8,0,Hybrid B: DeepONet + physics correction,47,0.1553106388710366
+i7,8,0,Hybrid B: DeepONet + physics correction,63,0.11708272964803658
+i7,8,0,Hybrid B: DeepONet + physics correction,79,0.2381536078196746
+i7,8,0,Hybrid B: DeepONet + physics correction,94,0.19772095177021468
+i7,8,0,Hybrid B: DeepONet + physics correction,110,0.2270522560482069
+i7,8,0,Hybrid B: DeepONet + physics correction,126,0.2244255768183119
+i7,8,0,Hybrid B: DeepONet + physics correction,142,0.2207944631342581
+i7,8,0,Hybrid B: DeepONet + physics correction,157,0.20496979555685163
+i7,8,0,Hybrid B: DeepONet + physics correction,173,0.24587949454212082
+i7,8,0,Hybrid B: DeepONet + physics correction,189,0.20267641986491047
+i7,8,0,Hybrid B: DeepONet + physics correction,205,0.26886848364006577
+i7,8,0,Hybrid B: DeepONet + physics correction,220,0.2939553795265716
+i7,8,0,Hybrid B: DeepONet + physics correction,236,0.26892196640600374
+i7,8,0,Hybrid B: DeepONet + physics correction,252,0.2974292780650517
+i7,8,0,Hybrid B: DeepONet + physics correction,268,0.2707417780348616
+i7,8,0,Hybrid B: DeepONet + physics correction,283,0.3248718315459356
+i7,8,0,Hybrid B: DeepONet + physics correction,299,0.26887574437320955
+i7,8,0,Hybrid C: blend + physics correction,0,0.17598272684491129
+i7,8,0,Hybrid C: blend + physics correction,16,0.19419327985313242
+i7,8,0,Hybrid C: blend + physics correction,31,0.17783344003156187
+i7,8,0,Hybrid C: blend + physics correction,47,0.19778699075840384
+i7,8,0,Hybrid C: blend + physics correction,63,0.11868616253128253
+i7,8,0,Hybrid C: blend + physics correction,79,0.20630534736460077
+i7,8,0,Hybrid C: blend + physics correction,94,0.19012327685227742
+i7,8,0,Hybrid C: blend + physics correction,110,0.22853427829324097
+i7,8,0,Hybrid C: blend + physics correction,126,0.2307232479433951
+i7,8,0,Hybrid C: blend + physics correction,142,0.2116771489163982
+i7,8,0,Hybrid C: blend + physics correction,157,0.2217258615007383
+i7,8,0,Hybrid C: blend + physics correction,173,0.27871781529183726
+i7,8,0,Hybrid C: blend + physics correction,189,0.20763894223414806
+i7,8,0,Hybrid C: blend + physics correction,205,0.25229358078886055
+i7,8,0,Hybrid C: blend + physics correction,220,0.3185038471482078
+i7,8,0,Hybrid C: blend + physics correction,236,0.1926520281243071
+i7,8,0,Hybrid C: blend + physics correction,252,0.2593921953191576
+i7,8,0,Hybrid C: blend + physics correction,268,0.24209042438953832
+i7,8,0,Hybrid C: blend + physics correction,283,0.3168263927127405
+i7,8,0,Hybrid C: blend + physics correction,299,0.16994714983012396
+i7,8,1,DeepONet,0,0.47268326241355524
+i7,8,1,DeepONet,16,0.48686437257597465
+i7,8,1,DeepONet,31,0.4560037117055987
+i7,8,1,DeepONet,47,0.45184344231800816
+i7,8,1,DeepONet,63,0.4115418434186436
+i7,8,1,DeepONet,79,0.3960994606516989
+i7,8,1,DeepONet,94,0.4475234355123718
+i7,8,1,DeepONet,110,0.54235503281686
+i7,8,1,DeepONet,126,0.5351531814408019
+i7,8,1,DeepONet,142,0.5274787426998714
+i7,8,1,DeepONet,157,0.5488116436927167
+i7,8,1,DeepONet,173,0.5633846598594702
+i7,8,1,DeepONet,189,0.5402190497770214
+i7,8,1,DeepONet,205,0.5166392844780519
+i7,8,1,DeepONet,220,0.41123900632450927
+i7,8,1,DeepONet,236,0.3970366283149811
+i7,8,1,DeepONet,252,0.4202499724806505
+i7,8,1,DeepONet,268,0.3893957661457625
+i7,8,1,DeepONet,283,0.41003535628517174
+i7,8,1,DeepONet,299,0.3524166913773135
+i7,8,1,PINN,0,0.15591813273330143
+i7,8,1,PINN,16,0.2081576157871561
+i7,8,1,PINN,31,0.1791317757210937
+i7,8,1,PINN,47,0.2140636763286505
+i7,8,1,PINN,63,0.287956772974633
+i7,8,1,PINN,79,0.42057727360084474
+i7,8,1,PINN,94,0.3686783192192015
+i7,8,1,PINN,110,0.3854021169618104
+i7,8,1,PINN,126,0.3814235549132219
+i7,8,1,PINN,142,0.37690776320010516
+i7,8,1,PINN,157,0.4281463657014588
+i7,8,1,PINN,173,0.6307574258349058
+i7,8,1,PINN,189,0.40399002460840533
+i7,8,1,PINN,205,0.24904394167630925
+i7,8,1,PINN,220,0.6389222106145176
+i7,8,1,PINN,236,0.42770136013194104
+i7,8,1,PINN,252,0.5232070657071304
+i7,8,1,PINN,268,0.20942728988505036
+i7,8,1,PINN,283,0.6129495652092452
+i7,8,1,PINN,299,0.32409029882808804
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",0,0.2929995412055317
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",16,0.3260679334119069
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",31,0.2893997437477631
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",47,0.30734873087115
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",63,0.20101465079084724
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",79,0.24966558361690191
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",94,0.27743878561389934
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",110,0.34137013362971674
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",126,0.3357155520330493
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",142,0.3177786440144558
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",157,0.35265547916731593
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",173,0.41340636214184906
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",189,0.33850876138901975
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",205,0.34494639693856655
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",220,0.3465046853340828
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",236,0.19538898886292919
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",252,0.29208327293592695
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",268,0.24242043536258778
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",283,0.30431814661028034
+i7,8,1,"Hybrid A: blend (DeepONet, PINN)",299,0.1558888541808232
+i7,8,1,Hybrid B: DeepONet + physics correction,0,0.13110474480185913
+i7,8,1,Hybrid B: DeepONet + physics correction,16,0.14345171234633158
+i7,8,1,Hybrid B: DeepONet + physics correction,31,0.1370184778507596
+i7,8,1,Hybrid B: DeepONet + physics correction,47,0.15611821423564665
+i7,8,1,Hybrid B: DeepONet + physics correction,63,0.11008601193125453
+i7,8,1,Hybrid B: DeepONet + physics correction,79,0.23150082796944169
+i7,8,1,Hybrid B: DeepONet + physics correction,94,0.19458838460551608
+i7,8,1,Hybrid B: DeepONet + physics correction,110,0.2257424268199412
+i7,8,1,Hybrid B: DeepONet + physics correction,126,0.2255111277302429
+i7,8,1,Hybrid B: DeepONet + physics correction,142,0.2216355086878245
+i7,8,1,Hybrid B: DeepONet + physics correction,157,0.20369724789121746
+i7,8,1,Hybrid B: DeepONet + physics correction,173,0.241320868974376
+i7,8,1,Hybrid B: DeepONet + physics correction,189,0.20029532832446983
+i7,8,1,Hybrid B: DeepONet + physics correction,205,0.2661068361698237
+i7,8,1,Hybrid B: DeepONet + physics correction,220,0.29137610090800964
+i7,8,1,Hybrid B: DeepONet + physics correction,236,0.2744184955116724
+i7,8,1,Hybrid B: DeepONet + physics correction,252,0.29211646214208853
+i7,8,1,Hybrid B: DeepONet + physics correction,268,0.27442224006494825
+i7,8,1,Hybrid B: DeepONet + physics correction,283,0.32275853982804165
+i7,8,1,Hybrid B: DeepONet + physics correction,299,0.27436453047629145
+i7,8,1,Hybrid C: blend + physics correction,0,0.17814687995206546
+i7,8,1,Hybrid C: blend + physics correction,16,0.19699022290178764
+i7,8,1,Hybrid C: blend + physics correction,31,0.17988260397435754
+i7,8,1,Hybrid C: blend + physics correction,47,0.2004166696846179
+i7,8,1,Hybrid C: blend + physics correction,63,0.11284889350778068
+i7,8,1,Hybrid C: blend + physics correction,79,0.20116223550049692
+i7,8,1,Hybrid C: blend + physics correction,94,0.18659662575429467
+i7,8,1,Hybrid C: blend + physics correction,110,0.22581915631682223
+i7,8,1,Hybrid C: blend + physics correction,126,0.22965693444332563
+i7,8,1,Hybrid C: blend + physics correction,142,0.21083929889968087
+i7,8,1,Hybrid C: blend + physics correction,157,0.2191068685609784
+i7,8,1,Hybrid C: blend + physics correction,173,0.2722945095581081
+i7,8,1,Hybrid C: blend + physics correction,189,0.20433930606405357
+i7,8,1,Hybrid C: blend + physics correction,205,0.23800581450803102
+i7,8,1,Hybrid C: blend + physics correction,220,0.3083800925786578
+i7,8,1,Hybrid C: blend + physics correction,236,0.19370396733121595
+i7,8,1,Hybrid C: blend + physics correction,252,0.25116390454415677
+i7,8,1,Hybrid C: blend + physics correction,268,0.2456601252634879
+i7,8,1,Hybrid C: blend + physics correction,283,0.312102102566817
+i7,8,1,Hybrid C: blend + physics correction,299,0.17501159085473322
+i7,8,2,DeepONet,0,0.4052847382205025
+i7,8,2,DeepONet,16,0.42976295310339574
+i7,8,2,DeepONet,31,0.40313911211574144
+i7,8,2,DeepONet,47,0.37730282691612077
+i7,8,2,DeepONet,63,0.3850112506324346
+i7,8,2,DeepONet,79,0.28724819549118963
+i7,8,2,DeepONet,94,0.35989740843433643
+i7,8,2,DeepONet,110,0.4968558384934595
+i7,8,2,DeepONet,126,0.5052046265637349
+i7,8,2,DeepONet,142,0.4856063349842296
+i7,8,2,DeepONet,157,0.4829515482597559
+i7,8,2,DeepONet,173,0.48536276185399047
+i7,8,2,DeepONet,189,0.47349245752349517
+i7,8,2,DeepONet,205,0.45229579503133793
+i7,8,2,DeepONet,220,0.36301172829851197
+i7,8,2,DeepONet,236,0.33246059948603135
+i7,8,2,DeepONet,252,0.3528051580420751
+i7,8,2,DeepONet,268,0.3106604720041942
+i7,8,2,DeepONet,283,0.33393609764993143
+i7,8,2,DeepONet,299,0.26627706229840087
+i7,8,2,PINN,0,0.15591813273330143
+i7,8,2,PINN,16,0.2081576157871561
+i7,8,2,PINN,31,0.1791317757210937
+i7,8,2,PINN,47,0.2140636763286505
+i7,8,2,PINN,63,0.287956772974633
+i7,8,2,PINN,79,0.42057727360084474
+i7,8,2,PINN,94,0.3686783192192015
+i7,8,2,PINN,110,0.3854021169618104
+i7,8,2,PINN,126,0.3814235549132219
+i7,8,2,PINN,142,0.37690776320010516
+i7,8,2,PINN,157,0.4281463657014588
+i7,8,2,PINN,173,0.6307574258349058
+i7,8,2,PINN,189,0.40399002460840533
+i7,8,2,PINN,205,0.24904394167630925
+i7,8,2,PINN,220,0.6389222106145176
+i7,8,2,PINN,236,0.42770136013194104
+i7,8,2,PINN,252,0.5232070657071304
+i7,8,2,PINN,268,0.20942728988505036
+i7,8,2,PINN,283,0.6129495652092452
+i7,8,2,PINN,299,0.32409029882808804
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",0,0.22194460396473356
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",16,0.2677161612178381
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",31,0.2322349404609081
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",47,0.23442015214670212
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",63,0.1672692850866867
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",79,0.20936793679132712
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",94,0.21714485318023552
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",110,0.26813772973080735
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",126,0.27426416708270224
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",142,0.2480296826247852
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",157,0.277896423923149
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",173,0.3686304824666808
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",189,0.26537680969404953
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",205,0.26885119549533615
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",220,0.36318301903116756
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",236,0.15318805551143647
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",252,0.27315223161438534
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",268,0.16393851052106057
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",283,0.28803360792640503
+i7,8,2,"Hybrid A: blend (DeepONet, PINN)",299,0.08828576109832888
+i7,8,2,Hybrid B: DeepONet + physics correction,0,0.08889195544595076
+i7,8,2,Hybrid B: DeepONet + physics correction,16,0.10965635277529574
+i7,8,2,Hybrid B: DeepONet + physics correction,31,0.09971600273157723
+i7,8,2,Hybrid B: DeepONet + physics correction,47,0.10980242723233623
+i7,8,2,Hybrid B: DeepONet + physics correction,63,0.07530413390813498
+i7,8,2,Hybrid B: DeepONet + physics correction,79,0.14071685002492354
+i7,8,2,Hybrid B: DeepONet + physics correction,94,0.10003646333731689
+i7,8,2,Hybrid B: DeepONet + physics correction,110,0.18498533819891239
+i7,8,2,Hybrid B: DeepONet + physics correction,126,0.17002399403708562
+i7,8,2,Hybrid B: DeepONet + physics correction,142,0.16172491307312342
+i7,8,2,Hybrid B: DeepONet + physics correction,157,0.1608805381871049
+i7,8,2,Hybrid B: DeepONet + physics correction,173,0.20777114510289446
+i7,8,2,Hybrid B: DeepONet + physics correction,189,0.15145918002624342
+i7,8,2,Hybrid B: DeepONet + physics correction,205,0.2319169069847009
+i7,8,2,Hybrid B: DeepONet + physics correction,220,0.23613718344702184
+i7,8,2,Hybrid B: DeepONet + physics correction,236,0.16881670976594682
+i7,8,2,Hybrid B: DeepONet + physics correction,252,0.20726330849233648
+i7,8,2,Hybrid B: DeepONet + physics correction,268,0.1835558817329726
+i7,8,2,Hybrid B: DeepONet + physics correction,283,0.21397686007521835
+i7,8,2,Hybrid B: DeepONet + physics correction,299,0.1740480274179389
+i7,8,2,Hybrid C: blend + physics correction,0,0.16756060182982613
+i7,8,2,Hybrid C: blend + physics correction,16,0.21087175098836905
+i7,8,2,Hybrid C: blend + physics correction,31,0.18011226554186854
+i7,8,2,Hybrid C: blend + physics correction,47,0.1935385517900274
+i7,8,2,Hybrid C: blend + physics correction,63,0.11537712878385169
+i7,8,2,Hybrid C: blend + physics correction,79,0.16880789479412694
+i7,8,2,Hybrid C: blend + physics correction,94,0.16473994118496663
+i7,8,2,Hybrid C: blend + physics correction,110,0.21424828169464266
+i7,8,2,Hybrid C: blend + physics correction,126,0.21767587554210246
+i7,8,2,Hybrid C: blend + physics correction,142,0.19085911105772727
+i7,8,2,Hybrid C: blend + physics correction,157,0.2223484493169927
+i7,8,2,Hybrid C: blend + physics correction,173,0.31764379901715845
+i7,8,2,Hybrid C: blend + physics correction,189,0.2061094983743067
+i7,8,2,Hybrid C: blend + physics correction,205,0.25769337488557187
+i7,8,2,Hybrid C: blend + physics correction,220,0.3395288077480888
+i7,8,2,Hybrid C: blend + physics correction,236,0.14595774067807846
+i7,8,2,Hybrid C: blend + physics correction,252,0.23253898036546072
+i7,8,2,Hybrid C: blend + physics correction,268,0.14688011446494537
+i7,8,2,Hybrid C: blend + physics correction,283,0.26835808418972673
+i7,8,2,Hybrid C: blend + physics correction,299,0.08182751911152
+i7,8,3,DeepONet,0,0.4436133404219557
+i7,8,3,DeepONet,16,0.45952549182833285
+i7,8,3,DeepONet,31,0.43303898457197176
+i7,8,3,DeepONet,47,0.41201789617929724
+i7,8,3,DeepONet,63,0.3949614403543638
+i7,8,3,DeepONet,79,0.28556417666992656
+i7,8,3,DeepONet,94,0.3589904782910847
+i7,8,3,DeepONet,110,0.4904940417604191
+i7,8,3,DeepONet,126,0.4890609421023706
+i7,8,3,DeepONet,142,0.4753257451337629
+i7,8,3,DeepONet,157,0.4938476966761026
+i7,8,3,DeepONet,173,0.5020503555496976
+i7,8,3,DeepONet,189,0.4828094567049998
+i7,8,3,DeepONet,205,0.4657364806240465
+i7,8,3,DeepONet,220,0.37054325627153445
+i7,8,3,DeepONet,236,0.3079133595194307
+i7,8,3,DeepONet,252,0.37362910212674494
+i7,8,3,DeepONet,268,0.27528192723600625
+i7,8,3,DeepONet,283,0.3725662836131158
+i7,8,3,DeepONet,299,0.23411221064464782
+i7,8,3,PINN,0,0.15591813273330143
+i7,8,3,PINN,16,0.2081576157871561
+i7,8,3,PINN,31,0.1791317757210937
+i7,8,3,PINN,47,0.2140636763286505
+i7,8,3,PINN,63,0.287956772974633
+i7,8,3,PINN,79,0.42057727360084474
+i7,8,3,PINN,94,0.3686783192192015
+i7,8,3,PINN,110,0.3854021169618104
+i7,8,3,PINN,126,0.3814235549132219
+i7,8,3,PINN,142,0.37690776320010516
+i7,8,3,PINN,157,0.4281463657014588
+i7,8,3,PINN,173,0.6307574258349058
+i7,8,3,PINN,189,0.40399002460840533
+i7,8,3,PINN,205,0.24904394167630925
+i7,8,3,PINN,220,0.6389222106145176
+i7,8,3,PINN,236,0.42770136013194104
+i7,8,3,PINN,252,0.5232070657071304
+i7,8,3,PINN,268,0.20942728988505036
+i7,8,3,PINN,283,0.6129495652092452
+i7,8,3,PINN,299,0.32409029882808804
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",0,0.2798512830948856
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",16,0.316653213085388
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",31,0.28073562788221174
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",47,0.2827220243443499
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",63,0.19868973902379686
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",79,0.20162934135929772
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",94,0.23650711368763408
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",110,0.3163779789286971
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",126,0.31270543760492425
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",142,0.289973086744654
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",157,0.3286697129640388
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",173,0.38985752965912984
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",189,0.31191901011157497
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",205,0.3093274172770748
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",220,0.3078717796814592
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",236,0.14096822982229576
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",252,0.23424767955682935
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",268,0.17050834165871012
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",283,0.2501351481043339
+i7,8,3,"Hybrid A: blend (DeepONet, PINN)",299,0.07778925476640426
+i7,8,3,Hybrid B: DeepONet + physics correction,0,0.08941903092542589
+i7,8,3,Hybrid B: DeepONet + physics correction,16,0.1085849060702044
+i7,8,3,Hybrid B: DeepONet + physics correction,31,0.10071081342525859
+i7,8,3,Hybrid B: DeepONet + physics correction,47,0.11386751561433686
+i7,8,3,Hybrid B: DeepONet + physics correction,63,0.0738940054190533
+i7,8,3,Hybrid B: DeepONet + physics correction,79,0.1349129147893526
+i7,8,3,Hybrid B: DeepONet + physics correction,94,0.09496996676082971
+i7,8,3,Hybrid B: DeepONet + physics correction,110,0.1724783447630452
+i7,8,3,Hybrid B: DeepONet + physics correction,126,0.1570422804060859
+i7,8,3,Hybrid B: DeepONet + physics correction,142,0.1493140113566743
+i7,8,3,Hybrid B: DeepONet + physics correction,157,0.15116183517241935
+i7,8,3,Hybrid B: DeepONet + physics correction,173,0.19544278203278995
+i7,8,3,Hybrid B: DeepONet + physics correction,189,0.14090228609648855
+i7,8,3,Hybrid B: DeepONet + physics correction,205,0.2440247841924585
+i7,8,3,Hybrid B: DeepONet + physics correction,220,0.24577703687535624
+i7,8,3,Hybrid B: DeepONet + physics correction,236,0.16436796547316296
+i7,8,3,Hybrid B: DeepONet + physics correction,252,0.2126737904136557
+i7,8,3,Hybrid B: DeepONet + physics correction,268,0.1795841156703187
+i7,8,3,Hybrid B: DeepONet + physics correction,283,0.21463078574765115
+i7,8,3,Hybrid B: DeepONet + physics correction,299,0.16952487970918967
+i7,8,3,Hybrid C: blend + physics correction,0,0.17927005962779252
+i7,8,3,Hybrid C: blend + physics correction,16,0.21521613016633165
+i7,8,3,Hybrid C: blend + physics correction,31,0.19186230905210291
+i7,8,3,Hybrid C: blend + physics correction,47,0.20022713241714168
+i7,8,3,Hybrid C: blend + physics correction,63,0.10675489968066638
+i7,8,3,Hybrid C: blend + physics correction,79,0.1385351819155277
+i7,8,3,Hybrid C: blend + physics correction,94,0.14675226585911388
+i7,8,3,Hybrid C: blend + physics correction,110,0.21114122154531811
+i7,8,3,Hybrid C: blend + physics correction,126,0.21238910769581582
+i7,8,3,Hybrid C: blend + physics correction,142,0.1820790635509055
+i7,8,3,Hybrid C: blend + physics correction,157,0.20994076417083118
+i7,8,3,Hybrid C: blend + physics correction,173,0.2790087989538846
+i7,8,3,Hybrid C: blend + physics correction,189,0.19387577292962152
+i7,8,3,Hybrid C: blend + physics correction,205,0.2800923127945289
+i7,8,3,Hybrid C: blend + physics correction,220,0.3065014507682315
+i7,8,3,Hybrid C: blend + physics correction,236,0.1272644877888652
+i7,8,3,Hybrid C: blend + physics correction,252,0.20818965016289645
+i7,8,3,Hybrid C: blend + physics correction,268,0.1515209776778178
+i7,8,3,Hybrid C: blend + physics correction,283,0.2309654711745451
+i7,8,3,Hybrid C: blend + physics correction,299,0.07429774448979251
+i7,8,4,DeepONet,0,0.45096669191277766
+i7,8,4,DeepONet,16,0.47383880727576677
+i7,8,4,DeepONet,31,0.4489509555021013
+i7,8,4,DeepONet,47,0.4261246437601993
+i7,8,4,DeepONet,63,0.3773535420878621
+i7,8,4,DeepONet,79,0.28951715119919663
+i7,8,4,DeepONet,94,0.3573196227100915
+i7,8,4,DeepONet,110,0.4887409139729264
+i7,8,4,DeepONet,126,0.491282217309597
+i7,8,4,DeepONet,142,0.4730159271726392
+i7,8,4,DeepONet,157,0.4807287870666853
+i7,8,4,DeepONet,173,0.4883129695515297
+i7,8,4,DeepONet,189,0.4718923083417914
+i7,8,4,DeepONet,205,0.45515057488943605
+i7,8,4,DeepONet,220,0.38133141389978836
+i7,8,4,DeepONet,236,0.37950369636793996
+i7,8,4,DeepONet,252,0.3927638682758716
+i7,8,4,DeepONet,268,0.31763614267700296
+i7,8,4,DeepONet,283,0.3934591350697695
+i7,8,4,DeepONet,299,0.2915072099660185
+i7,8,4,PINN,0,0.15591813273330143
+i7,8,4,PINN,16,0.2081576157871561
+i7,8,4,PINN,31,0.1791317757210937
+i7,8,4,PINN,47,0.2140636763286505
+i7,8,4,PINN,63,0.287956772974633
+i7,8,4,PINN,79,0.42057727360084474
+i7,8,4,PINN,94,0.3686783192192015
+i7,8,4,PINN,110,0.3854021169618104
+i7,8,4,PINN,126,0.3814235549132219
+i7,8,4,PINN,142,0.37690776320010516
+i7,8,4,PINN,157,0.4281463657014588
+i7,8,4,PINN,173,0.6307574258349058
+i7,8,4,PINN,189,0.40399002460840533
+i7,8,4,PINN,205,0.24904394167630925
+i7,8,4,PINN,220,0.6389222106145176
+i7,8,4,PINN,236,0.42770136013194104
+i7,8,4,PINN,252,0.5232070657071304
+i7,8,4,PINN,268,0.20942728988505036
+i7,8,4,PINN,283,0.6129495652092452
+i7,8,4,PINN,299,0.32409029882808804
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",0,0.24659636320383543
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",16,0.29347504255234574
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",31,0.2558591970730793
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",47,0.26482861709559086
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",63,0.16444270642231865
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",79,0.2118396620896636
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",94,0.22734776500960424
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",110,0.27732258417559175
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",126,0.28043697150676616
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",142,0.25647205253876915
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",157,0.29288877183451534
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",173,0.3822386252547576
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",189,0.27845399760271755
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",205,0.2466521558219471
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",220,0.3232693112734471
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",236,0.15823319765292684
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",252,0.24609054917216278
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",268,0.16729482697763262
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",283,0.2867231007849005
+i7,8,4,"Hybrid A: blend (DeepONet, PINN)",299,0.09370024285805778
+i7,8,4,Hybrid B: DeepONet + physics correction,0,0.2060066897122546
+i7,8,4,Hybrid B: DeepONet + physics correction,16,0.2153122576846827
+i7,8,4,Hybrid B: DeepONet + physics correction,31,0.2185647383219903
+i7,8,4,Hybrid B: DeepONet + physics correction,47,0.20329685818628715
+i7,8,4,Hybrid B: DeepONet + physics correction,63,0.1739831657861599
+i7,8,4,Hybrid B: DeepONet + physics correction,79,0.18071505479380617
+i7,8,4,Hybrid B: DeepONet + physics correction,94,0.17795504419308347
+i7,8,4,Hybrid B: DeepONet + physics correction,110,0.24167601452591927
+i7,8,4,Hybrid B: DeepONet + physics correction,126,0.24089604742438098
+i7,8,4,Hybrid B: DeepONet + physics correction,142,0.22115626997823182
+i7,8,4,Hybrid B: DeepONet + physics correction,157,0.22739931393403673
+i7,8,4,Hybrid B: DeepONet + physics correction,173,0.22681068473478372
+i7,8,4,Hybrid B: DeepONet + physics correction,189,0.21111230194684683
+i7,8,4,Hybrid B: DeepONet + physics correction,205,0.30069298312034864
+i7,8,4,Hybrid B: DeepONet + physics correction,220,0.1966073894084444
+i7,8,4,Hybrid B: DeepONet + physics correction,236,0.22137823966932005
+i7,8,4,Hybrid B: DeepONet + physics correction,252,0.20421791546361112
+i7,8,4,Hybrid B: DeepONet + physics correction,268,0.24023663622195837
+i7,8,4,Hybrid B: DeepONet + physics correction,283,0.265934102178824
+i7,8,4,Hybrid B: DeepONet + physics correction,299,0.22635464670733155
+i7,8,4,Hybrid C: blend + physics correction,0,0.17377383155006984
+i7,8,4,Hybrid C: blend + physics correction,16,0.21845775558597016
+i7,8,4,Hybrid C: blend + physics correction,31,0.1869378575786509
+i7,8,4,Hybrid C: blend + physics correction,47,0.20278161332068256
+i7,8,4,Hybrid C: blend + physics correction,63,0.11613194564786017
+i7,8,4,Hybrid C: blend + physics correction,79,0.1713049845931205
+i7,8,4,Hybrid C: blend + physics correction,94,0.16915599006956725
+i7,8,4,Hybrid C: blend + physics correction,110,0.22112212504342751
+i7,8,4,Hybrid C: blend + physics correction,126,0.2232657783994384
+i7,8,4,Hybrid C: blend + physics correction,142,0.19631300546314148
+i7,8,4,Hybrid C: blend + physics correction,157,0.2286832635073677
+i7,8,4,Hybrid C: blend + physics correction,173,0.3247460075888829
+i7,8,4,Hybrid C: blend + physics correction,189,0.2114141060033099
+i7,8,4,Hybrid C: blend + physics correction,205,0.27352249670740086
+i7,8,4,Hybrid C: blend + physics correction,220,0.35353316912158467
+i7,8,4,Hybrid C: blend + physics correction,236,0.1559003316737874
+i7,8,4,Hybrid C: blend + physics correction,252,0.24575788195330964
+i7,8,4,Hybrid C: blend + physics correction,268,0.1467649816808737
+i7,8,4,Hybrid C: blend + physics correction,283,0.27892621027288755
+i7,8,4,Hybrid C: blend + physics correction,299,0.08386303069552006
+i7,10,0,DeepONet,0,0.3897323343517202
+i7,10,0,DeepONet,16,0.4204248984759712
+i7,10,0,DeepONet,31,0.3871700194962303
+i7,10,0,DeepONet,47,0.3613930104834433
+i7,10,0,DeepONet,63,0.35536600772774873
+i7,10,0,DeepONet,79,0.29401069823408954
+i7,10,0,DeepONet,94,0.3720735831977629
+i7,10,0,DeepONet,110,0.5476718957468298
+i7,10,0,DeepONet,126,0.5315264080312956
+i7,10,0,DeepONet,142,0.5108058995775353
+i7,10,0,DeepONet,157,0.5102971154167192
+i7,10,0,DeepONet,173,0.5240037660659421
+i7,10,0,DeepONet,189,0.4979815070370853
+i7,10,0,DeepONet,205,0.4652759318882803
+i7,10,0,DeepONet,220,0.3798276581035624
+i7,10,0,DeepONet,236,0.272433147819592
+i7,10,0,DeepONet,252,0.3556416806054992
+i7,10,0,DeepONet,268,0.2968247911574892
+i7,10,0,DeepONet,283,0.307450051899936
+i7,10,0,DeepONet,299,0.21442961191782695
+i7,10,0,PINN,0,0.15256870753511664
+i7,10,0,PINN,16,0.1916313366609723
+i7,10,0,PINN,31,0.2028179571327067
+i7,10,0,PINN,47,0.1638221455755079
+i7,10,0,PINN,63,0.11022290738967032
+i7,10,0,PINN,79,0.15161521086766852
+i7,10,0,PINN,94,0.149115298472696
+i7,10,0,PINN,110,0.17656277414171964
+i7,10,0,PINN,126,0.13909604448633855
+i7,10,0,PINN,142,0.1858525737401781
+i7,10,0,PINN,157,0.13681852457901392
+i7,10,0,PINN,173,0.13474074024792487
+i7,10,0,PINN,189,0.1626498827999447
+i7,10,0,PINN,205,0.2589197900668976
+i7,10,0,PINN,220,0.2314465197554137
+i7,10,0,PINN,236,0.2100987705299411
+i7,10,0,PINN,252,0.1416870994588018
+i7,10,0,PINN,268,0.26908344787872573
+i7,10,0,PINN,283,0.14069766407827283
+i7,10,0,PINN,299,0.21558681033156746
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",0,0.146010217289899
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",16,0.17850474821200976
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",31,0.19111483951214006
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",47,0.1596017945140791
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",63,0.11322719231853944
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",79,0.12237090148441943
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",94,0.13274939661736826
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",110,0.19394038957928142
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",126,0.1818310506554735
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",142,0.21156774639419598
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",157,0.15566924102292165
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",173,0.17110241997594125
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",189,0.2021516932992249
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",205,0.19517581109976864
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",220,0.154746007576252
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",236,0.12849982582303843
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",252,0.14876860548222912
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",268,0.1605966653047652
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",283,0.11923660946998771
+i7,10,0,"Hybrid A: blend (DeepONet, PINN)",299,0.13911865073139829
+i7,10,0,Hybrid B: DeepONet + physics correction,0,0.17726925436167945
+i7,10,0,Hybrid B: DeepONet + physics correction,16,0.17681710062785275
+i7,10,0,Hybrid B: DeepONet + physics correction,31,0.18833241485184432
+i7,10,0,Hybrid B: DeepONet + physics correction,47,0.16636429414796974
+i7,10,0,Hybrid B: DeepONet + physics correction,63,0.12280968946310562
+i7,10,0,Hybrid B: DeepONet + physics correction,79,0.16415525737785566
+i7,10,0,Hybrid B: DeepONet + physics correction,94,0.17916551013855014
+i7,10,0,Hybrid B: DeepONet + physics correction,110,0.2330844000430177
+i7,10,0,Hybrid B: DeepONet + physics correction,126,0.23424094830692127
+i7,10,0,Hybrid B: DeepONet + physics correction,142,0.23516861372730674
+i7,10,0,Hybrid B: DeepONet + physics correction,157,0.23291526081467762
+i7,10,0,Hybrid B: DeepONet + physics correction,173,0.23960141620046652
+i7,10,0,Hybrid B: DeepONet + physics correction,189,0.23282926105257903
+i7,10,0,Hybrid B: DeepONet + physics correction,205,0.1753338426285436
+i7,10,0,Hybrid B: DeepONet + physics correction,220,0.18458484890058938
+i7,10,0,Hybrid B: DeepONet + physics correction,236,0.1768802223799043
+i7,10,0,Hybrid B: DeepONet + physics correction,252,0.19586250693979634
+i7,10,0,Hybrid B: DeepONet + physics correction,268,0.16611171597324842
+i7,10,0,Hybrid B: DeepONet + physics correction,283,0.16734311867866522
+i7,10,0,Hybrid B: DeepONet + physics correction,299,0.1382223274601876
+i7,10,0,Hybrid C: blend + physics correction,0,0.14168543911730194
+i7,10,0,Hybrid C: blend + physics correction,16,0.17017597141238808
+i7,10,0,Hybrid C: blend + physics correction,31,0.182634715987391
+i7,10,0,Hybrid C: blend + physics correction,47,0.15036024460565936
+i7,10,0,Hybrid C: blend + physics correction,63,0.09955330242120868
+i7,10,0,Hybrid C: blend + physics correction,79,0.11883043515741032
+i7,10,0,Hybrid C: blend + physics correction,94,0.12960824543389432
+i7,10,0,Hybrid C: blend + physics correction,110,0.17612626437348156
+i7,10,0,Hybrid C: blend + physics correction,126,0.16639328229918351
+i7,10,0,Hybrid C: blend + physics correction,142,0.1997029119169344
+i7,10,0,Hybrid C: blend + physics correction,157,0.14578876762191326
+i7,10,0,Hybrid C: blend + physics correction,173,0.16497100610696305
+i7,10,0,Hybrid C: blend + physics correction,189,0.1933605291288642
+i7,10,0,Hybrid C: blend + physics correction,205,0.21162572150632059
+i7,10,0,Hybrid C: blend + physics correction,220,0.17046772126615098
+i7,10,0,Hybrid C: blend + physics correction,236,0.14825856115312727
+i7,10,0,Hybrid C: blend + physics correction,252,0.15074932553499196
+i7,10,0,Hybrid C: blend + physics correction,268,0.16438918089350563
+i7,10,0,Hybrid C: blend + physics correction,283,0.11587950089235903
+i7,10,0,Hybrid C: blend + physics correction,299,0.14079295495096864
+i7,10,1,DeepONet,0,0.39558228732409906
+i7,10,1,DeepONet,16,0.4352299768332826
+i7,10,1,DeepONet,31,0.40546062776599207
+i7,10,1,DeepONet,47,0.3708346866217554
+i7,10,1,DeepONet,63,0.3963752506989654
+i7,10,1,DeepONet,79,0.29247281667679126
+i7,10,1,DeepONet,94,0.36886999307518475
+i7,10,1,DeepONet,110,0.5504440791291891
+i7,10,1,DeepONet,126,0.5373195262929404
+i7,10,1,DeepONet,142,0.5114093908216177
+i7,10,1,DeepONet,157,0.5158550973957253
+i7,10,1,DeepONet,173,0.5306823926365085
+i7,10,1,DeepONet,189,0.5004233487392562
+i7,10,1,DeepONet,205,0.44993973863898545
+i7,10,1,DeepONet,220,0.38103832206840343
+i7,10,1,DeepONet,236,0.23758127799064352
+i7,10,1,DeepONet,252,0.3614437004511057
+i7,10,1,DeepONet,268,0.2693625174876416
+i7,10,1,DeepONet,283,0.2966768524375145
+i7,10,1,DeepONet,299,0.24085753705914162
+i7,10,1,PINN,0,0.15256870753511664
+i7,10,1,PINN,16,0.1916313366609723
+i7,10,1,PINN,31,0.2028179571327067
+i7,10,1,PINN,47,0.1638221455755079
+i7,10,1,PINN,63,0.11022290738967032
+i7,10,1,PINN,79,0.15161521086766852
+i7,10,1,PINN,94,0.149115298472696
+i7,10,1,PINN,110,0.17656277414171964
+i7,10,1,PINN,126,0.13909604448633855
+i7,10,1,PINN,142,0.1858525737401781
+i7,10,1,PINN,157,0.13681852457901392
+i7,10,1,PINN,173,0.13474074024792487
+i7,10,1,PINN,189,0.1626498827999447
+i7,10,1,PINN,205,0.2589197900668976
+i7,10,1,PINN,220,0.2314465197554137
+i7,10,1,PINN,236,0.2100987705299411
+i7,10,1,PINN,252,0.1416870994588018
+i7,10,1,PINN,268,0.26908344787872573
+i7,10,1,PINN,283,0.14069766407827283
+i7,10,1,PINN,299,0.21558681033156746
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",0,0.1699179540504981
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",16,0.20385033477740952
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",31,0.21346324023724525
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",47,0.18175529683143085
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",63,0.1549390852205558
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",79,0.13178001210206822
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",94,0.15216286677629157
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",110,0.23432204090628406
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",126,0.22691741626574358
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",142,0.24460295460681086
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",157,0.19894350653260695
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",173,0.21811223492835166
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",189,0.2377342864445079
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",205,0.2194510413138408
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",220,0.1828699268955277
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",236,0.13540286786861747
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",252,0.1840509098723894
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",268,0.1481623211803436
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",283,0.13143584099898123
+i7,10,1,"Hybrid A: blend (DeepONet, PINN)",299,0.14731024489035263
+i7,10,1,Hybrid B: DeepONet + physics correction,0,0.17675013200720993
+i7,10,1,Hybrid B: DeepONet + physics correction,16,0.1767132889329437
+i7,10,1,Hybrid B: DeepONet + physics correction,31,0.18817300366623063
+i7,10,1,Hybrid B: DeepONet + physics correction,47,0.1646248812340348
+i7,10,1,Hybrid B: DeepONet + physics correction,63,0.1250104518803782
+i7,10,1,Hybrid B: DeepONet + physics correction,79,0.16682576036325708
+i7,10,1,Hybrid B: DeepONet + physics correction,94,0.18382294645144776
+i7,10,1,Hybrid B: DeepONet + physics correction,110,0.240386942179615
+i7,10,1,Hybrid B: DeepONet + physics correction,126,0.2404926000830081
+i7,10,1,Hybrid B: DeepONet + physics correction,142,0.2407558997844432
+i7,10,1,Hybrid B: DeepONet + physics correction,157,0.23872876150803984
+i7,10,1,Hybrid B: DeepONet + physics correction,173,0.24706292908791735
+i7,10,1,Hybrid B: DeepONet + physics correction,189,0.23764562912278378
+i7,10,1,Hybrid B: DeepONet + physics correction,205,0.17129362124141886
+i7,10,1,Hybrid B: DeepONet + physics correction,220,0.17637037761295984
+i7,10,1,Hybrid B: DeepONet + physics correction,236,0.17266378134558288
+i7,10,1,Hybrid B: DeepONet + physics correction,252,0.19227501382310358
+i7,10,1,Hybrid B: DeepONet + physics correction,268,0.169623315786493
+i7,10,1,Hybrid B: DeepONet + physics correction,283,0.16758355694355676
+i7,10,1,Hybrid B: DeepONet + physics correction,299,0.13868573221365038
+i7,10,1,Hybrid C: blend + physics correction,0,0.1618420349331575
+i7,10,1,Hybrid C: blend + physics correction,16,0.18627008755645255
+i7,10,1,Hybrid C: blend + physics correction,31,0.19395804537237754
+i7,10,1,Hybrid C: blend + physics correction,47,0.16330819888704412
+i7,10,1,Hybrid C: blend + physics correction,63,0.11699571895181694
+i7,10,1,Hybrid C: blend + physics correction,79,0.12762624636965123
+i7,10,1,Hybrid C: blend + physics correction,94,0.14889417561281865
+i7,10,1,Hybrid C: blend + physics correction,110,0.2104279936496817
+i7,10,1,Hybrid C: blend + physics correction,126,0.20528372936956207
+i7,10,1,Hybrid C: blend + physics correction,142,0.2295675402698504
+i7,10,1,Hybrid C: blend + physics correction,157,0.18359537945000043
+i7,10,1,Hybrid C: blend + physics correction,173,0.20639223579212843
+i7,10,1,Hybrid C: blend + physics correction,189,0.22526398553756577
+i7,10,1,Hybrid C: blend + physics correction,205,0.2153172038227785
+i7,10,1,Hybrid C: blend + physics correction,220,0.1724581280656376
+i7,10,1,Hybrid C: blend + physics correction,236,0.1395742887809512
+i7,10,1,Hybrid C: blend + physics correction,252,0.166781648790914
+i7,10,1,Hybrid C: blend + physics correction,268,0.14357827251484073
+i7,10,1,Hybrid C: blend + physics correction,283,0.12781494696038043
+i7,10,1,Hybrid C: blend + physics correction,299,0.12439821326224795
+i7,10,2,DeepONet,0,0.3939618173237819
+i7,10,2,DeepONet,16,0.43610610737758193
+i7,10,2,DeepONet,31,0.4045101237238531
+i7,10,2,DeepONet,47,0.372754872316302
+i7,10,2,DeepONet,63,0.3146656091203762
+i7,10,2,DeepONet,79,0.2927751270470416
+i7,10,2,DeepONet,94,0.36818274464711903
+i7,10,2,DeepONet,110,0.5580261050035124
+i7,10,2,DeepONet,126,0.537370055492653
+i7,10,2,DeepONet,142,0.5097524549691214
+i7,10,2,DeepONet,157,0.5119521686339432
+i7,10,2,DeepONet,173,0.5286519742460756
+i7,10,2,DeepONet,189,0.4940336911770984
+i7,10,2,DeepONet,205,0.4654438513291956
+i7,10,2,DeepONet,220,0.361805864888543
+i7,10,2,DeepONet,236,0.28196522762379067
+i7,10,2,DeepONet,252,0.3530917754352443
+i7,10,2,DeepONet,268,0.31600096740941946
+i7,10,2,DeepONet,283,0.3136784019427975
+i7,10,2,DeepONet,299,0.23193248205455322
+i7,10,2,PINN,0,0.15256870753511664
+i7,10,2,PINN,16,0.1916313366609723
+i7,10,2,PINN,31,0.2028179571327067
+i7,10,2,PINN,47,0.1638221455755079
+i7,10,2,PINN,63,0.11022290738967032
+i7,10,2,PINN,79,0.15161521086766852
+i7,10,2,PINN,94,0.149115298472696
+i7,10,2,PINN,110,0.17656277414171964
+i7,10,2,PINN,126,0.13909604448633855
+i7,10,2,PINN,142,0.1858525737401781
+i7,10,2,PINN,157,0.13681852457901392
+i7,10,2,PINN,173,0.13474074024792487
+i7,10,2,PINN,189,0.1626498827999447
+i7,10,2,PINN,205,0.2589197900668976
+i7,10,2,PINN,220,0.2314465197554137
+i7,10,2,PINN,236,0.2100987705299411
+i7,10,2,PINN,252,0.1416870994588018
+i7,10,2,PINN,268,0.26908344787872573
+i7,10,2,PINN,283,0.14069766407827283
+i7,10,2,PINN,299,0.21558681033156746
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",0,0.1686941238647595
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",16,0.20325954325413118
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",31,0.2121720643128912
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",47,0.18203374364666952
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",63,0.1247275962577596
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",79,0.12960491784814587
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",94,0.15162548537532664
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",110,0.23762044805317326
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",126,0.22705470048650808
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",142,0.24400747643178228
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",157,0.19765153532745683
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",173,0.21868416306728086
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",189,0.2348652021720589
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",205,0.2010926170154951
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",220,0.1558024123726609
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",236,0.12133625405353718
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",252,0.16899543979091364
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",268,0.1418715750484181
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",283,0.13472454318816984
+i7,10,2,"Hybrid A: blend (DeepONet, PINN)",299,0.11169587240128563
+i7,10,2,Hybrid B: DeepONet + physics correction,0,0.1755419465510464
+i7,10,2,Hybrid B: DeepONet + physics correction,16,0.1752445621110847
+i7,10,2,Hybrid B: DeepONet + physics correction,31,0.1875938500570909
+i7,10,2,Hybrid B: DeepONet + physics correction,47,0.16450510202685775
+i7,10,2,Hybrid B: DeepONet + physics correction,63,0.12519321773491043
+i7,10,2,Hybrid B: DeepONet + physics correction,79,0.16630503680594097
+i7,10,2,Hybrid B: DeepONet + physics correction,94,0.17875776736758564
+i7,10,2,Hybrid B: DeepONet + physics correction,110,0.23383080215258464
+i7,10,2,Hybrid B: DeepONet + physics correction,126,0.2339413232209654
+i7,10,2,Hybrid B: DeepONet + physics correction,142,0.2344253659088533
+i7,10,2,Hybrid B: DeepONet + physics correction,157,0.23263303556947865
+i7,10,2,Hybrid B: DeepONet + physics correction,173,0.23957155418161855
+i7,10,2,Hybrid B: DeepONet + physics correction,189,0.23164810513281883
+i7,10,2,Hybrid B: DeepONet + physics correction,205,0.17409783330195122
+i7,10,2,Hybrid B: DeepONet + physics correction,220,0.18148194908814552
+i7,10,2,Hybrid B: DeepONet + physics correction,236,0.18065237168487655
+i7,10,2,Hybrid B: DeepONet + physics correction,252,0.1974083495919052
+i7,10,2,Hybrid B: DeepONet + physics correction,268,0.17049043861628912
+i7,10,2,Hybrid B: DeepONet + physics correction,283,0.17088958820505828
+i7,10,2,Hybrid B: DeepONet + physics correction,299,0.14206886476027605
+i7,10,2,Hybrid C: blend + physics correction,0,0.1605687398816887
+i7,10,2,Hybrid C: blend + physics correction,16,0.18492785392893027
+i7,10,2,Hybrid C: blend + physics correction,31,0.19272771753716786
+i7,10,2,Hybrid C: blend + physics correction,47,0.16266121390117325
+i7,10,2,Hybrid C: blend + physics correction,63,0.1153047325797619
+i7,10,2,Hybrid C: blend + physics correction,79,0.12532724464263345
+i7,10,2,Hybrid C: blend + physics correction,94,0.14500121437246025
+i7,10,2,Hybrid C: blend + physics correction,110,0.20473708079678538
+i7,10,2,Hybrid C: blend + physics correction,126,0.19952216874789183
+i7,10,2,Hybrid C: blend + physics correction,142,0.22403957240918776
+i7,10,2,Hybrid C: blend + physics correction,157,0.1783485669619551
+i7,10,2,Hybrid C: blend + physics correction,173,0.199637516006091
+i7,10,2,Hybrid C: blend + physics correction,189,0.2201724359986875
+i7,10,2,Hybrid C: blend + physics correction,205,0.21433149314253955
+i7,10,2,Hybrid C: blend + physics correction,220,0.16916586113914117
+i7,10,2,Hybrid C: blend + physics correction,236,0.1401721945815524
+i7,10,2,Hybrid C: blend + physics correction,252,0.1670183192055243
+i7,10,2,Hybrid C: blend + physics correction,268,0.14335380165289957
+i7,10,2,Hybrid C: blend + physics correction,283,0.12746763566668484
+i7,10,2,Hybrid C: blend + physics correction,299,0.12269193859679153
+i7,10,3,DeepONet,0,0.3836985101682376
+i7,10,3,DeepONet,16,0.4179735157481295
+i7,10,3,DeepONet,31,0.3871262831288014
+i7,10,3,DeepONet,47,0.35345462834519253
+i7,10,3,DeepONet,63,0.36498032154126187
+i7,10,3,DeepONet,79,0.300320568649428
+i7,10,3,DeepONet,94,0.3799844384482055
+i7,10,3,DeepONet,110,0.5768711210996377
+i7,10,3,DeepONet,126,0.5604264456137116
+i7,10,3,DeepONet,142,0.5326834341436828
+i7,10,3,DeepONet,157,0.5257859454341416
+i7,10,3,DeepONet,173,0.546866852854827
+i7,10,3,DeepONet,189,0.5104203127438893
+i7,10,3,DeepONet,205,0.4353640247189314
+i7,10,3,DeepONet,220,0.3633775455545243
+i7,10,3,DeepONet,236,0.25832161432500744
+i7,10,3,DeepONet,252,0.34779716248184217
+i7,10,3,DeepONet,268,0.30215044566845817
+i7,10,3,DeepONet,283,0.29903636966698466
+i7,10,3,DeepONet,299,0.215756089750156
+i7,10,3,PINN,0,0.15256870753511664
+i7,10,3,PINN,16,0.1916313366609723
+i7,10,3,PINN,31,0.2028179571327067
+i7,10,3,PINN,47,0.1638221455755079
+i7,10,3,PINN,63,0.11022290738967032
+i7,10,3,PINN,79,0.15161521086766852
+i7,10,3,PINN,94,0.149115298472696
+i7,10,3,PINN,110,0.17656277414171964
+i7,10,3,PINN,126,0.13909604448633855
+i7,10,3,PINN,142,0.1858525737401781
+i7,10,3,PINN,157,0.13681852457901392
+i7,10,3,PINN,173,0.13474074024792487
+i7,10,3,PINN,189,0.1626498827999447
+i7,10,3,PINN,205,0.2589197900668976
+i7,10,3,PINN,220,0.2314465197554137
+i7,10,3,PINN,236,0.2100987705299411
+i7,10,3,PINN,252,0.1416870994588018
+i7,10,3,PINN,268,0.26908344787872573
+i7,10,3,PINN,283,0.14069766407827283
+i7,10,3,PINN,299,0.21558681033156746
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",0,0.19556836721264323
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",16,0.22425337502447085
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",31,0.22618267345258403
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",47,0.1954000178917769
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",63,0.17469496598377965
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",79,0.14907961906314499
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",94,0.1852237021640626
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",110,0.29438876536425823
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",126,0.28660620885198906
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",142,0.2941261017729386
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",157,0.2523096320682993
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",173,0.27731752235735196
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",189,0.28099242995432727
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",205,0.2340507465978423
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",220,0.18451120373417926
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",236,0.12508260678618072
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",252,0.19774598613442648
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",268,0.13870115795859964
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",283,0.1510580912607018
+i7,10,3,"Hybrid A: blend (DeepONet, PINN)",299,0.1149455384303161
+i7,10,3,Hybrid B: DeepONet + physics correction,0,0.17754939438512352
+i7,10,3,Hybrid B: DeepONet + physics correction,16,0.17594579532354854
+i7,10,3,Hybrid B: DeepONet + physics correction,31,0.1872509923889138
+i7,10,3,Hybrid B: DeepONet + physics correction,47,0.1647957414903469
+i7,10,3,Hybrid B: DeepONet + physics correction,63,0.12428038651645017
+i7,10,3,Hybrid B: DeepONet + physics correction,79,0.17033667437521405
+i7,10,3,Hybrid B: DeepONet + physics correction,94,0.18593645021063834
+i7,10,3,Hybrid B: DeepONet + physics correction,110,0.24106909688396494
+i7,10,3,Hybrid B: DeepONet + physics correction,126,0.24151535465995347
+i7,10,3,Hybrid B: DeepONet + physics correction,142,0.2415520590013242
+i7,10,3,Hybrid B: DeepONet + physics correction,157,0.23945190731924457
+i7,10,3,Hybrid B: DeepONet + physics correction,173,0.2477718978098818
+i7,10,3,Hybrid B: DeepONet + physics correction,189,0.23791816684027953
+i7,10,3,Hybrid B: DeepONet + physics correction,205,0.17077356604310887
+i7,10,3,Hybrid B: DeepONet + physics correction,220,0.17854683267072746
+i7,10,3,Hybrid B: DeepONet + physics correction,236,0.17435693465860366
+i7,10,3,Hybrid B: DeepONet + physics correction,252,0.19305910112001673
+i7,10,3,Hybrid B: DeepONet + physics correction,268,0.17104327542959336
+i7,10,3,Hybrid B: DeepONet + physics correction,283,0.16911342292289155
+i7,10,3,Hybrid B: DeepONet + physics correction,299,0.1380580528227402
+i7,10,3,Hybrid C: blend + physics correction,0,0.1766919320547598
+i7,10,3,Hybrid C: blend + physics correction,16,0.19608927060757878
+i7,10,3,Hybrid C: blend + physics correction,31,0.2001038942490914
+i7,10,3,Hybrid C: blend + physics correction,47,0.17165641977678844
+i7,10,3,Hybrid C: blend + physics correction,63,0.13037174649660282
+i7,10,3,Hybrid C: blend + physics correction,79,0.13780662873871227
+i7,10,3,Hybrid C: blend + physics correction,94,0.16608631146100358
+i7,10,3,Hybrid C: blend + physics correction,110,0.23596758654263061
+i7,10,3,Hybrid C: blend + physics correction,126,0.2333674560395149
+i7,10,3,Hybrid C: blend + physics correction,142,0.24974693523135552
+i7,10,3,Hybrid C: blend + physics correction,157,0.21375522113812326
+i7,10,3,Hybrid C: blend + physics correction,173,0.2356891035701555
+i7,10,3,Hybrid C: blend + physics correction,189,0.24678695478814527
+i7,10,3,Hybrid C: blend + physics correction,205,0.22289179518412547
+i7,10,3,Hybrid C: blend + physics correction,220,0.17583768518507922
+i7,10,3,Hybrid C: blend + physics correction,236,0.1355336855928601
+i7,10,3,Hybrid C: blend + physics correction,252,0.1817939634391749
+i7,10,3,Hybrid C: blend + physics correction,268,0.1340387401691829
+i7,10,3,Hybrid C: blend + physics correction,283,0.14078032230911186
+i7,10,3,Hybrid C: blend + physics correction,299,0.1135010947867409
+i7,10,4,DeepONet,0,0.39402749229603423
+i7,10,4,DeepONet,16,0.41779880444375217
+i7,10,4,DeepONet,31,0.3818138742156268
+i7,10,4,DeepONet,47,0.35380346190710504
+i7,10,4,DeepONet,63,0.3962088603396236
+i7,10,4,DeepONet,79,0.29023556581688986
+i7,10,4,DeepONet,94,0.36877398917655074
+i7,10,4,DeepONet,110,0.5656512085314589
+i7,10,4,DeepONet,126,0.5542187727369234
+i7,10,4,DeepONet,142,0.5308082727337983
+i7,10,4,DeepONet,157,0.51683044509096
+i7,10,4,DeepONet,173,0.5318986493590763
+i7,10,4,DeepONet,189,0.5043089830741454
+i7,10,4,DeepONet,205,0.44874260205327665
+i7,10,4,DeepONet,220,0.3672502005742445
+i7,10,4,DeepONet,236,0.30164032365105703
+i7,10,4,DeepONet,252,0.3707641701877099
+i7,10,4,DeepONet,268,0.3223299400754774
+i7,10,4,DeepONet,283,0.3408148800870141
+i7,10,4,DeepONet,299,0.2182300636582765
+i7,10,4,PINN,0,0.15256870753511664
+i7,10,4,PINN,16,0.1916313366609723
+i7,10,4,PINN,31,0.2028179571327067
+i7,10,4,PINN,47,0.1638221455755079
+i7,10,4,PINN,63,0.11022290738967032
+i7,10,4,PINN,79,0.15161521086766852
+i7,10,4,PINN,94,0.149115298472696
+i7,10,4,PINN,110,0.17656277414171964
+i7,10,4,PINN,126,0.13909604448633855
+i7,10,4,PINN,142,0.1858525737401781
+i7,10,4,PINN,157,0.13681852457901392
+i7,10,4,PINN,173,0.13474074024792487
+i7,10,4,PINN,189,0.1626498827999447
+i7,10,4,PINN,205,0.2589197900668976
+i7,10,4,PINN,220,0.2314465197554137
+i7,10,4,PINN,236,0.2100987705299411
+i7,10,4,PINN,252,0.1416870994588018
+i7,10,4,PINN,268,0.26908344787872573
+i7,10,4,PINN,283,0.14069766407827283
+i7,10,4,PINN,299,0.21558681033156746
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",0,0.14909522780548265
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",16,0.1776193498880383
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",31,0.1886227859443699
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",47,0.15533240284661476
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",63,0.12297141035020115
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",79,0.11918812706718057
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",94,0.13042231618665173
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",110,0.19914689839512795
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",126,0.1889837756907055
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",142,0.21855470068166336
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",157,0.1566784559987817
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",173,0.17651931942387697
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",189,0.20392717977962913
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",205,0.20084419947091295
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",220,0.15732400486147735
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",236,0.12625264426212504
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",252,0.14817395916485837
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",268,0.15798442637799778
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",283,0.1247189282433054
+i7,10,4,"Hybrid A: blend (DeepONet, PINN)",299,0.1334426185186104
+i7,10,4,Hybrid B: DeepONet + physics correction,0,0.17901496073211506
+i7,10,4,Hybrid B: DeepONet + physics correction,16,0.17818266104234542
+i7,10,4,Hybrid B: DeepONet + physics correction,31,0.19035007580733584
+i7,10,4,Hybrid B: DeepONet + physics correction,47,0.16657654888303858
+i7,10,4,Hybrid B: DeepONet + physics correction,63,0.12865588771100214
+i7,10,4,Hybrid B: DeepONet + physics correction,79,0.16567891862778394
+i7,10,4,Hybrid B: DeepONet + physics correction,94,0.18167210867235017
+i7,10,4,Hybrid B: DeepONet + physics correction,110,0.23857407648669712
+i7,10,4,Hybrid B: DeepONet + physics correction,126,0.23975571949476937
+i7,10,4,Hybrid B: DeepONet + physics correction,142,0.23983298446701465
+i7,10,4,Hybrid B: DeepONet + physics correction,157,0.23660932831811735
+i7,10,4,Hybrid B: DeepONet + physics correction,173,0.2444994878442227
+i7,10,4,Hybrid B: DeepONet + physics correction,189,0.23563088743612123
+i7,10,4,Hybrid B: DeepONet + physics correction,205,0.17424881584853172
+i7,10,4,Hybrid B: DeepONet + physics correction,220,0.17893298313979705
+i7,10,4,Hybrid B: DeepONet + physics correction,236,0.17745899196491077
+i7,10,4,Hybrid B: DeepONet + physics correction,252,0.19511742215398242
+i7,10,4,Hybrid B: DeepONet + physics correction,268,0.1689090068393943
+i7,10,4,Hybrid B: DeepONet + physics correction,283,0.17022340390837642
+i7,10,4,Hybrid B: DeepONet + physics correction,299,0.13805063582873134
+i7,10,4,Hybrid C: blend + physics correction,0,0.14166177669857338
+i7,10,4,Hybrid C: blend + physics correction,16,0.1701565481926
+i7,10,4,Hybrid C: blend + physics correction,31,0.18316658110465495
+i7,10,4,Hybrid C: blend + physics correction,47,0.14922131637678035
+i7,10,4,Hybrid C: blend + physics correction,63,0.10267943496627148
+i7,10,4,Hybrid C: blend + physics correction,79,0.11634567404130672
+i7,10,4,Hybrid C: blend + physics correction,94,0.12694467144089602
+i7,10,4,Hybrid C: blend + physics correction,110,0.17537288850900953
+i7,10,4,Hybrid C: blend + physics correction,126,0.16595285038088892
+i7,10,4,Hybrid C: blend + physics correction,142,0.19984398045527244
+i7,10,4,Hybrid C: blend + physics correction,157,0.14368673405331825
+i7,10,4,Hybrid C: blend + physics correction,173,0.16464172818983688
+i7,10,4,Hybrid C: blend + physics correction,189,0.19239027998931155
+i7,10,4,Hybrid C: blend + physics correction,205,0.21199827586341313
+i7,10,4,Hybrid C: blend + physics correction,220,0.17067426305442526
+i7,10,4,Hybrid C: blend + physics correction,236,0.14712816955984803
+i7,10,4,Hybrid C: blend + physics correction,252,0.1505679082593253
+i7,10,4,Hybrid C: blend + physics correction,268,0.16313947466615644
+i7,10,4,Hybrid C: blend + physics correction,283,0.1165766084824234
+i7,10,4,Hybrid C: blend + physics correction,299,0.1385910340191961

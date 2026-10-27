@@ -20,3 +20,5 @@ venv/
 *.pyc
 *.pt
 data/real_thermal/
+results/real_pinn/**/*.npy
+results/real_pinn_hybrid/**/*.npz
