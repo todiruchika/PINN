@@ -130,3 +130,39 @@ of these processors are not known.
 
 Map comparisons (truth, DeepONet, gappy POD, errors; the frame with the median DeepONet error, seed 0): `results/real_deeponet/comparison_maps_i5_i7_n5.png`,
 `_n8.png` and `_n10.png`.
+
+### Hybrid: DeepONet + physics (branch `github_dataset-hybrid`)
+
+No PINN for this dataset was on GitHub yet, so the physics side is a **physics-based inverse reconstruction** (`src/physics/screened_poisson.py`), a
+PINN-style model without a neural network. It assumes steady heat conduction with vertical heat loss and adiabatic edges,
+`-kappa*laplacian(T) + h*(T - T0) = q`, with unknown heat sources `q` written as Gaussian bumps on a coarse grid; the equation is solved
+for each bump with a cosine transform and the bump amplitudes are fitted to the noisy sensor readings with a ridge penalty. It uses no training maps. Its
+decay length, bump spacing and ridge are chosen on validation frames. It can be swapped for a neural PINN: the interface is just "map predictions for the same test frames".
+
+Hybrids (`src/eval/real_hybrid.py`; summary `src/eval/real_hybrid_report.py`; 5 seeds x 3 sensor counts x i5/i7):
+1. **blend**: `w*DeepONet + (1-w)*Physics`, w chosen on validation;
+2. **DeepONet + physics correction**: fit the physics response to the DeepONet's residual at the sensors and add it to the DeepONet map;
+3. blend, then correction.
+
+**"The hybrid" is variant 2**, picked as the variant with the lowest mean validation error over all settings (validation only, no test frames in the choice;
+variants 1 and 3 are within noise of each other on validation). An earlier rule (best variant per setting on validation) was dropped because validation could not
+tell the variants apart. I had already seen per-seed test numbers when I wrote the second rule, so treat the choice as made with some knowledge of the results.
+
+Test frames, relative error against the temperature rise (mean of 5 seeds; lower is better; `results/real_hybrid/`):
+
+| Processor | Sensors | DeepONet | Physics | **Hybrid (DeepONet + physics correction)** | Hybrid vs DeepONet | Gappy POD (ref.) |
+|---|---|---|---|---|---|---|
+| i5-3337U | 5 | **0.227** | 0.419 | 0.256 | worse | 0.169 |
+| | 8 | 0.152 | 0.248 | 0.149 | tie | 0.113 |
+| | 10 | 0.149 | 0.158 | **0.141** | better | 0.129 |
+| i7-8650U | 5 | 0.246 | 0.501 | 0.246 | tie | 0.367 |
+| | 8 | 0.104 | 0.332 | **0.101** | better | 0.214 |
+| | 10 | 0.111 | 0.284 | **0.099** | better | 0.086 |
+
+"better / worse / tie" is a paired 95% interval over the test frames (`results/real_hybrid/paired_comparison.csv`). The hybrid is clearly better than the physics model in
+all six settings, and better than the DeepONet in 3 of 6 (tie in 2, worse in 1: i5 with 5 sensors). So it is better than **both** individual models in 3 of 6 settings, by
+small margins (3 to 11% lower error), and the classical gappy POD is still better on the i5 and at 10 sensors on the i7. The physics model alone is much weaker than the
+DeepONet, so blending it in (variant 1) does not help; the useful part is the physics-based correction at the sensors. Caveats: the i5 has a single validation and a single test workload and
+its validation frames are much harder than its test frames (DeepONet validation error 0.5 vs test 0.15), so validation-based choices transfer imperfectly; frames inside a workload are
+strongly correlated, so the frame-level intervals are optimistic; the physics model is not a neural PINN and the physical constants are tuned, not known.
+

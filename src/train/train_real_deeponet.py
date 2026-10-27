@@ -121,7 +121,8 @@ def baselines(D: dict, n: int, cfg: dict, readings: dict, return_preds: bool = F
     return (rows, preds) if return_preds else rows
 
 
-def train_one(D: dict, n: int, seed: int, cfg: dict, readings: dict, quiet: bool = True, save_maps: int = 0):
+def train_one(D: dict, n: int, seed: int, cfg: dict, readings: dict, quiet: bool = True, save_maps: int = 0,
+              return_preds: bool = False):
     torch.manual_seed(seed); np.random.seed(seed)
     tr = cfg["training"]
     H, W = D["shape"]
@@ -168,7 +169,8 @@ def train_one(D: dict, n: int, seed: int, cfg: dict, readings: dict, quiet: bool
     pred = predict("test")
     rows = [{"model": "DeepONet", "frame": k, **metrics_row(pred[k], D["maps"]["test"][k], mask_val)} for k in range(len(pred))]
     maps = [(k, pred[k], D["maps"]["test"][k]) for k in range(min(save_maps, len(pred)))]
-    return rows, best, train_s, sum(p.numel() for p in model.parameters()), maps
+    out = (rows, best, train_s, sum(p.numel() for p in model.parameters()), maps)
+    return out + ({"validation": predict("validation"), "test": pred},) if return_preds else out
 
 
 def save_map_figure(maps, rc, n, shape, out: Path, title: str) -> None:
