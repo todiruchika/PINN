@@ -1,0 +1,50 @@
+{
+  "device": "i7_idle",
+  "grid_h": 185,
+  "grid_w": 154,
+  "r": 40,
+  "cumulative_energy_at_r": 0.9511159584469551,
+  "n_train_frames": 70,
+  "pivots": [
+    {
+      "row": 80,
+      "col": 8
+    },
+    {
+      "row": 145,
+      "col": 4
+    },
+    {
+      "row": 17,
+      "col": 23
+    },
+    {
+      "row": 177,
+      "col": 7
+    },
+    {
+      "row": 180,
+      "col": 26
+    },
+    {
+      "row": 8,
+      "col": 37
+    },
+    {
+      "row": 139,
+      "col": 41
+    },
+    {
+      "row": 58,
+      "col": 149
+    },
+    {
+      "row": 154,
+      "col": 23
+    },
+    {
+      "row": 90,
+      "col": 22
+    }
+  ]
+}

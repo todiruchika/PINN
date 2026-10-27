@@ -1,0 +1,296 @@
+{
+  "row": {
+    "model": "B",
+    "bc_mode": "hard",
+    "source_kind": "gaussian",
+    "split": "test",
+    "sample_id": "i5_stream_091",
+    "n_sensors": 8,
+    "seed": 0,
+    "rel_l2": 0.02243068413431533,
+    "rmse": 1.9608573932480229,
+    "mae": 1.4201874861863648,
+    "mse": 3.844961716655431,
+    "max_abs_err": 5.518524169921875,
+    "peak_temp_err": 1.585845947265625,
+    "hotspot_loc_cells": 18.384776310850235,
+    "pred_peak_temp": 95.00821685791016,
+    "true_peak_temp": 93.42237091064453,
+    "boundary_flux_mean": 0.1608940102268586,
+    "sensor_rmse": 0.011527225851106741,
+    "source_rel_l2": NaN,
+    "source_centre_err": NaN,
+    "n_params": 12761,
+    "train_seconds": 244.8791374999564,
+    "inference_seconds": 0.01219520007725805,
+    "final_loss": 0.008687220513820648,
+    "final_residual": 0.008513182401657104,
+    "final_data_loss": 1.7403800711690565e-06
+  },
+  "config": {
+    "name": "model_b_github",
+    "notes": "Model B on the GitHub real-chip thermal-map dataset (data/github_real, data/generated_github). die_L_x_m is set to 1.0 (abstract unit square) since no physical die size is known for these parts. Rather than invent new physical units, t_die/h_eff are chosen so eps = t_die/(h_eff*L^2) matches the synthetic-dataset calibration (~5.55e-4): what matters for the PDE is the ratio of lateral conduction to vertical sinking, not absolute metres. leak_fraction is set to 0 (no basis for a per-block leakage fraction on real, floorplan-unknown chips) -- a further simplification beyond the synthetic config's already-approximate mean leak_fraction. k(T) keeps the synthetic generator's k_A/k_offset, a generic silicon conductivity law, not something uniquely calibrated to the 12mm geometry.",
+    "device": "cpu",
+    "physics": {
+      "L": 1.0,
+      "t_die": 0.0005,
+      "h_eff": 0.9009016393,
+      "beta": 0.012,
+      "T0": 25.0,
+      "leak_fraction": 0.0
+    },
+    "model": {
+      "bc_mode": "hard",
+      "field": {
+        "width": 64,
+        "depth": 4,
+        "activation": "tanh",
+        "out_scale": 1.0,
+        "fourier": null
+      },
+      "source": {
+        "kind": "gaussian",
+        "n_blobs": 6,
+        "init_amp": 1.0,
+        "init_width": 0.12,
+        "min_width": 0.02,
+        "max_width": 0.5
+      }
+    },
+    "training": {
+      "adam_steps": 5000,
+      "lr": 0.001,
+      "lr_min": 1e-05,
+      "lbfgs_steps": 2000,
+      "lbfgs_lr": 1.0,
+      "lbfgs_history": 50,
+      "n_collocation": 2048,
+      "n_collocation_lbfgs": 4096,
+      "n_boundary": 256,
+      "weight_scheme": "fixed",
+      "w_residual": 1.0,
+      "w_data": 100.0,
+      "w_boundary": 1.0,
+      "residual_scale": 1.0,
+      "anneal_every": 100,
+      "anneal_ema": 0.9,
+      "grad_clip": null,
+      "restore_best": true,
+      "log_every": 500,
+      "log_every_lbfgs": 200
+    }
+  },
+  "history": [
+    {
+      "step": 0,
+      "phase": "adam",
+      "loss": 45.03779220581055,
+      "residual": 0.47382980585098267,
+      "data": 0.44563961029052734,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 500,
+      "phase": "adam",
+      "loss": 0.1905943602323532,
+      "residual": 0.1657213568687439,
+      "data": 0.00024873006623238325,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 1000,
+      "phase": "adam",
+      "loss": 0.06456022709608078,
+      "residual": 0.05436396971344948,
+      "data": 0.00010196259972872213,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 1500,
+      "phase": "adam",
+      "loss": 0.041304051876068115,
+      "residual": 0.033816296607255936,
+      "data": 7.487753464374691e-05,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 2000,
+      "phase": "adam",
+      "loss": 0.035661228001117706,
+      "residual": 0.03207891434431076,
+      "data": 3.5823140933644027e-05,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 2500,
+      "phase": "adam",
+      "loss": 0.0301503986120224,
+      "residual": 0.028393955901265144,
+      "data": 1.756441815814469e-05,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 3000,
+      "phase": "adam",
+      "loss": 0.027294591069221497,
+      "residual": 0.02602280303835869,
+      "data": 1.2717889148916584e-05,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 3500,
+      "phase": "adam",
+      "loss": 0.027107160538434982,
+      "residual": 0.026150990277528763,
+      "data": 9.561702427163254e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 4000,
+      "phase": "adam",
+      "loss": 0.02709469199180603,
+      "residual": 0.02618628926575184,
+      "data": 9.084021257876884e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 4500,
+      "phase": "adam",
+      "loss": 0.025806987658143044,
+      "residual": 0.024868043139576912,
+      "data": 9.38944322115276e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 4999,
+      "phase": "adam",
+      "loss": 0.025796255096793175,
+      "residual": 0.024877898395061493,
+      "data": 9.183574547932949e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5001,
+      "phase": "lbfgs",
+      "loss": 0.025077112019062042,
+      "residual": 0.02416374534368515,
+      "data": 9.133673302130774e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5201,
+      "phase": "lbfgs",
+      "loss": 0.018369929865002632,
+      "residual": 0.017904186621308327,
+      "data": 4.657439603761304e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5401,
+      "phase": "lbfgs",
+      "loss": 0.015256174840033054,
+      "residual": 0.014796668663620949,
+      "data": 4.5950632738822605e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5601,
+      "phase": "lbfgs",
+      "loss": 0.014386149123311043,
+      "residual": 0.013976847752928734,
+      "data": 4.093018105777446e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5801,
+      "phase": "lbfgs",
+      "loss": 0.013376113958656788,
+      "residual": 0.013010004535317421,
+      "data": 3.6610954339266755e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6001,
+      "phase": "lbfgs",
+      "loss": 0.012634387239813805,
+      "residual": 0.012306490913033485,
+      "data": 3.278962594777113e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6201,
+      "phase": "lbfgs",
+      "loss": 0.01164638064801693,
+      "residual": 0.011358778923749924,
+      "data": 2.8760198347299593e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6401,
+      "phase": "lbfgs",
+      "loss": 0.010991821996867657,
+      "residual": 0.010747088119387627,
+      "data": 2.44734246734879e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6601,
+      "phase": "lbfgs",
+      "loss": 0.010423044674098492,
+      "residual": 0.010204225778579712,
+      "data": 2.188192866015015e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6801,
+      "phase": "lbfgs",
+      "loss": 0.00965892244130373,
+      "residual": 0.009446041658520699,
+      "data": 2.128812184309936e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 7001,
+      "phase": "lbfgs",
+      "loss": 0.009086924605071545,
+      "residual": 0.008906234055757523,
+      "data": 1.8069027873934829e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 7150,
+      "phase": "lbfgs",
+      "loss": 0.008687220513820648,
+      "residual": 0.008513182401657104,
+      "data": 1.7403800711690565e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    }
+  ],
+  "scaler": {
+    "offset": 82.5532195,
+    "scale": 8.737628278320315
+  }
+}

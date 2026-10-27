@@ -1,0 +1,50 @@
+{
+  "device": "tpu_edge",
+  "grid_h": 256,
+  "grid_w": 244,
+  "r": 10,
+  "cumulative_energy_at_r": 0.9957590727733842,
+  "n_train_frames": 70,
+  "pivots": [
+    {
+      "row": 34,
+      "col": 235
+    },
+    {
+      "row": 3,
+      "col": 42
+    },
+    {
+      "row": 95,
+      "col": 141
+    },
+    {
+      "row": 142,
+      "col": 57
+    },
+    {
+      "row": 237,
+      "col": 131
+    },
+    {
+      "row": 82,
+      "col": 87
+    },
+    {
+      "row": 179,
+      "col": 109
+    },
+    {
+      "row": 241,
+      "col": 49
+    },
+    {
+      "row": 134,
+      "col": 220
+    },
+    {
+      "row": 7,
+      "col": 158
+    }
+  ]
+}

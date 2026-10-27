@@ -1,0 +1,296 @@
+{
+  "row": {
+    "model": "B",
+    "bc_mode": "hard",
+    "source_kind": "gaussian",
+    "split": "test",
+    "sample_id": "i7_compress7zip_092",
+    "n_sensors": 5,
+    "seed": 2,
+    "rel_l2": 0.04366741576023253,
+    "rmse": 3.7926191862111307,
+    "mae": 3.0523239540179112,
+    "mse": 14.38396029161678,
+    "max_abs_err": 9.513656616210938,
+    "peak_temp_err": 1.5945968627929688,
+    "hotspot_loc_cells": 70.21395872616783,
+    "pred_peak_temp": 96.18403625488281,
+    "true_peak_temp": 94.58943939208984,
+    "boundary_flux_mean": 0.29377075915491335,
+    "sensor_rmse": 0.002307757539230291,
+    "source_rel_l2": NaN,
+    "source_centre_err": NaN,
+    "n_params": 12761,
+    "train_seconds": 255.85087730002124,
+    "inference_seconds": 0.014914200059138238,
+    "final_loss": 0.0003067480865865946,
+    "final_residual": 0.0003050111117772758,
+    "final_data_loss": 1.736971455557068e-08
+  },
+  "config": {
+    "name": "model_b_github",
+    "notes": "Model B on the GitHub real-chip thermal-map dataset (data/github_real, data/generated_github). die_L_x_m is set to 1.0 (abstract unit square) since no physical die size is known for these parts. Rather than invent new physical units, t_die/h_eff are chosen so eps = t_die/(h_eff*L^2) matches the synthetic-dataset calibration (~5.55e-4): what matters for the PDE is the ratio of lateral conduction to vertical sinking, not absolute metres. leak_fraction is set to 0 (no basis for a per-block leakage fraction on real, floorplan-unknown chips) -- a further simplification beyond the synthetic config's already-approximate mean leak_fraction. k(T) keeps the synthetic generator's k_A/k_offset, a generic silicon conductivity law, not something uniquely calibrated to the 12mm geometry.",
+    "device": "cpu",
+    "physics": {
+      "L": 1.0,
+      "t_die": 0.0005,
+      "h_eff": 0.9009016393,
+      "beta": 0.012,
+      "T0": 25.0,
+      "leak_fraction": 0.0
+    },
+    "model": {
+      "bc_mode": "hard",
+      "field": {
+        "width": 64,
+        "depth": 4,
+        "activation": "tanh",
+        "out_scale": 1.0,
+        "fourier": null
+      },
+      "source": {
+        "kind": "gaussian",
+        "n_blobs": 6,
+        "init_amp": 1.0,
+        "init_width": 0.12,
+        "min_width": 0.02,
+        "max_width": 0.5
+      }
+    },
+    "training": {
+      "adam_steps": 5000,
+      "lr": 0.001,
+      "lr_min": 1e-05,
+      "lbfgs_steps": 2000,
+      "lbfgs_lr": 1.0,
+      "lbfgs_history": 50,
+      "n_collocation": 2048,
+      "n_collocation_lbfgs": 4096,
+      "n_boundary": 256,
+      "weight_scheme": "fixed",
+      "w_residual": 1.0,
+      "w_data": 100.0,
+      "w_boundary": 1.0,
+      "residual_scale": 1.0,
+      "anneal_every": 100,
+      "anneal_ema": 0.9,
+      "grad_clip": null,
+      "restore_best": true,
+      "log_every": 500,
+      "log_every_lbfgs": 200
+    }
+  },
+  "history": [
+    {
+      "step": 0,
+      "phase": "adam",
+      "loss": 78.63153076171875,
+      "residual": 0.46703198552131653,
+      "data": 0.7816449999809265,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 500,
+      "phase": "adam",
+      "loss": 0.05432342737913132,
+      "residual": 0.048988454043865204,
+      "data": 5.3349725931184366e-05,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 1000,
+      "phase": "adam",
+      "loss": 0.03188776597380638,
+      "residual": 0.02980908378958702,
+      "data": 2.0786817913176492e-05,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 1500,
+      "phase": "adam",
+      "loss": 0.02430589683353901,
+      "residual": 0.0229681096971035,
+      "data": 1.3377871255215723e-05,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 2000,
+      "phase": "adam",
+      "loss": 0.02206743136048317,
+      "residual": 0.021117523312568665,
+      "data": 9.499073712504469e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 2500,
+      "phase": "adam",
+      "loss": 0.01861630193889141,
+      "residual": 0.017970137298107147,
+      "data": 6.461642442445736e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 3000,
+      "phase": "adam",
+      "loss": 0.015816938132047653,
+      "residual": 0.015313450247049332,
+      "data": 5.034881723986473e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 3500,
+      "phase": "adam",
+      "loss": 0.014712195843458176,
+      "residual": 0.014311608858406544,
+      "data": 4.0058653212327044e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 4000,
+      "phase": "adam",
+      "loss": 0.013450931757688522,
+      "residual": 0.013037552125751972,
+      "data": 4.133800302952295e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 4500,
+      "phase": "adam",
+      "loss": 0.013693506829440594,
+      "residual": 0.01332289632409811,
+      "data": 3.706109509948874e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 4999,
+      "phase": "adam",
+      "loss": 0.012383343651890755,
+      "residual": 0.012019348330795765,
+      "data": 3.6399555938260164e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5001,
+      "phase": "lbfgs",
+      "loss": 0.013704023323953152,
+      "residual": 0.013339989818632603,
+      "data": 3.640333943621954e-06,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5201,
+      "phase": "lbfgs",
+      "loss": 0.004718962125480175,
+      "residual": 0.004628393333405256,
+      "data": 9.056872158907936e-07,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5401,
+      "phase": "lbfgs",
+      "loss": 0.0018616373417899013,
+      "residual": 0.001832020003348589,
+      "data": 2.9617291374961496e-07,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5601,
+      "phase": "lbfgs",
+      "loss": 0.0011221271706745028,
+      "residual": 0.0011117943795397878,
+      "data": 1.0332796307466197e-07,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 5801,
+      "phase": "lbfgs",
+      "loss": 0.0008954384829849005,
+      "residual": 0.0008882720721885562,
+      "data": 7.166422477666856e-08,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6001,
+      "phase": "lbfgs",
+      "loss": 0.001041759504005313,
+      "residual": 0.0010166219435632229,
+      "data": 2.513754111532762e-07,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6201,
+      "phase": "lbfgs",
+      "loss": 0.0005958607653155923,
+      "residual": 0.000589533185120672,
+      "data": 6.327587698251591e-08,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6401,
+      "phase": "lbfgs",
+      "loss": 0.0005060064722783864,
+      "residual": 0.0005017018411308527,
+      "data": 4.3046263442647614e-08,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6601,
+      "phase": "lbfgs",
+      "loss": 0.00043246892164461315,
+      "residual": 0.0004287823394406587,
+      "data": 3.686569627348035e-08,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 6801,
+      "phase": "lbfgs",
+      "loss": 0.0003842849691864103,
+      "residual": 0.0003813322400674224,
+      "data": 2.952729083460781e-08,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 7001,
+      "phase": "lbfgs",
+      "loss": 0.000336678815074265,
+      "residual": 0.00033380225067958236,
+      "data": 2.8765622772652932e-08,
+      "boundary": 0.0,
+      "w_data": 100.0
+    },
+    {
+      "step": 7189,
+      "phase": "lbfgs",
+      "loss": 0.0003067480865865946,
+      "residual": 0.0003050111117772758,
+      "data": 1.736971455557068e-08,
+      "boundary": 0.0,
+      "w_data": 100.0
+    }
+  ],
+  "scaler": {
+    "offset": 76.70593,
+    "scale": 17.47208666259766
+  }
+}

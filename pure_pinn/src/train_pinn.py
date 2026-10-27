@@ -21,6 +21,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -162,8 +163,18 @@ def train_one_chip(chip: ChipSample, n_sensors: int, seed: int, config: dict, ve
                 line_search_fn="strong_wolfe",
             )
             counter = {"n": 0}
+            # Wall-clock cap: strong_wolfe line search can, on a few chips,
+            # stall doing many closure evaluations with little loss progress
+            # (seen taking 3h on a single solve vs. ~4min typical). This bounds
+            # the damage -- the best iterate so far is restored regardless.
+            lbfgs_deadline = time.perf_counter() + float(tr.get("lbfgs_wall_clock_cap_s", 300))
+
+            class _LBFGSTimeout(Exception):
+                pass
 
             def closure():
+                if time.perf_counter() > lbfgs_deadline:
+                    raise _LBFGSTimeout()
                 opt2.zero_grad(set_to_none=True)
                 l_res, l_dat, l_bnd = losses_at(xy_col, xy_bnd)
                 loss = total(l_res, l_dat, l_bnd, wd_cur, w_b)
@@ -176,10 +187,16 @@ def train_one_chip(chip: ChipSample, n_sensors: int, seed: int, config: dict, ve
                               f"res={entry['residual']:.4e} data={entry['data']:.4e}")
                 return loss
 
-            opt2.step(closure)
-            l_res, l_dat, l_bnd = losses_at(xy_col, xy_bnd)
-            record(adam_steps + counter["n"] + 1, "lbfgs",
-                   l_res, l_dat, l_bnd, total(l_res, l_dat, l_bnd, wd_cur, w_b), wd_cur)
+            try:
+                opt2.step(closure)
+            except _LBFGSTimeout:
+                if verbose:
+                    print(f"  [lbfgs] wall-clock cap hit after {counter['n']} evals; "
+                          f"restoring best iterate and moving on")
+            else:
+                l_res, l_dat, l_bnd = losses_at(xy_col, xy_bnd)
+                record(adam_steps + counter["n"] + 1, "lbfgs",
+                       l_res, l_dat, l_bnd, total(l_res, l_dat, l_bnd, wd_cur, w_b), wd_cur)
 
     # restore the best iterate: L-BFGS can and does step uphill on this problem
     if tr.get("restore_best", True) and best["state"] is not None:

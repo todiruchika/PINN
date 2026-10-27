@@ -1,0 +1,50 @@
+{
+  "device": "i5_flac",
+  "grid_h": 177,
+  "grid_w": 166,
+  "r": 10,
+  "cumulative_energy_at_r": 0.9984451402262201,
+  "n_train_frames": 70,
+  "pivots": [
+    {
+      "row": 31,
+      "col": 75
+    },
+    {
+      "row": 17,
+      "col": 134
+    },
+    {
+      "row": 8,
+      "col": 158
+    },
+    {
+      "row": 10,
+      "col": 81
+    },
+    {
+      "row": 4,
+      "col": 35
+    },
+    {
+      "row": 71,
+      "col": 138
+    },
+    {
+      "row": 127,
+      "col": 152
+    },
+    {
+      "row": 78,
+      "col": 85
+    },
+    {
+      "row": 27,
+      "col": 15
+    },
+    {
+      "row": 118,
+      "col": 3
+    }
+  ]
+}

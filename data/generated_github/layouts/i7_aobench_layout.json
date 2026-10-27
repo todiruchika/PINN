@@ -1,0 +1,50 @@
+{
+  "device": "i7_aobench",
+  "grid_h": 185,
+  "grid_w": 154,
+  "r": 10,
+  "cumulative_energy_at_r": 0.9957005914917446,
+  "n_train_frames": 70,
+  "pivots": [
+    {
+      "row": 19,
+      "col": 150
+    },
+    {
+      "row": 74,
+      "col": 147
+    },
+    {
+      "row": 130,
+      "col": 125
+    },
+    {
+      "row": 9,
+      "col": 111
+    },
+    {
+      "row": 178,
+      "col": 6
+    },
+    {
+      "row": 113,
+      "col": 150
+    },
+    {
+      "row": 16,
+      "col": 7
+    },
+    {
+      "row": 143,
+      "col": 93
+    },
+    {
+      "row": 81,
+      "col": 6
+    },
+    {
+      "row": 87,
+      "col": 88
+    }
+  ]
+}

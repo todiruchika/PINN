@@ -292,7 +292,48 @@ with N (about 28-30 cells throughout). Only 3 chips, all from the train split.
 
 ---
 
-## 7. Layout
+## 7. Cross-domain validation: real-chip thermal maps
+
+Model B also runs, **unmodified in architecture**, against real IR-measured
+thermal maps from commercial CPUs/GPU/TPU
+([`sheldonucr/commercial_thermal_map_dataset`](https://github.com/sheldonucr/commercial_thermal_map_dataset),
+Lu & Tan, MLCAD 2024) -- an out-of-distribution generalisation check, not a
+retraining. Full writeup, approximations made, and known issues:
+**[`docs/github_dataset_validation.md`](docs/github_dataset_validation.md)**.
+
+Headline (pilot: 27 chips x N{5,8,10} x 3 seeds = 243 solves, 9 real devices):
+
+| N | rel L2 (mean ± seed std) |
+|---|---|
+| 5  | 0.045 ± 0.001 |
+| 8  | 0.023 ± 0.002 |
+| 10 | 0.018 ± 0.001 |
+
+Lower than the synthetic-dataset numbers above -- read this as these IR maps
+being single smooth, camera-blurred hotspots (a good match for the trainable
+Gaussian-blob source), not as "generalises better to real chips" in general.
+See the doc for the device-to-device spread, the `i7_compress7zip` N=10
+instability, why `hotspot_loc_cells` is unreliable on this dataset
+specifically (`peak_temp_err` is the metric to trust there), and a qualitative
+finding worth reading in full: reconstructed hotspots are systematically
+pulled toward the domain centre when the true hotspot sits near a frame edge
+-- a likely mismatch between the hard-BC adiabatic assumption and these IR
+frames being a cropped sub-window of a larger die/package, not the true
+physical boundary.
+
+```bash
+python extract_github_frames.py          # repo root: pkl -> data/github_real
+python generate_github_sensors.py         # repo root: per-device POD-QR + sensor JSONs
+cd pure_pinn
+python src/train_pinn.py --config experiments/configs/model_b_github.json \
+    --data-root ../data/github_real --sensor-root ../data/generated_github \
+    --split test --n-chips 27 --sensors 5,8,10 --seeds 0,1,2 \
+    --metrics ../results/metrics_github.csv --runs-dir ../results/runs_github
+```
+
+---
+
+## 8. Layout
 
 ```
 src/
@@ -303,8 +344,14 @@ src/
   evaluate.py      non-sensor-node metrics, results CSV, merge/plot
   make_flowchart.py  design-flow figure (unchanged)
 tests/             test_physics.py, test_forward_solve.py
-experiments/       configs/model_b_default.json, run_model_b.sh
+experiments/       configs/model_b_default.json, model_b_github.json, run_model_b.sh
 results/verification/  the 8-solve check above
+results/runs_github/, figures/error_vs_sensors_github.png   real-chip pilot (section 7)
 results_legacy_old_dataset/   results and split lists from the previous (incompatible) dataset
-docs/              original implementation note (describes the previous dataset)
+docs/              model_b_implementation_paper.txt (prior dataset), github_dataset_validation.md (section 7)
 ```
+
+Real-chip pipeline scripts (`extract_github_frames.py`, `generate_github_sensors.py`,
+`analyze_github_results.py`) live at the repository root, alongside `github_dataset/`
+(the cloned, gitignored source repo) and `data/github_real/`, `data/generated_github/`
+(its extracted output).

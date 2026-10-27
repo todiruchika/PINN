@@ -1,0 +1,50 @@
+{
+  "device": "i5_opencv",
+  "grid_h": 177,
+  "grid_w": 166,
+  "r": 10,
+  "cumulative_energy_at_r": 0.9915788619865864,
+  "n_train_frames": 70,
+  "pivots": [
+    {
+      "row": 61,
+      "col": 153
+    },
+    {
+      "row": 11,
+      "col": 127
+    },
+    {
+      "row": 5,
+      "col": 151
+    },
+    {
+      "row": 81,
+      "col": 127
+    },
+    {
+      "row": 119,
+      "col": 6
+    },
+    {
+      "row": 27,
+      "col": 70
+    },
+    {
+      "row": 168,
+      "col": 161
+    },
+    {
+      "row": 15,
+      "col": 98
+    },
+    {
+      "row": 67,
+      "col": 49
+    },
+    {
+      "row": 118,
+      "col": 113
+    }
+  ]
+}
