@@ -50,6 +50,48 @@ def low_data_figure() -> None:
     fig.savefig(FIG / "low_data.png", dpi=200)
 
 
+# Real IR maps, i7, sampled test frames: error against temperature rise vs training workloads the DeepONet sees.
+# Source: results/real_fbpinn/summary.csv and README on branch siya-real-fair (PINN/FBPINN use no training maps).
+WORKLOADS = [2, 4, 13]
+REAL_LOW = {
+    5: {"DeepONet": [0.504, 0.439, 0.230], "PINN": [0.695] * 3, "FBPINN": [0.608] * 3,
+        "Hybrid (correction)": [0.444, 0.448, 0.229]},
+    8: {"DeepONet": [0.432, 0.356, 0.110], "PINN": [0.371] * 3, "FBPINN": [0.398] * 3,
+        "Hybrid (correction)": [0.196, 0.163, 0.106]},
+    10: {"DeepONet": [0.403, 0.338, 0.107], "PINN": [0.176] * 3, "FBPINN": [0.168] * 3,
+         "Hybrid (correction)": [0.191, 0.143, 0.091]},
+}
+REAL_STYLE = {
+    "DeepONet": STYLE["DeepONet"],
+    "PINN": STYLE["PINN"],
+    "FBPINN": dict(color="#eda100", marker="D", linestyle=":"),
+    "Hybrid (correction)": STYLE["Hybrid (blend)"],
+}
+
+
+def real_low_data_figure() -> None:
+    fig, axes = plt.subplots(1, 3, figsize=(7.16, 2.3), constrained_layout=True)
+    for ax, (n, series) in zip(axes, REAL_LOW.items()):
+        for name, ys in series.items():
+            ax.plot(WORKLOADS, ys, label=name, linewidth=1.4, markersize=4.5, markeredgecolor="white",
+                    markeredgewidth=0.6, **REAL_STYLE[name])
+        ax.set_xscale("log")
+        ax.set_xticks(WORKLOADS, [str(w) for w in WORKLOADS])
+        ax.minorticks_off()
+        ax.set_ylim(bottom=0)
+        ax.set_title(f"{n} sensors", color=INK, fontsize=8.5)
+        ax.set_xlabel("Training workloads (DeepONet)")
+        ax.grid(True, color=GRID, linewidth=0.5)
+        ax.set_axisbelow(True)
+        for s in ("top", "right"):
+            ax.spines[s].set_visible(False)
+    axes[0].set_ylabel("Test error vs. temperature rise")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, frameon=False, loc="outside upper center", ncol=4, fontsize=7.5)
+    fig.savefig(FIG / "real_low_data.pdf")
+    fig.savefig(FIG / "real_low_data.png", dpi=200)
+
+
 def crop(name: str, top_frac: float, out: str) -> None:
     """Remove the title strip a source figure was saved with; captions go in the paper instead."""
     im = Image.open(FIG / name)
@@ -59,5 +101,6 @@ def crop(name: str, top_frac: float, out: str) -> None:
 
 if __name__ == "__main__":
     low_data_figure()
+    real_low_data_figure()
     crop("real_maps_n8.png", 0.11, "real_maps_n8_crop.png")
     crop("sim_maps_n10.png", 0.04, "sim_maps_n10_crop.png")

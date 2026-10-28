@@ -40,7 +40,7 @@ We study this virtual-sensing problem as a neural-network learning problem and a
 We compare three families: a purely data-driven neural operator (DeepONet) that maps sensor readings to the full field, a physics-informed neural network (PINN) fitted per chip from its sensors and the steady heat equation alone, and two ways of combining them: physics as an extra training loss, and a validation-weighted blend of the two predictions.
 On 700 simulated $12\times12$\,mm dies with 5, 8 and 10 noisy, quantised sensors placed by POD-QR, the DeepONet reaches 11.5\%, 8.6\% and 6.1\% relative $L_2$ error when trained on 500 chips, and adding the heat-equation residual to its loss changes nothing measurable.
 The blend, by contrast, is never worse than its better component, and its benefit grows as training data shrinks: with 25 training chips it lowers the error from 12.7\% to 8.8\% at 8 sensors and from 9.3\% to 6.4\% at 10 sensors, while the PINN also recovers peak temperature 5--6\,$^\circ$C more accurately than the DeepONet.
-On real infrared maps of two commercial Intel CPUs, a hybrid that corrects the DeepONet with a heat-equation response fitted to its residual at the sensors is better than the DeepONet in 3 of 6 settings, tied in 2 and worse in 1, and a classical gappy-POD baseline remains competitive.
+On real infrared maps of two commercial Intel CPUs, a hybrid that corrects the DeepONet with a heat-equation response fitted to its residual at the sensors matches or improves on the DeepONet when all training workloads are used, and when the DeepONet sees only 2 or 4 of 13 training workloads it roughly halves the DeepONet's error at 8 and 10 sensors (for example 0.36 to 0.16 relative to the temperature rise) and beats per-frame PINN and FBPINN solvers at 8 sensors; a classical gappy-POD baseline remains competitive with full data.
 A survey of further architectures (FNO/PINO, FBPINN, XPINN) on the same protocol confirms the pattern: physics in the loss adds little once data are plentiful.
 We trace this to the reference maps themselves, which leave a 33\% pointwise residual in a grid discretisation of the heat equation, and conclude that physics is most valuable as a separate, data-free estimator combined with a learned operator when training data are scarce.
 \end{abstract}
@@ -75,7 +75,7 @@ Our contributions are:
 \begin{enumerate}
 \item A controlled comparison of a data-driven DeepONet, a per-chip PINN, a physics-informed DeepONet and a validation-weighted DeepONet--PINN blend for full-chip thermal reconstruction, on 700 simulated dies with a realistic sensor model (noise, quantisation, calibration offsets) and POD-QR sensor placement.
 \item A data-scarcity study (25 to 500 training chips) with paired bootstrap confidence intervals, showing that the blend is never worse than its better component and that its gain over the DeepONet grows from at most 0.4 percentage points with 500 training chips to 1--4 points with 25, while physics added as a loss term gives no measurable gain.
-\item A transfer study on measured IR maps of an Intel i5-3337U and i7-8650U \cite{lu2024dataset}, with a physics-based correction hybrid and classical baselines.
+\item A transfer study on measured IR maps of an Intel i5-3337U and i7-8650U \cite{lu2024dataset}, comparing the DeepONet with per-frame PINN and FBPINN solvers run on the same frames and readings, three hybrids and classical baselines, including a scarcity study with 2, 4 and 13 training workloads that reproduces the simulated finding on measured data.
 \item A survey of further physics-informed architectures (FNO/PINO, FBPINN, XPINN, and a differentiable-solver hybrid) and a diagnosis of why a PDE loss adds little here: the reference maps themselves leave a 33\% pointwise residual in the discretised heat equation.
 \end{enumerate}
 
@@ -212,12 +212,22 @@ with $w\in\{0,0.1,\dots,1\}$ chosen per sensor count by the mean relative $L_2$ 
 Because $w=0$ and $w=1$ are allowed, the blend can always fall back on the better component, and $w$ itself measures how much the learned operator is trusted.
 The blend uses the seed-0 DeepONet.
 
-\subsection{Real IR maps: physics reconstruction and correction hybrid}
-For the real maps the power map, die stack and material constants are unknown, so we use a physics-based reconstruction with the structure of (\ref{eq:pde}) but linearised: $(1-\ell^2\nabla^2)(T-T_0)=q/h$ with adiabatic edges and a decay length $\ell$ in pixels.
+\subsection{Real IR maps: physics models and hybrids}
+For the real maps the power map, die stack and material constants are unknown, so three physics-based estimators are used, none of which sees a training map.
+
+\emph{Physics reconstruction.} A linearised form of (\ref{eq:pde}), $(1-\ell^2\nabla^2)(T-T_0)=q/h$, with adiabatic edges and a decay length $\ell$ in pixels.
 The unknown source is expanded in Gaussian bumps on a coarse grid; the response of each bump is computed with a discrete cosine transform (which enforces the adiabatic edges), and the bump amplitudes and the constant $T_0$ are fitted to the sensor readings by ridge regression.
-Like a PINN, it uses no training maps; its three settings ($\ell$, bump spacing, ridge weight) are chosen on validation frames.
-We test three hybrids, with every setting chosen on validation frames: (i) the blend above; (ii) a \emph{correction}, which fits the same physics response to the DeepONet's residual at the sensors, $y_i-\hat T_\mathrm{D}(\mathbf{x}_i)$, and adds it to the DeepONet map, spreading the sensor mismatch in a way the heat equation allows; and (iii) blend followed by correction.
-Variant (ii) had the lowest mean validation error over all settings and is reported as ``the hybrid''.
+Its three settings ($\ell$, bump spacing, ridge weight) are chosen on validation frames.
+
+\emph{Per-frame PINN.} The per-chip PINN above, unchanged, fitted to each IR frame.
+The die is mapped to the unit square, $t_\mathrm{die}$ and $h_\mathrm{eff}$ are set so that $\varepsilon$ in (\ref{eq:nondim}) equals its simulated value, leakage is switched off, and the sink temperature is the minimum of the processor's training maps, since a real chip has no ambient reading.
+To keep the cost affordable the budget is shortened to 600 Adam and 100 L-BFGS steps (about 2 minutes per frame), with one seed.
+
+\emph{Per-frame FBPINN.} The same per-frame solver with the field network replaced by a finite-basis PINN \cite{moseley2023fbpinn}: $2\times2$ overlapping subdomains, each a tanh network of width 32 and depth 4, blended by a smooth partition of unity in $(\cos\pi x,\cos\pi y)$, so the adiabatic edges remain exact.
+It has $1.32\times10^4$ parameters, against $1.28\times10^4$ for the PINN, and identical frames, readings, budget and sink temperature; the layout was fixed in advance, not tuned.
+
+\emph{Hybrids.} Every setting is chosen on validation frames only: (A) a blend $w\hat T_\mathrm{D}+(1-w)\hat T_\mathrm{phys}$ of the DeepONet with the physics reconstruction, the PINN or the FBPINN; (B) a \emph{correction}, which fits the physics-reconstruction response to the DeepONet's residual at the sensors, $y_i-\hat T_\mathrm{D}(\mathbf{x}_i)$, and adds it to the DeepONet map, spreading the sensor mismatch in a way the heat equation allows; and (C) a blend followed by correction.
+In every experiment variant B had the lowest mean validation error over all settings, so it is reported as ``the hybrid''; we do not pick a variant per setting.
 
 \subsection{Classical baselines}
 \emph{Gappy POD} \cite{everson1995gappy} fits the readings with the leading POD modes of the training maps (number of modes chosen on validation data).
@@ -413,6 +423,75 @@ Fig.~\ref{fig:real_maps} shows one typical test frame per processor: on the i7 t
 \label{fig:real_maps}
 \end{figure*}
 
+\subsection{Per-frame physics solvers}
+Each PINN or FBPINN solve takes minutes, so these models were run on a regular sample of frames: 10 validation and 10 test frames for the i5, and 20 and 20 for the i7.
+Table~\ref{tab:real_frames} compares all models on exactly these test frames and the same noisy readings; its DeepONet and hybrid values differ slightly from Table~\ref{tab:real}, which uses every test frame.
+With all training workloads, both per-frame solvers are much weaker than the DeepONet (for example 0.70 and 0.61 against 0.23 at 5 sensors on the i7), and blending them in helps little.
+The FBPINN is better than the PINN in 4 of 6 settings and tied in the other two (paired 95\% intervals over the test frames), with the largest gain where the PINN fails, at 5 sensors (0.76 to 0.51 on the i5): splitting the field into local networks makes it easier to fit a few readings that disagree with a single smooth source.
+The correction hybrid is better than the DeepONet at i5/8 and i7/10 sensors and tied in the other four settings, and better than both per-frame solvers in all six.
+
+\begin{table*}[t]
+\caption{Real IR maps, sampled test frames (i5: 10, i7: 20), all training workloads. Error relative to the temperature rise (lower is better). DeepONet, blends and hybrid: mean of 5 DeepONet seeds; PINN and FBPINN: 1 seed per frame; gappy POD and the training-mean map are deterministic.}
+\label{tab:real_frames}
+\centering
+\footnotesize
+\begin{tabular}{@{}l c ccc ccc@{}}
+\toprule
+& & \multicolumn{3}{c}{i5-3337U} & \multicolumn{3}{c}{i7-8650U} \\
+\cmidrule(lr){3-5}\cmidrule(l){6-8}
+Model & Seeds & $N{=}5$ & 8 & 10 & 5 & 8 & 10 \\
+\midrule
+DeepONet & 5 & .209 & .150 & .149 & \best{.230} & .110 & .107 \\
+Per-frame PINN & 1 & .762 & .233 & .236 & .695 & .371 & .176 \\
+Per-frame FBPINN & 1 & .512 & .209 & .218 & .608 & .398 & .168 \\
+Blend: DeepONet + PINN (A) & 5 & .416 & .182 & .201 & \best{.230} & .110 & .097 \\
+Blend: DeepONet + FBPINN (A) & 5 & .407 & .164 & .187 & \best{.230} & .110 & .099 \\
+Hybrid: DeepONet + physics correction (B) & 5 & .229 & .132 & .139 & \best{.229} & \best{.106} & .091 \\
+Gappy POD & -- & \best{.124} & \best{.100} & \best{.137} & .370 & .221 & \best{.085} \\
+Training-mean map & -- & .956 & .956 & .956 & .905 & .905 & .905 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Few training workloads}
+To test the data-scarcity result on measured maps, the i7 DeepONet was retrained on only 1, 2 or 4 of its 13 training workloads (nested, seeded subsets; the sensor layout fitted on all 13 is kept); the per-frame solvers use no training maps and are unchanged.
+Fig.~\ref{fig:real_lowdata} and Table~\ref{tab:real_low} show the result, which mirrors Fig.~\ref{fig:lowdata}.
+The DeepONet degrades sharply (0.11 to 0.43 at 8 sensors with 2 workloads, and with the single idle workload it fails completely, error about 2.5), while the correction hybrid holds up: with 4 workloads it lowers the DeepONet's error from 0.356 to 0.163 at 8 sensors and from 0.338 to 0.143 at 10 sensors, reductions of more than half, and at 8 sensors it beats the PINN (0.371) and the FBPINN (0.398) by an equally wide margin.
+Paired over test frames, the hybrid is better than the DeepONet at 8 and 10 sensors with both 2 and 4 workloads, and at 5 sensors with 2 workloads; it ties at 5 sensors with 4 workloads.
+At 10 sensors the per-frame solvers are already good on their own (PINN 0.176, FBPINN 0.168): with 2 workloads the hybrid (0.191) ties the PINN and is slightly worse than the FBPINN, and the FBPINN blend (A) reaches 0.165, but variant A was not the validation choice, so we report B.
+As in simulation, physics contributes most when the learned model has little data, and whichever physics estimator is used, combining it with the learned operator is safer than relying on either alone.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/real_low_data.pdf}
+\caption{Real IR maps (i7, 20 sampled test frames): test error relative to the temperature rise against the number of training workloads given to the DeepONet. The per-frame PINN and FBPINN use no training maps. The correction hybrid (DeepONet + physics correction, 5 seeds) stays well below the DeepONet when training workloads are few.}
+\label{fig:real_lowdata}
+\end{figure*}
+
+\begin{table*}[t]
+\caption{Real IR maps, i7, 20 sampled test frames: error relative to the temperature rise when the DeepONet is trained on 2, 4 or all 13 training workloads. DeepONet, blends and hybrid: mean of 5 seeds; PINN and FBPINN: 1 seed, no training maps.}
+\label{tab:real_low}
+\centering
+\footnotesize
+\begin{tabular}{@{}cc cccccc@{}}
+\toprule
+$N$ & Workloads & DeepONet & PINN & FBPINN & Blend (A, PINN) & Blend (A, FBPINN) & Hybrid (B, correction) \\
+\midrule
+\multirow{3}{*}{5}  & 2  & .504 & .695 & .608 & .495 & .483 & \best{.444} \\
+                    & 4  & .439 & .695 & .608 & .439 & \best{.438} & .448 \\
+                    & 13 & .230 & .695 & .608 & .230 & .230 & \best{.229} \\
+\midrule
+\multirow{3}{*}{8}  & 2  & .432 & .371 & .398 & .270 & .294 & \best{.196} \\
+                    & 4  & .356 & .371 & .398 & .293 & .307 & \best{.163} \\
+                    & 13 & .110 & .371 & .398 & .110 & .110 & \best{.106} \\
+\midrule
+\multirow{3}{*}{10} & 2  & .403 & .176 & .168 & .179 & \best{.165} & .191 \\
+                    & 4  & .338 & .176 & .168 & .203 & .185 & \best{.143} \\
+                    & 13 & .107 & .176 & .168 & .097 & .099 & \best{.091} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
 %=====================================================================
 \section{Other Physics-Informed Architectures}\label{sec:other}
 
@@ -459,9 +538,8 @@ The references come from a finer mesh and sharp, block-wise sources that a coars
 A PDE loss on the coarse grid therefore asks the network to move away from the very maps it is fitted to, exactly where the error is largest.
 The per-chip PINN and the blend avoid this conflict: the physics model makes its own prediction, and the validation data decide how much of it to keep.
 
-The architectures in Table~\ref{tab:other} were also run on the i7 IR maps, but with a different split (by mean temperature, test workloads fio, encode-flac and t-test1) and one seed, so the numbers are not comparable with Table~\ref{tab:real}.
-On that split a data-only decoder, FBPINN, XPINN and FNO reached 2.5--4.2\% relative $L_2$ error (absolute temperature) at 10 sensors, against 2.4\% for thin-plate-spline interpolation and 2.0\% for a POD fit, repeating the observation that classical methods are competitive on smooth real maps when 10 sensors are available.
-The per-chip PINN was likewise tested on 27 IR frames from 9 devices as a cross-domain check (4.5\%, 2.3\% and 1.8\% relative $L_2$ at 5, 8 and 10 sensors, 3 seeds), again with a separate protocol.
+On the real maps the FBPINN was evaluated as a per-frame solver under the fair protocol of Section~\ref{sec:real}.
+An FNO for the real maps was implemented but not run: one training step took 2.8\,s on our CPU, so a budget equal to the DeepONet's (6000 steps, 5 seeds, 3 sensor counts, 4 data settings) did not fit the compute available, and a reduced budget would not have been a fair comparison.
 
 %=====================================================================
 \section{Discussion}\label{sec:discussion}
@@ -471,7 +549,8 @@ Our results give a consistent answer across models and datasets.
 Physics added as a \emph{loss term} to a model trained on hundreds of supervised maps is neutral at best and harmful when the PDE and the reference data disagree at grid scale.
 Physics used as a \emph{separate, data-free estimator} helps in two ways: it carries information that the training set lacks when training data are scarce, and it is biased differently from a learned operator, notably recovering the peak temperature that data-driven models flatten.
 A simple validation-weighted combination exploits both and degrades gracefully as data shrink, which is the property a deployed virtual sensor needs.
-For the real maps, where the physics is known only in form, using it to correct the learned prediction at the sensors works better than blending in a weak physics estimate.
+The measured IR maps show the same pattern: with all 13 training workloads the hybrid improves on the DeepONet only slightly, but with 2 or 4 workloads it cuts the error by about half at 8 and 10 sensors.
+There, where the physics is known only in form, using it to correct the learned prediction at the sensors worked better on validation than blending in a separate physics solution.
 
 \subsection{Implications for thermal measurement}
 For a design-time or run-time thermal monitor, three practical points follow.
@@ -483,8 +562,9 @@ For a design-time or run-time thermal monitor, three practical points follow.
 The simulated dies use a two-dimensional compact model with uniform power per block and several constants ($t_\mathrm{die}$, $h_\mathrm{eff}$, power ranges) that are plausible but not traced to a specific product.
 Sensor positions are fixed per study by POD-QR; robustness to other placements was not tested.
 Several entries rest on one seed (the PINN, the blend, most architectures in Table~\ref{tab:other}); we report the seed count for every entry and give paired confidence intervals for the main claims.
-The real-data study covers two processors; the i5 has a single validation and a single test workload, the IR maps are smooth and camera-blurred, and the variant of the real-data hybrid was fixed after some per-seed test numbers had been seen.
-The models of Section~\ref{sec:other} were run on the real maps with a different split from Table~\ref{tab:real}.
+The real-data study covers two processors; the i5 has a single validation and a single test workload, the IR maps are smooth and camera-blurred, and the rule for choosing the real-data hybrid variant was fixed after some per-seed test numbers had been seen.
+The per-frame PINN and FBPINN were run on sampled frames (10 or 20 per split), with one seed and a shortened budget; frames within a workload are strongly correlated, so the frame-level confidence intervals in Tables~\ref{tab:real_frames} and~\ref{tab:real_low} are optimistic.
+The scarcity study on real maps covers the i7 only.
 Finally, only steady state is modelled.
 
 %=====================================================================
@@ -492,7 +572,7 @@ Finally, only steady state is modelled.
 We studied full-chip thermal map reconstruction from 5 to 10 noisy sensors as a neural-network learning problem and asked when the heat equation helps.
 A data-driven DeepONet reconstructs simulated maps to 6--11\% relative error in milliseconds, and adding the PDE residual to its loss, or to FNO, FBPINN and XPINN models, gives no measurable gain.
 Combining the DeepONet with an independent per-chip PINN through a validation-chosen weight is never worse than its better component, improves accuracy and peak-temperature estimates, and helps most when training data are scarce, cutting the error by about a third with 25 training chips.
-On real IR maps of two Intel CPUs, a physics-based correction of the DeepONet improves on it in half of the settings, while gappy POD remains a strong baseline.
+On real IR maps of two Intel CPUs, a physics-based correction of the DeepONet matches or improves on it with full training data and roughly halves its error at 8 and 10 sensors when only 2 or 4 training workloads are available, beating per-frame PINN and FBPINN solvers at 8 sensors; with full data, gappy POD remains a strong baseline.
 Future work includes transient reconstruction, learning the sensor placement jointly with the reconstruction, uncertainty estimates for the blended map, three-dimensional die-and-package models, and validation on more processors with measured power.
 
 \section*{Data and Code Availability}

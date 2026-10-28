@@ -18,11 +18,12 @@ That is a measurement problem, which matches T-IM's scope. Backups from the same
 | Table IV, Fig. 3 (low data) | `smriti-hybrid(pinn+deeponet)`: `results/low_data/summary.md` |
 | Fig. 2 | `smriti-hybrid(pinn+deeponet)`: `results/model_a/maps_n10_seed0.png` |
 | Table V, Fig. 4 (real IR) | `github_dataset-hybrid`: `results/real_hybrid/summary_hybrid.csv`, `paired_comparison.csv`, `results/real_deeponet/summary_i5_i7.csv`, `comparison_maps_i5_i7_n8.png` |
-| Table VI, FNO/FBPINN/XPINN, residual check | `siya-fbpinn`: `results/comparison/summary.md`, `RESULTS.md`, `scarcity.md` |
-| Table VI, solver hybrid | `siya-fbpinn`: `results/phys_*/N10_seed0/results.json` |
+| Table VI (real, sampled frames: PINN, FBPINN, blends, hybrid B) | `siya-real-fair`: `results/real_fbpinn/summary.csv`, `paired_comparison.csv`, README |
+| Table VII, Fig. 5 (real, few training workloads) | `siya-real-fair` README; PINN-hybrid rows from `github_dataset-hybrid`: `results/real_pinn_hybrid/summary.csv`, `paired_comparison.csv` |
+| Table VIII, FNO/FBPINN/XPINN, residual check | `siya-fbpinn`: `results/comparison/summary.md`, `RESULTS.md`, `scarcity.md` |
+| Table VIII, solver hybrid | `siya-fbpinn`: `results/phys_*/N10_seed0/results.json` |
 | Data-driven PINN (text only) | `data-driven-pinn`: `DATA_DRIVEN_PINN.md` §5 |
-| Other models on real data (text only, different split) | `siya-real-all-models`: `results/real/README.md` |
-| Per-chip PINN on real data (text only, different protocol) | `pure-pinn`: `pure_pinn/docs/github_dataset_validation.md` |
+| Real-data FNO not run (text only) | `siya-real-fair` README |
 | Dataset, sensors, noise | `main`: `PROTOCOL.md` |
 
 ## Before submission (red TODOs in the PDF)
