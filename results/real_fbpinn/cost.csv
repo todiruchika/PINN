@@ -1,0 +1,4 @@
+model,kind,n_params,seconds_median,runs
+DeepONet,"trained once per (processor, sensors, seed)",119169,107.74383839999791,30
+PINN (Ruchika),"per frame, 600 Adam + 100 L-BFGS",12761,110.6921660999651,180
+FBPINN,"per frame, 600 Adam + 100 L-BFGS",13212,318.31475905003026,180

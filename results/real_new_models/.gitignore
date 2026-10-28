@@ -1,0 +1,3 @@
+# model predictions on the sampled frames (large, regenerable); summaries live in results/real_fno and results/real_fbpinn
+preds/
+smoke/

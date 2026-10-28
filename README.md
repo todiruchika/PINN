@@ -204,3 +204,56 @@ With little training data the hybrids are clearly better than the DeepONet (pair
 (10 and 20 frames, strongly correlated within a workload) so intervals are optimistic; the i5 has a single validation and a single test workload; the PINN has one seed and a reduced budget;
 a single training workload (idle) is an extreme case where the DeepONet fails completely (error 2.5).
 
+
+### FBPINN and its hybrid with the DeepONet on the real maps (branch `siya-real-fair`)
+
+New per-frame model, scored under the same conditions as Ruchika's PINN: same sampled frames (`subset_idx`, 10 + 10 for the i5, 20 + 20 for
+the i7), same noisy readings (`read_sensors`), same metrics (`metrics_row`, non-sensor pixels). The FBPINN (`src/models/real_fbpinn.py`) is her
+`train_one_chip` **unchanged** (config `model_b_github.json`, 600 Adam + 100 L-BFGS, one seed, `T_amb` = minimum of the training maps) with only the
+field network swapped: 2 x 2 overlapping subdomains, each a tanh MLP (width 32, depth 4), blended by a smooth partition of unity in
+`(cos pi x, cos pi y)`, so the adiabatic edges stay exact as in her hard-BC network. 13.2k parameters (hers: 12.8k). Layout fixed in advance, no search.
+Hybrids (`src/eval/real_fbpinn_hybrid.py`, report `src/eval/real_fbpinn_report.py`) are the three variants of `real_hybrid_pinn.py` with the FBPINN
+in place of the PINN, all settings chosen on validation frames only; DeepONet predictions are the original 5-seed runs of that study (checked: their
+per-frame errors reproduce `results/real_pinn_hybrid/per_frame_rise_error*.csv` to 1e-7).
+
+```bash
+python -m src.eval.real_fbpinn_runs --processor i5 --shard 0 --shards 6     # 180 solves in total (i5 60, i7 120)
+python -m src.eval.real_fbpinn_hybrid                     # and --k-workloads 4, --k-workloads 2
+python -m src.eval.real_fbpinn_report
+```
+
+Test frames, error against temperature rise (DeepONet and hybrid: mean of 5 seeds; PINN, FBPINN: 1 seed; `results/real_fbpinn/summary.csv`,
+paired 95% bootstrap intervals over the sampled test frames in `paired_comparison.csv`, chart `results_full.png`):
+
+| Processor | Sensors | DeepONet | PINN (Ruchika) | **FBPINN** | A: blend (DeepONet, FBPINN) | B: + physics correction (chosen) | gappy POD | train-mean |
+|---|---|---|---|---|---|---|---|---|
+| i5 | 5 / 8 / 10 | 0.209 / 0.150 / 0.149 | 0.762 / 0.233 / 0.236 | 0.512 / 0.209 / 0.218 | 0.407 / 0.164 / 0.187 | 0.229 / 0.132 / 0.139 | **0.124 / 0.100 / 0.137** | 0.956 |
+| i7 | 5 / 8 / 10 | **0.230** / 0.110 / 0.107 | 0.695 / 0.371 / 0.176 | 0.608 / 0.398 / 0.168 | 0.230 / 0.110 / 0.099 | **0.229 / 0.106** / 0.091 | 0.370 / 0.221 / **0.085** | 0.905 |
+
+Few training workloads (i7; the FBPINN uses no training maps, so the same solves are reused):
+
+| Sensors | Training workloads | DeepONet | FBPINN | A: blend | B: + physics correction (chosen) | C: blend + correction |
+|---|---|---|---|---|---|---|
+| 5 | 2 / 4 | 0.504 / 0.439 | 0.608 | 0.483 / **0.438** | **0.444** / 0.448 | 0.476 / 0.448 |
+| 8 | 2 / 4 | 0.432 / 0.356 | 0.398 | 0.294 / 0.307 | **0.196 / 0.163** | 0.252 / 0.198 |
+| 10 | 2 / 4 | 0.403 / 0.338 | 0.168 | 0.165 / 0.185 | 0.191 / **0.143** | **0.158** / 0.145 |
+
+How to read it.
+* **FBPINN vs Ruchika's PINN** (same frames, budget and pipeline): better in 4 of 6 settings, tie in 2 (i7 with 8 and 10 sensors), never worse. The gain is
+  large where the PINN fails (5 sensors: 0.76 -> 0.51 on the i5, 0.70 -> 0.61 on the i7).
+* **FBPINN vs DeepONet**: worse in all 6 settings with full training data. With few training workloads it is better at 10 sensors (2 and 4 workloads),
+  tied at 8, worse at 5.
+* **The hybrid**: by the global rule (lowest mean validation error over all settings) the chosen variant is **B in all three experiments**, and B does
+  not use the FBPINN, so the reported hybrid is identical to the existing one (paired difference 0). The FBPINN blend (A) helps where the DeepONet is
+  weak, e.g. 8 sensors / 2 workloads 0.432 -> 0.294 and 10 sensors / 2 workloads 0.403 -> 0.165 (better than B there, 0.191), but on validation
+  it loses to B on average, so it is not the reported hybrid. We report B as the rule requires and do not pick per setting.
+* Gappy POD is still the best method on the i5 (5 and 8 sensors) and ties at 10 sensors on both processors.
+
+Cost (`cost.csv`): DeepONet 119k parameters, ~110 s per trained model; PINN 12.8k, ~110 s per frame; FBPINN 13.2k, ~320 s per frame. The FBPINN
+times were measured with 20 single-thread solves running in parallel, the PINN times in the original runs, so the wall-clock numbers are not directly comparable.
+
+Caveats: small sampled test sets (10 i5 / 20 i7 frames, strongly correlated within a workload, so frame-level intervals are optimistic); the i5 has a
+single validation and a single test workload; PINN and FBPINN have one seed and a reduced budget; FBPINN was not tuned (one fixed layout). **FNO / PINO
+were not run**: the FNO code is in the branch (`src/models/real_fno.py`, `src/train/train_real_fno.py`; input = scattered normalised readings + mask
++ x, y channels) but on this CPU one training step took 2.8 s, so the DeepONet-equal budget (6000 steps x 5 seeds x 3 sensor counts x 4 data
+settings) did not fit the compute available, and cutting its budget would have broken the same-compute rule.
