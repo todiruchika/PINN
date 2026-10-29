@@ -13,17 +13,14 @@ That is a measurement problem, which matches T-IM's scope. Backups from the same
 ## Where every number comes from
 | Paper item | Source (branch: file) |
 |---|---|
-| Table I, DeepONet and physics-informed DeepONet | `smriti-hybrid(pinn+deeponet)`: `results/model_a/summary.md`, `results/model_c_summary.md` |
-| Tables I–III, PINN and blend | `smriti-hybrid(pinn+deeponet)`: `results/blend/summary.md`, `results/blend/paired_analysis.md` |
-| Table IV, Fig. 3 (low data) | `smriti-hybrid(pinn+deeponet)`: `results/low_data/summary.md` |
+| Table II (DeepONet, physics-informed DeepONet) | `smriti-hybrid(pinn+deeponet)`: `results/model_a/summary.md`, `results/model_c_summary.md` |
+| Tables II-IV (PINN, blend, peak/hotspot, paired) | `smriti-hybrid(pinn+deeponet)`: `results/blend/summary.md`, `results/blend/paired_analysis.md` |
+| Table V, Fig. 3 (simulated low data) | `smriti-hybrid(pinn+deeponet)`: `results/low_data/summary.md` |
 | Fig. 2 | `smriti-hybrid(pinn+deeponet)`: `results/model_a/maps_n10_seed0.png` |
-| Table V, Fig. 4 (real IR) | `github_dataset-hybrid`: `results/real_hybrid/summary_hybrid.csv`, `paired_comparison.csv`, `results/real_deeponet/summary_i5_i7.csv`, `comparison_maps_i5_i7_n8.png` |
-| Table VI (real, sampled frames: PINN, FBPINN, blends, hybrid B) | `siya-real-fair`: `results/real_fbpinn/summary.csv`, `paired_comparison.csv`, README |
-| Table VII, Fig. 5 (real, few training workloads) | `siya-real-fair` README; PINN-hybrid rows from `github_dataset-hybrid`: `results/real_pinn_hybrid/summary.csv`, `paired_comparison.csv` |
-| Table VIII, FNO/FBPINN/XPINN, residual check | `siya-fbpinn`: `results/comparison/summary.md`, `RESULTS.md`, `scarcity.md` |
-| Table VIII, solver hybrid | `siya-fbpinn`: `results/phys_*/N10_seed0/results.json` |
-| Data-driven PINN (text only) | `data-driven-pinn`: `DATA_DRIVEN_PINN.md` §5 |
-| Real-data FNO not run (text only) | `siya-real-fair` README |
+| Table VI, Fig. 4 (real, all test frames) | `github_dataset-hybrid`: `results/real_hybrid/summary_hybrid.csv`, `paired_comparison.csv`, `results/real_deeponet/summary_i5_i7.csv`, `comparison_maps_i5_i7_n8.png` |
+| Tables VII-VIII, Fig. 5 (real, per-frame PINN, few workloads) | `github_dataset-hybrid`: `results/real_pinn_hybrid/summary.csv`, `paired_comparison.csv`, README; gappy POD and train-mean on sampled frames from `siya-real-fair`: `results/real_fbpinn/summary.csv` |
+| Section IX, Table IX (other architectures) | `siya-fbpinn`: `results/comparison/summary.md`, `RESULTS.md`, `scarcity.md`, `results/phys_*/N10_seed0/results.json`; real FBPINN and FNO cost: `siya-real-fair` README; data-driven PINN: `data-driven-pinn`: `DATA_DRIVEN_PINN.md` §5 |
+| Residual check (Section VIII-B) | `siya-fbpinn`: `results/comparison/RESULTS.md` §4.2 |
 | Dataset, sensors, noise | `main`: `PROTOCOL.md` |
 
 ## Before submission (red TODOs in the PDF)
